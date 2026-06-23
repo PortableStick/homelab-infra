@@ -1,0 +1,11 @@
+*.log
+.venv/
+.DS_Store
+key.txt
+age/
+*.key
+*.pem
+**/compose.env
+stacks/**/.env
+hosts/**/.env
+!**/*.example
