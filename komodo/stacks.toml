@@ -1,3 +1,67 @@
+[[server]]
+name = "Local"
+[server.config]
+enabled = true
+
+[[repo]]
+name = "homelab-infra"
+[repo.config]
+server = "Local"
+builder = "Local"
+repo = "PortableStick/homelab-infra"
+
+[[procedure]]
+name = "Rotate Server Keys"
+description = "Rotates all currently connected Server keys."
+tags = ["system"]
+config.schedule = "Every day at 06:00"
+
+[[procedure.config.stage]]
+name = "Stage 1"
+enabled = true
+executions = [
+  { execution.type = "RotateAllServerKeys", execution.params = {}, enabled = true }
+]
+
+[[procedure]]
+name = "Backup Core Database"
+description = "Triggers the Core database backup at the scheduled time."
+tags = ["system"]
+config.schedule = "Every day at 01:00"
+
+[[procedure.config.stage]]
+name = "Stage 1"
+enabled = true
+executions = [
+  { execution.type = "BackupCoreDatabase", execution.params = {}, enabled = true }
+]
+
+[[procedure]]
+name = "Global Auto Update"
+description = "Pulls and auto updates Stacks and Deployments using 'poll_for_updates' or 'auto_update'."
+tags = ["system"]
+config.schedule = "Every day at 03:00"
+
+[[procedure.config.stage]]
+name = "Stage 1"
+enabled = true
+executions = [
+  { execution.type = "GlobalAutoUpdate", execution.params.skip_auto_update = false, enabled = true }
+]
+
+[[builder]]
+name = "Local"
+[builder.config]
+type = "Server"
+params.server = "Local"
+
+[[resource_sync]]
+name = "homelab-infra"
+[resource_sync.config]
+linked_repo = "homelab-infra"
+resource_path = ["komodo/stacks.toml"]
+delete = true
+
 [[stack]]
 name = "acme-dns"
 description = "Serveur DNS pour challenge acme"
