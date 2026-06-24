@@ -1,10 +1,10 @@
 [[stack]]
-name = "whoami-test"
-description = "Stack test"
+name = "acme-dns"
+description = "Serveur DNS pour challenge acme"
 deploy = true
-tags = ["test"]
+tags = ["edge"]
 [stack.config]
 server = "Local"
 git_provider = "github.com"
 repo = "PortableStick/homelab-infra"
-file_paths = ["hosts/vps-prod/stacks/whoami/compose.yaml"]
+file_paths = ["hosts/vps-prod/stacks/acme-dns/compose.yaml"]

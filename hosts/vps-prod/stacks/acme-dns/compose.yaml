@@ -1,0 +1,17 @@
+services:
+  acme-dns:
+    image: joohoi/acme-dns:latest
+    container_name: acme-dns
+    restart: unless-stopped
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      - ./config.cfg:/etc/acme-dns/config.cfg:ro
+      - /data/acme-dns:/var/lib/acme-dns
+    networks:
+      - frontend
+networks:
+  frontend:
+    name: frontend
+    external: true
