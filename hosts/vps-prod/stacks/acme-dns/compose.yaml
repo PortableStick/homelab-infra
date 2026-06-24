@@ -4,8 +4,8 @@ services:
     container_name: acme-dns
     restart: unless-stopped
     ports:
-      - "53:53/udp"
-      - "53:53/tcp"
+      - "116.202.22.50:53:53/udp"
+      - "116.202.22.50:53:53/tcp"
     volumes:
       - ./config.cfg:/etc/acme-dns/config.cfg:ro
       - /data/acme-dns:/var/lib/acme-dns
