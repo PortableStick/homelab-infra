@@ -1,0 +1,41 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - ACME_DNS_API_BASE=http://acme-dns
+      - ACME_DNS_STORAGE_PATH=/acme-dns/storage.json
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=frontend"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.http.tls.certresolver=letencrypt"
+      - "--entrypoints.websecure.http.tls.domains[0].main=vindiesel.vip"
+      - "--entrypoints.websecure.http.tls.domains[0].sans=*.vindiesel.vip"
+      - "--entrypoints.websecure.http.tls.domains[1].main=lucasmasse.net"
+      - "--entrypoints.websecure.http.tls.domains[1].sans=*.lucasmasse.net"
+      - "--certificatesresolvers.letencrypt.acme.dnschallenge=true"
+      - "--certificatesresolvers.letencrypt.acme.dnschallenge.provider=acme-dns"
+      - "--certificatesresolvers.letencrypt.acme.email=kastu69@proton.me"
+      - "--certificatesresolvers.letencrypt.acme.storage=/acme/acme.json"
+      - "--certificatesresolvers.letencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /data/traefik/acme:/acme
+      - /data/traefik/acme-dns/storage.json:/acme-dns/storage.json:ro
+    networks:
+      - frontend
+networks:
+  frontend:
+    name: frontend
+    external: true

@@ -72,3 +72,14 @@ server = "Local"
 git_provider = "github.com"
 repo = "PortableStick/homelab-infra"
 file_paths = ["hosts/vps-prod/stacks/acme-dns/compose.yaml"]
+
+[[stack]]
+name = "traefik"
+description = "Reverse proxy + HTTPS"
+deploy = true
+tags = ["edge"]
+[stack.config]
+server = "Local"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vps-prod/stacks/traefik/compose.yaml"]
