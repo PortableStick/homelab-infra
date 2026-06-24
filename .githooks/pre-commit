@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+for f in $(git diff --cached --name-only --diff-filter=ACM | grep '^secrets/' || true); do
+  if [ -s "$f" ] && ! grep -q 'ENC\[' "$f"; then
+    echo "$f n'est pas chiffre."
+    exit 1
+  fi
+done
+
+gitleaks protect --staged --redact --no-banner
