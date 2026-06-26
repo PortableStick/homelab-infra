@@ -83,3 +83,15 @@ server = "Local"
 git_provider = "github.com"
 repo = "PortableStick/homelab-infra"
 file_paths = ["hosts/vps-prod/stacks/traefik/compose.yaml"]
+
+[[stack]]
+name = "portfolio"
+description = "Portfolio scolaire BUT - public"
+deploy = true
+after = ["traefik"]
+tags = ["app"]
+[stack.config]
+server = "Local"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vps-prod/stacks/portfolio/compose.yaml"]
