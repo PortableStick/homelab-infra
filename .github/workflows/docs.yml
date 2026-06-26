@@ -1,0 +1,38 @@
+# Build + déploiement de la doc sur GitHub Pages.
+# Calqué sur le workflow officiel Material for MkDocs (squidfunk.github.io/mkdocs-material/publishing-your-site).
+# Seule différence : on installe depuis docs/requirements.txt (versions épinglées) au lieu de
+# "pip install mkdocs-material" non versionné.
+# Après le 1er run : Repo > Settings > Pages > Source = branche "gh-pages".
+name: docs
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:        # déclenchement manuel depuis l'onglet Actions
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+      - uses: actions/cache@v4
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: ~/.cache
+          restore-keys: |
+            mkdocs-material-
+      - run: pip install -r docs/requirements.txt
+      - run: mkdocs gh-deploy --force

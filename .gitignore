@@ -9,3 +9,5 @@ age/
 stacks/**/.env
 hosts/**/.env
 !**/*.example
+# Build MkDocs local (déployé sur gh-pages par la CI)
+site/

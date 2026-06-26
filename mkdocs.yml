@@ -1,0 +1,75 @@
+site_name: homelab-infra
+site_description: >-
+  Documentation opérationnelle de l'infrastructure auto-hébergée gérée par Komodo.
+  Référentiel de configuration et procédures de restauration.
+site_author: PortableStick
+copyright: Documentation interne — homelab-infra
+
+# Dépôt (affiche le lien "edit" et l'icône en en-tête)
+repo_url: https://github.com/PortableStick/homelab-infra
+repo_name: PortableStick/homelab-infra
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: fr
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Passer en thème sombre
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Passer en thème clair
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+
+plugins:
+  - search:
+      lang: fr
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Accueil: index.md
+  - Architecture: architecture.md
+  - Poste de travail (SOPS/age): poste-travail-sops-age.md
+  - Komodo: komodo.md
+  - Reverse proxy & TLS (Traefik): reverse-proxy-tls.md
+  - acme-dns: acme-dns.md
+  - Secrets (SOPS/age): secrets-sops.md
+  - Sécurité & CI: securite-ci.md
+  - Procédures planifiées: procedures-planifiees.md
+  - Restauration complète: restauration.md

@@ -1,0 +1,5 @@
+# Dépendances de build de la documentation (épinglées pour des builds reproductibles).
+# Dernière version de Material for MkDocs au 2026-03-19 : 9.7.2
+# (à partir de cette série, Material for MkDocs est en mode maintenance ;
+#  corrections de bugs/sécurité au moins jusqu'à nov. 2026 — voir changelog officiel).
+mkdocs-material==9.7.2

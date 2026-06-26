@@ -8,6 +8,7 @@ services:
     environment:
       - ACME_DNS_API_BASE=http://acme-dns
       - ACME_DNS_STORAGE_PATH=/acme-dns/storage.json
+      - DOCKER_API_VERSION=1.44
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"

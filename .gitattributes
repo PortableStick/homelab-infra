@@ -1,0 +1,24 @@
+# Normalise les fins de ligne : LF dans le dépôt pour tous les fichiers texte.
+# Évite le bruit de diff CRLF<->LF quand on édite sous Windows.
+* text=auto eol=lf
+
+# Fichiers qui DOIVENT rester en LF (sinon ils cassent côté Linux/conteneurs)
+*.sh        text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.toml      text eol=lf
+*.cfg       text eol=lf
+*.env       text eol=lf
+*.md        text eol=lf
+
+# Binaires : jamais de conversion de fins de ligne
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.pdf       binary
+*.zip       binary
+*.gz        binary
+*.db        binary
+*.age       binary
