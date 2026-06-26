@@ -83,16 +83,25 @@ de Traefik/lego) **s'enregistre** auprès de l'API acme-dns et reçoit un sous-d
 (`/data/traefik/acme-dns/storage.json`). Il faut alors créer, dans la zone du domaine à certifier, un
 **CNAME** qui pointe `_acme-challenge` vers ce sous-domaine acme-dns :
 
-| Type | Nom | Valeur |
-| --- | --- | --- |
-| `CNAME` | `_acme-challenge.vindiesel.vip` | `<sous-domaine généré>.acme.vindiesel.vip` |
-| `CNAME` | `_acme-challenge.lucasmasse.net` | `<sous-domaine généré>.acme.vindiesel.vip` |
+Comme on utilise des certificats **wildcard** (`*.lucasmasse.net`, `*.vindiesel.vip`), **un seul**
+CNAME par domaine de base suffit — il couvre tous les sous-domaines présents et futurs. Valeurs
+réelles posées chez Cloudflare (DNS-only), lues depuis `storage.json` :
 
-!!! info "À compléter — valeurs des CNAME"
-    Le `<sous-domaine généré>` est créé par acme-dns et lisible dans
-    `/data/traefik/acme-dns/storage.json` après le premier enregistrement. Reporter ici les valeurs
-    réelles des deux CNAME une fois `storage.json` généré. Tant que ces CNAME ne sont pas posés chez
-    Cloudflare, l'émission des certificats wildcard échoue.
+| Type | Nom (dans la zone) | Valeur |
+| --- | --- | --- |
+| `CNAME` | `_acme-challenge.lucasmasse.net` | `a2f5ff5b-dba9-4a7e-9144-9ad40f5ac009.acme.vindiesel.vip` |
+| `CNAME` | `_acme-challenge.vindiesel.vip` | `c08c5d9d-12de-4b5e-8f62-4886134fc30d.acme.vindiesel.vip` |
+
+!!! note "Ces CNAME sont permanents"
+    Le compte acme-dns créé pour chaque domaine est conservé dans `storage.json` et **réutilisé** à
+    chaque renouvellement. Tu ne reposes jamais ces CNAME. Si tu détruis `storage.json`, de nouveaux
+    sous-domaines seront générés et il faudra réécrire les CNAME avec les nouvelles valeurs.
+
+!!! warning "Ne crée PAS de CNAME par sous-domaine"
+    `storage.json` peut contenir d'anciennes entrées **par hôte** (`git.lucasmasse.net`,
+    `portfolio.lucasmasse.net`…), héritées d'une époque où des routers demandaient des certs par hôte.
+    Avec le wildcard, elles sont **inutiles** : seuls les CNAME des domaines de base ci-dessus comptent.
+    Voir la « règle d'or » dans [Reverse proxy & TLS](reverse-proxy-tls.md).
 
 ---
 

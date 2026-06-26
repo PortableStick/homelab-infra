@@ -62,6 +62,20 @@ défaut le resolver de certificats **`letsencrypt`**.
 Deux certificats wildcard sont demandés : `vindiesel.vip` (+ `*.vindiesel.vip`) et `lucasmasse.net`
 (+ `*.lucasmasse.net`). Les wildcards **imposent** le challenge DNS (impossible en HTTP-01).
 
+!!! warning "Règle d'or : ne PAS mettre `tls.certresolver` sur les routers des services"
+    Le résolveur **et** les domaines wildcard sont déjà déclarés **par défaut sur l'entrypoint
+    `websecure`**. Un service doit donc se contenter de `traefik.enable=true`, sa règle `Host(...)`,
+    `entrypoints=websecure`, `tls=true` et son port — **sans** label `tls.certresolver`.
+
+    Si un router ajoute `tls.certresolver=...`, Traefik demande un **certificat par hôte** (un challenge
+    DNS + un CNAME `_acme-challenge` par sous-domaine) au lieu d'utiliser le wildcard. Pire, si le nom
+    du résolveur ne correspond pas exactement à celui défini ici (`letsencrypt`), le router tombe en
+    erreur *« nonexistent certificate resolver »* et ne sert aucun certificat. C'est précisément ce
+    qui a bloqué la mise en place initiale.
+
+    En clair : **un seul** CNAME wildcard par domaine suffit pour tous les sous-domaines présents et
+    futurs (voir [acme-dns](acme-dns.md)).
+
 ## Résolveur ACME (challenge DNS via acme-dns)
 
 ```
@@ -69,7 +83,7 @@ Deux certificats wildcard sont demandés : `vindiesel.vip` (+ `*.vindiesel.vip`)
 --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=acme-dns
 --certificatesresolvers.letsencrypt.acme.email=kastu69@proton.me
 --certificatesresolvers.letsencrypt.acme.storage=/acme/acme.json
---certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
 ```
 
 Le provider DNS est **`acme-dns`** (serveur DNS auto-hébergé, voir [acme-dns](acme-dns.md)). Traefik
@@ -86,21 +100,24 @@ environment:
 | Email ACME | `kastu69@proton.me` | `traefik/compose.yaml` |
 | Stockage certs | `/acme/acme.json` → bind `/data/traefik/acme` | `traefik/compose.yaml` |
 | API acme-dns | `http://acme-dns` (réseau `frontend`) | `traefik/compose.yaml` |
-| Identifiants acme-dns | `/acme-dns/storage.json` (ro) → bind `/data/traefik/acme-dns/storage.json` | `traefik/compose.yaml` |
+| Comptes acme-dns | `/acme-dns/storage.json` (**lecture-écriture**) → bind `/data/traefik/acme-dns/storage.json` | `traefik/compose.yaml` |
 
-!!! danger "Actuellement en Let's Encrypt **staging**"
-    Le `caserver` pointe sur `acme-staging-v02` : les certificats émis **ne sont pas reconnus par les
-    navigateurs** (c'est l'environnement de test, sans limite de taux stricte). C'est volontaire le
-    temps de valider la chaîne acme-dns. **Pour passer en production**, remplacer la ligne `caserver`
-    par l'endpoint de production de Let's Encrypt :
+!!! success "En production"
+    Le `caserver` pointe sur l'endpoint **production** de Let's Encrypt
+    (`acme-v02`) : les certificats wildcard sont **valides et reconnus par les navigateurs**.
 
-    ```
-    --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-    ```
+!!! note "Bascule staging → production (historique / si à refaire)"
+    Le déploiement a d'abord été validé en **staging** (`acme-staging-v02`, sans limite de débit
+    stricte), puis basculé en production. Si tu dois refaire la manip un jour :
 
-    Puis **supprimer l'ancien `acme.json`** (`/data/traefik/acme/acme.json`) qui contient des certs
-    staging, sinon Traefik ne re-demandera pas de certs prod. Recréer un `acme.json` vide avec les
-    droits `600`.
+    1. Remplacer le `caserver` par `https://acme-v02.api.letsencrypt.org/directory`.
+    2. **Vider** `/data/traefik/acme/acme.json` (il contient le compte + les certs staging, sinon
+       Traefik ne re-demande rien) puis recréer un fichier vide en `600` :
+       `rm -f /data/traefik/acme/acme.json && install -m 600 /dev/null /data/traefik/acme/acme.json`.
+    3. Recréer le conteneur Traefik.
+
+    ⚠️ La prod a des **limites de débit strictes** : on valide toujours le challenge en staging
+    **avant** de basculer, pour ne pas se faire bloquer sur une config cassée.
 
 ## Volumes
 

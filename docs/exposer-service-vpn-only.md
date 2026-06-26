@@ -139,10 +139,8 @@ Aucun cert supplémentaire : le wildcard `*.vindiesel.vip` est déjà demandé p
 challenge DNS acme-dns (voir [Reverse proxy & TLS](reverse-proxy-tls.md)). Le challenge DNS ne dépend
 pas de l'accessibilité du service, donc un service VPN-only obtient quand même un cert valide.
 
-!!! warning "Rappel staging"
-    Tant que Traefik est sur le `caserver` **staging** de Let's Encrypt, le certificat de
-    `komodo.vindiesel.vip` ne sera pas reconnu par le navigateur. Voir le passage staging → prod dans
-    [Reverse proxy & TLS](reverse-proxy-tls.md).
+!!! success "Certificats en production"
+    Traefik est en Let's Encrypt **production** : le certificat de `komodo.vindiesel.vip` est valide.
 
 ## Variante plus stricte (pour plus tard)
 

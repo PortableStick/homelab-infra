@@ -69,6 +69,8 @@ nav:
   - Komodo: komodo.md
   - Reverse proxy & TLS (Traefik): reverse-proxy-tls.md
   - acme-dns: acme-dns.md
+  - Forgejo: forgejo.md
+  - Portfolio: portfolio.md
   - Secrets (SOPS/age): secrets-sops.md
   - Sécurité & CI: securite-ci.md
   - Procédures planifiées: procedures-planifiees.md

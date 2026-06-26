@@ -22,7 +22,15 @@ Concrètement :
 - La **reprise après sinistre** repose sur deux ingrédients : ce dépôt (configuration) **+** une
   restauration de la base Komodo depuis une sauvegarde.
 
-!!! warning "État réel au moment de la rédaction (à tenir à jour)"
+!!! success "En place et fonctionnel"
+    - **HTTPS valide en production** : certificats wildcard `*.lucasmasse.net` / `*.vindiesel.vip`
+      via Traefik (v3.6) + acme-dns, en Let's Encrypt **production**.
+    - **Services applicatifs déployés** : [Forgejo](forgejo.md) (forge Git) et
+      [portfolio](portfolio.md) (site Astro public).
+    - **Accès admin durci** : pattern VPN-only documenté pour les services sensibles
+      (voir [Exposer un service en VPN-only](exposer-service-vpn-only.md)).
+
+!!! warning "Limites connues (à tenir à jour)"
     Deux éléments nécessaires à une restauration « perte totale du VPS » **n'existent pas encore**.
     Ils sont signalés comme tels dans toute la doc, et ne doivent pas être présentés comme acquis :
 
@@ -53,9 +61,12 @@ Concrètement :
 - **[Komodo](komodo.md)** — Core, Periphery, base de données, GitOps et resource sync.
 - **[Reverse proxy & TLS](reverse-proxy-tls.md)** — Traefik, entrypoints, certificats.
 - **[acme-dns](acme-dns.md)** — serveur DNS dédié au challenge ACME.
+- **[Forgejo](forgejo.md)** — forge Git auto-hébergée (`git.lucasmasse.net`).
+- **[Portfolio](portfolio.md)** — site Astro public (`but.lucasmasse.net`).
 - **[Secrets (SOPS/age)](secrets-sops.md)** — chiffrement, clé maître, workflow.
 - **[Sécurité & CI](securite-ci.md)** — gitleaks, hook pre-commit.
 - **[Procédures planifiées](procedures-planifiees.md)** — tâches automatiques de Komodo.
+- **[Exposer un service en VPN-only](exposer-service-vpn-only.md)** — pattern d'accès privé via Tailscale.
 - **[Restauration complète](restauration.md)** — remonter l'infra depuis un VPS nu.
 
 !!! note "Sources"
