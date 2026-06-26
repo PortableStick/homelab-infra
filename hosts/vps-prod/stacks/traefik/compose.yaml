@@ -9,8 +9,6 @@ services:
       - ACME_DNS_API_BASE=http://acme-dns
       - ACME_DNS_STORAGE_PATH=/acme-dns/storage.json
     command:
-      # DEBUG temporaire
-      - "--log.level=DEBUG"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=frontend"
