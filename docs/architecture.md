@@ -84,7 +84,7 @@ l'hôte lors d'une restauration.
 | --- | --- | --- | --- |
 | `/data/acme-dns` | `/var/lib/acme-dns` | acme-dns (base SQLite) | `acme-dns/compose.yaml` |
 | `/data/traefik/acme` | `/acme` | Traefik (stockage des certificats `acme.json`) | `traefik/compose.yaml` |
-| `/data/traefik/acme-dns/storage.json` | `/acme-dns/storage.json` (ro) | Traefik (identifiants acme-dns) | `traefik/compose.yaml` |
+| `/data/traefik/acme-dns/storage.json` | `/acme-dns/storage.json` | Traefik (comptes acme-dns, **lecture-écriture**) | `traefik/compose.yaml` |
 | `/var/run/docker.sock` | `/var/run/docker.sock` | Traefik (ro) et Komodo Periphery | `traefik/` et `komodo/compose.yaml` |
 
 Komodo utilise par ailleurs des **volumes Docker nommés** (`postgres-data`, `ferretdb-state`, `keys`)
