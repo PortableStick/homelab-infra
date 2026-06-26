@@ -72,4 +72,5 @@ nav:
   - Secrets (SOPS/age): secrets-sops.md
   - Sécurité & CI: securite-ci.md
   - Procédures planifiées: procedures-planifiees.md
+  - Exposer un service en VPN-only: exposer-service-vpn-only.md
   - Restauration complète: restauration.md

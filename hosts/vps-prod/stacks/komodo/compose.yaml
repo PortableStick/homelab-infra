@@ -46,11 +46,25 @@ services:
     restart: unless-stopped
     depends_on:
       - ferretdb
-    ports:
-      - 9120:9120
+    # ports:
+    #   - 9120:9120
     env_file: ./compose.env
     environment:
       KOMODO_DATABASE_ADDRESS: ferretdb:27017
+    networks:
+      - default     # comms internes avec ferretdb / periphery
+      - frontend    # joignable par Traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=frontend"
+      - "traefik.http.routers.komodo.rule=Host(`komodo.vindiesel.vip`)"
+      - "traefik.http.routers.komodo.entrypoints=websecure"
+      - "traefik.http.routers.komodo.tls=true"
+      - "traefik.http.routers.komodo.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.komodo.middlewares=komodo-vpn"
+      # N'accepte que les connexions venant de la plage Tailscale
+      - "traefik.http.middlewares.komodo-vpn.ipallowlist.sourcerange=100.64.0.0/10"
+      - "traefik.http.services.komodo.loadbalancer.server.port=9120"
     volumes:
       ## Attach the Core / Periphery communication keys
       - keys:/config/keys
@@ -98,3 +112,9 @@ volumes:
   ferretdb-state:
   # Core / Periphery
   keys:
+
+networks:
+  # Réseau partagé avec Traefik. Doit déjà exister : docker network create frontend
+  frontend:
+    name: frontend
+    external: true
