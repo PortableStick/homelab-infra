@@ -32,7 +32,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /data/traefik/acme:/acme
-      - /data/traefik/acme-dns/storage.json:/acme-dns/storage.json:ro
+      - /data/traefik/acme-dns/storage.json:/acme-dns/storage.json
     networks:
       - frontend
 networks:

@@ -102,7 +102,7 @@ environment:
 | --- | --- | --- |
 | `/var/run/docker.sock` (ro) | `/var/run/docker.sock` | Découverte des conteneurs |
 | `/data/traefik/acme` | `/acme` | Stockage `acme.json` (certificats + clés) |
-| `/data/traefik/acme-dns/storage.json` (ro) | `/acme-dns/storage.json` | Identifiants du compte acme-dns |
+| `/data/traefik/acme-dns/storage.json` | `/acme-dns/storage.json` | Comptes/sous-domaines acme-dns — **en lecture-écriture** (le provider y écrit lors de l'enregistrement). Doit exister comme **fichier** avant le `up`, sinon Docker crée un dossier. |
 
 !!! info "À compléter — tableau de bord Traefik"
     L'étape intermédiaire (dépôt `infra`) exposait un dashboard Traefik protégé par basicauth sur
