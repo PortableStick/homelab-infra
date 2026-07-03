@@ -1,19 +1,24 @@
 services:
-  whoami:
+  wildcard-generator:
     image: traefik/whoami
-    container_name: whoami-test
+    container_name: wildcard-generator
     restart: unless-stopped
     networks:
       - frontend
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.int.vindiesel.vip`)"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.middlewares=int-vpn"
-      - "traefik.http.middlewares.int-vpn.ipallowlist.sourcerange=100.64.0.0/10"
-      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+      - "traefik.http.routers.wildcard-generator.rule=Host(`cert.vindiesel.vip`)"
+      - "traefik.http.routers.wildcard-generator.entrypoints=websecure"
+      - "traefik.http.routers.wildcard-generator.service=noop@internal"
+      - "traefik.http.routers.wildcard-generator.tls=true"
+      - "traefik.http.routers.wildcard-generator.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.wildcard-generator.tls.domains[0].main=vindiesel.vip"
+      - "traefik.http.routers.wildcard-generator.tls.domains[0].sans=*.vindiesel.vip"
+      - "traefik.http.routers.wildcard-generator.tls.domains[1].main=lucasmasse.net"
+      - "traefik.http.routers.wildcard-generator.tls.domains[1].sans=*.lucasmasse.net"
+      - "traefik.http.routers.wildcard-generator.tls.domains[2].main=int.vindiesel.vip"
+      - "traefik.http.routers.wildcard-generator.tls.domains[2].sans=*.int.vindiesel.vip"
 
 networks:
   frontend:
