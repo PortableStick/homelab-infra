@@ -46,6 +46,26 @@ need age-keygen
 # log "Installation Docker..."
 # ... (laisser volontairement à écrire/valider avant usage)
 
+# --- Étape 2b : préserver l'IP source client (userland-proxy off) ------------
+# Sans ça, l'IP source des clients tailnet est masquée en 172.20.0.1 (passerelle
+# du bridge Docker) avant d'atteindre Traefik, ce qui casse l'ipAllowList des
+# services VPN-only (*.int.vindiesel.vip). Voir docs/exposer-service-vpn-only.md.
+# À placer avant tout démarrage de conteneur : le restart docker ci-dessous ne
+# doit tuer aucune stack en cours.
+log "Configuration Docker : userland-proxy=false (préservation IP source)"
+mkdir -p /etc/docker
+if [ ! -f /etc/docker/daemon.json ]; then
+  printf '{\n  "userland-proxy": false\n}\n' > /etc/docker/daemon.json
+  systemctl restart docker
+elif command -v jq >/dev/null 2>&1; then
+  tmp="$(mktemp)"
+  jq '. + {"userland-proxy": false}' /etc/docker/daemon.json > "$tmp" && mv "$tmp" /etc/docker/daemon.json
+  systemctl restart docker
+else
+  echo "  /etc/docker/daemon.json existe déjà et jq est absent :"
+  echo "  ajoute manuellement \"userland-proxy\": false puis 'systemctl restart docker'."
+fi
+
 # --- Étape 3 : port 53 (info) ------------------------------------------------
 log "Vérification du port 53 (acme-dns écoute sur ${PUBLIC_IP}:53)"
 if ss -ulpn 2>/dev/null | grep -q "${PUBLIC_IP}:53"; then
