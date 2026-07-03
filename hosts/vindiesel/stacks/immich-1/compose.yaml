@@ -109,7 +109,7 @@ services:
 
 networks:
   backend:
-    name: backend
+    name: immich1_backend
   proxy:
     name: proxy
     external: true
