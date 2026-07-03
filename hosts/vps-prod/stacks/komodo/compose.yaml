@@ -57,10 +57,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend"
-      - "traefik.http.routers.komodo.rule=Host(`komodo.vindiesel.vip`)"
+      - "traefik.http.routers.komodo.rule=Host(`komodo.int.vindiesel.vip`)"
       - "traefik.http.routers.komodo.entrypoints=websecure"
       - "traefik.http.routers.komodo.tls=true"
-      - "traefik.http.routers.komodo.tls.certresolver=letsencrypt"
       - "traefik.http.routers.komodo.middlewares=komodo-vpn"
       # N'accepte que les connexions venant de la plage Tailscale
       - "traefik.http.middlewares.komodo-vpn.ipallowlist.sourcerange=100.64.0.0/10"

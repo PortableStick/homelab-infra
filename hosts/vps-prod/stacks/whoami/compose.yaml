@@ -1,13 +1,15 @@
 services:
-  wildcard-generator:
+  whoami:
     image: traefik/whoami
-    container_name: wildcard-generator
+    container_name: whoami
     restart: unless-stopped
     networks:
       - frontend
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend"
+
+      # Force la génération des certs en demandant le tls à traefik
       - "traefik.http.routers.wildcard-generator.rule=Host(`cert.vindiesel.vip`)"
       - "traefik.http.routers.wildcard-generator.entrypoints=websecure"
       - "traefik.http.routers.wildcard-generator.service=noop@internal"
@@ -19,6 +21,20 @@ services:
       - "traefik.http.routers.wildcard-generator.tls.domains[1].sans=*.lucasmasse.net"
       - "traefik.http.routers.wildcard-generator.tls.domains[2].main=int.vindiesel.vip"
       - "traefik.http.routers.wildcard-generator.tls.domains[2].sans=*.int.vindiesel.vip"
+
+      - "traefik.http.routers.whoami-public.rule=Host(`whoami.vindiesel.vip`) || Host(`whoami.lucasmasse.net`)"
+      - "traefik.http.routers.whoami-public.entrypoints=websecure"
+      - "traefik.http.routers.whoami-public.tls=true"
+      - "traefik.http.routers.whoami-public.service=whoami"
+
+      - "traefik.http.routers.whoami-int.rule=Host(`whoami.int.vindiesel.vip`)"
+      - "traefik.http.routers.whoami-int.entrypoints=websecure"
+      - "traefik.http.routers.whoami-int.tls=true"
+      - "traefik.http.routers.whoami-int.service=whoami"
+      - "traefik.http.routers.whoami-int.middlewares=int-vpn"
+      - "traefik.http.middlewares.int-vpn.ipallowlist.sourcerange=100.64.0.0/10"
+
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
 
 networks:
   frontend:
