@@ -27,6 +27,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=acme-dns"
       - "--certificatesresolvers.letsencrypt.acme.email=kastu69@proton.me"
       - "--certificatesresolvers.letsencrypt.acme.storage=/acme/acme.json"
+      - "--log.level=DEBUG"
       - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
     ports:
       - "80:80"
