@@ -1,3 +1,5 @@
 creation_rules:
   - path_regex: secrets[\\/]vps[\\/].*\.env$
     age: age16jmqm9c42x330uyvdf07lq2qy892c7hdj96t6dw4m9rmhy4cw96spyc5cr
+  - path_regex: secrets[\\/]vindiesel[\\/].*\.env$
+    age: age16jmqm9c42x330uyvdf07lq2qy892c7hdj96t6dw4m9rmhy4cw96spyc5cr

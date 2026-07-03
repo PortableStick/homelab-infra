@@ -1,0 +1,32 @@
+http:
+  routers:
+    immich-photos:
+      rule: "Host(`photos.int.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-vindiesel
+      middlewares:
+        - int-vpn
+      tls: {}
+
+    immich-pictures:
+      rule: "Host(`pictures.int.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-vindiesel
+      middlewares:
+        - int-vpn
+      tls: {}
+
+  services:
+    home-vindiesel:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://100.65.11.58:80"
+
+  middlewares:
+    int-vpn:
+      ipAllowList:
+        sourceRange:
+          - "100.64.0.0/10"
