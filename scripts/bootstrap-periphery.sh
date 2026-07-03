@@ -19,8 +19,8 @@
 set -euo pipefail
 
 ### Paramètres (à adapter) ###################################################
-CONNECT_AS="docker-vindiesel"                 # nom de ce serveur tel que déclaré côté Core
-CORE_PUBLIC_KEY=""                            # clé publique du Core VPS (UI Komodo > Settings, "MCow...")
+CONNECT_AS="${CONNECT_AS:-docker-vindiesel}"  # nom de ce serveur tel que déclaré côté Core
+CORE_PUBLIC_KEY="${CORE_PUBLIC_KEY:-}"        # clé publique du Core VPS (UI Komodo > Settings, "MCow...")
 ALLOWED_IPS='["100.64.0.0/10"]'               # plages autorisées à joindre la Periphery (tailnet CGNAT)
 PERIPHERY_ROOT="/etc/komodo"                  # racine Periphery (défaut Komodo)
 AGE_KEY_FILE="${PERIPHERY_ROOT}/age/key.txt"
