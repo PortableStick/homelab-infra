@@ -52,29 +52,47 @@ défaut le resolver de certificats **`letsencrypt`**.
 
 ## Certificats wildcard
 
+**Trois** certificats wildcard sont demandés : `*.vindiesel.vip`, `*.lucasmasse.net` et
+`*.int.vindiesel.vip` (zone interne VPN-only). Les wildcards **imposent** le challenge DNS (impossible
+en HTTP-01).
+
+### Où la génération est déclenchée : le routeur générateur
+
+La génération n'est **pas** portée par les services applicatifs, mais par un **routeur générateur
+dédié** dans la stack `whoami` (`hosts/vps-prod/stacks/whoami/compose.yaml`) :
+
+```yaml
+- "traefik.http.routers.wildcard-generator.rule=Host(`cert.vindiesel.vip`)"
+- "traefik.http.routers.wildcard-generator.service=noop@internal"   # ne sert rien : juste le déclencheur
+- "traefik.http.routers.wildcard-generator.tls=true"
+- "traefik.http.routers.wildcard-generator.tls.certresolver=letsencrypt"
+- "traefik.http.routers.wildcard-generator.tls.domains[0].main=vindiesel.vip"
+- "traefik.http.routers.wildcard-generator.tls.domains[0].sans=*.vindiesel.vip"
+- "traefik.http.routers.wildcard-generator.tls.domains[1].main=lucasmasse.net"
+- "traefik.http.routers.wildcard-generator.tls.domains[1].sans=*.lucasmasse.net"
+- "traefik.http.routers.wildcard-generator.tls.domains[2].main=int.vindiesel.vip"
+- "traefik.http.routers.wildcard-generator.tls.domains[2].sans=*.int.vindiesel.vip"
 ```
---entrypoints.websecure.http.tls.domains[0].main=vindiesel.vip
---entrypoints.websecure.http.tls.domains[0].sans=*.vindiesel.vip
---entrypoints.websecure.http.tls.domains[1].main=lucasmasse.net
---entrypoints.websecure.http.tls.domains[1].sans=*.lucasmasse.net
-```
 
-Deux certificats wildcard sont demandés : `vindiesel.vip` (+ `*.vindiesel.vip`) et `lucasmasse.net`
-(+ `*.lucasmasse.net`). Les wildcards **imposent** le challenge DNS (impossible en HTTP-01).
+C'est le **seul** routeur qui porte `certresolver` **et** `tls.domains`. Son `service=noop@internal`
+ne route vers rien (un accès à `cert.vindiesel.vip` renvoie un 404 — normal, personne n'y va) : son
+unique rôle est de faire émettre les trois wildcards. `traefik/compose.yaml` déclare aussi ces
+domaines au niveau de l'entrypoint `websecure` ; c'est redondant avec le générateur (d'où le
+warning bénin *« Domain … is duplicated »* dans les logs), mais sans danger.
 
-!!! warning "Règle d'or : ne PAS mettre `tls.certresolver` sur les routers des services"
-    Le résolveur **et** les domaines wildcard sont déjà déclarés **par défaut sur l'entrypoint
-    `websecure`**. Un service doit donc se contenter de `traefik.enable=true`, sa règle `Host(...)`,
-    `entrypoints=websecure`, `tls=true` et son port — **sans** label `tls.certresolver`.
+!!! warning "Règle d'or : `certresolver` + `tls.domains` UNIQUEMENT sur le routeur générateur"
+    Un service applicatif doit se contenter de `traefik.enable=true`, sa règle `Host(...)`,
+    `entrypoints=websecure`, `tls=true` (nu) et son port — **sans** `tls.certresolver`. Il consomme
+    alors le wildcard déjà émis.
 
-    Si un router ajoute `tls.certresolver=...`, Traefik demande un **certificat par hôte** (un challenge
-    DNS + un CNAME `_acme-challenge` par sous-domaine) au lieu d'utiliser le wildcard. Pire, si le nom
-    du résolveur ne correspond pas exactement à celui défini ici (`letsencrypt`), le router tombe en
+    Si un router de service ajoute `tls.certresolver=...`, Traefik demande un **certificat par hôte**
+    (un challenge DNS + un CNAME `_acme-challenge` par sous-domaine) au lieu d'utiliser le wildcard.
+    Pire, si le nom du résolveur ne correspond pas exactement (`letsencrypt`), le router tombe en
     erreur *« nonexistent certificate resolver »* et ne sert aucun certificat. C'est précisément ce
-    qui a bloqué la mise en place initiale.
+    qui a bloqué la mise en place initiale (et ce qui donnait des certs par hôte à `git`/`portfolio`).
 
-    En clair : **un seul** CNAME wildcard par domaine suffit pour tous les sous-domaines présents et
-    futurs (voir [acme-dns](acme-dns.md)).
+    Pour ajouter une nouvelle zone wildcard : **une ligne** `tls.domains[n]` sur le générateur **+**
+    un CNAME `_acme-challenge.<zone>` vers le sous-domaine acme-dns (voir [acme-dns](acme-dns.md)).
 
 ## Résolveur ACME (challenge DNS via acme-dns)
 

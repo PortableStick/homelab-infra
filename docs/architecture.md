@@ -45,6 +45,7 @@ commande Docker standard pour un réseau externe.)*
 | --- | --- | --- |
 | `vindiesel.vip` | Domaine principal + wildcard `*.vindiesel.vip` (certs Traefik) | `traefik/compose.yaml` |
 | `lucasmasse.net` | Domaine secondaire + wildcard `*.lucasmasse.net` (certs Traefik) | `traefik/compose.yaml` |
+| `int.vindiesel.vip` | Zone **interne VPN-only** + wildcard `*.int.vindiesel.vip`. Tout service sous ce nom pointe vers l'IP Tailscale et n'est joignable que sur le tailnet (voir [Exposer un service en VPN-only](exposer-service-vpn-only.md)) | `whoami/compose.yaml` (générateur), `komodo/compose.yaml` |
 | `acme.vindiesel.vip` | Zone déléguée à acme-dns pour le challenge ACME | `acme-dns/config.cfg` |
 | `acmens.vindiesel.vip` | Serveur de noms (NS) de la zone acme, pointant vers `116.202.22.50` | `acme-dns/config.cfg` |
 
@@ -65,8 +66,12 @@ Voir [acme-dns](acme-dns.md) pour les enregistrements de délégation exacts à 
 | 53 | UDP + TCP | acme-dns | **uniquement** sur `116.202.22.50` | `acme-dns/compose.yaml` |
 | 80 | TCP | Traefik (HTTP, redirige vers HTTPS) | toutes interfaces | `traefik/compose.yaml` |
 | 443 | TCP | Traefik (HTTPS) | toutes interfaces | `traefik/compose.yaml` |
-| 9120 | TCP | Komodo Core (UI/API) | toutes interfaces | `komodo/compose.yaml` |
-| 8081 | TCP | whoami (stack de test) | toutes interfaces | `whoami/compose.yaml` |
+
+!!! note "Komodo et whoami ne publient plus de port sur l'hôte"
+    Komodo Core (`9120`) et whoami (anciennement `8081`) **n'exposent plus de port** : leurs blocs
+    `ports:` sont commentés. On les atteint désormais **uniquement via Traefik** (réseau `frontend`) :
+    Komodo sur `komodo.int.vindiesel.vip` en VPN-only, whoami sur ses trois noms de test. Voir
+    [Exposer un service en VPN-only](exposer-service-vpn-only.md).
 
 !!! warning "acme-dns sur le port 53 et systemd-resolved"
     Un commit du dépôt corrige un conflit entre acme-dns (port 53) et `systemd-resolved`

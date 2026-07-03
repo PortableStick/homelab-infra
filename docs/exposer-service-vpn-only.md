@@ -1,19 +1,35 @@
 # Exposer un service en VPN-only
 
 Pattern pour rendre un service joignable **uniquement via le VPN Tailscale**, avec un vrai nom de
-domaine en HTTPS valide. Documenté ici sur l'exemple de **Komodo** (`komodo.vindiesel.vip`).
+domaine en HTTPS valide. Documenté ici sur l'exemple de **Komodo** (`komodo.int.vindiesel.vip`).
+
+!!! tip "Convention : la zone `*.int.vindiesel.vip` est VPN-only"
+    Par convention, **tout nom sous `int.vindiesel.vip`** suit ce pattern : DNS vers l'IP Tailscale +
+    `ipAllowList`. Le wildcard `*.int.vindiesel.vip` (émis par Traefik) couvre les certificats. Les
+    zones publiques (`*.vindiesel.vip`, `*.lucasmasse.net`) restent, elles, accessibles depuis Internet.
 
 ## Principe
 
 Trois éléments combinés :
 
-1. **Traefik** route le nom (`komodo.vindiesel.vip`) vers le conteneur, via le réseau Docker
+1. **Traefik** route le nom (`komodo.int.vindiesel.vip`) vers le conteneur, via le réseau Docker
    `frontend` — le port du service n'est plus publié sur l'hôte.
 2. Un **enregistrement DNS** fait pointer le nom vers l'**IP Tailscale** du VPS (`100.x`), joignable
    seulement sur le tailnet.
 3. Un **middleware `ipAllowList`** Traefik n'accepte que les connexions venant de la plage Tailscale
    (`100.64.0.0/10`). Double verrou : même si quelqu'un vise l'IP publique avec le bon `Host`, il est
    rejeté.
+
+!!! danger "Prérequis critique : préservation de l'IP source (`userland-proxy: false`)"
+    L'`ipAllowList` filtre sur l'**IP de la connexion TCP que Traefik voit**. Par défaut, le
+    userland-proxy de Docker **masque** l'IP source des clients tailnet en `172.20.0.1` (la passerelle
+    du bridge `frontend`) → Traefik ne voit jamais la `100.x` réelle et **rejette tout en 403**.
+
+    Il faut donc `{"userland-proxy": false}` dans `/etc/docker/daemon.json` (+ `systemctl restart
+    docker`) pour que Docker utilise le DNAT iptables qui **préserve l'IP source**. C'est appliqué par
+    `scripts/bootstrap.sh` (étape 2b). Sans ça, **aucun** service VPN-only ne fonctionne. Diagnostic :
+    `docker logs traefik | grep -i reject` — si tu vois `Rejecting IP 172.20.0.1`, le fix n'est pas en
+    place.
 
 !!! info "Pourquoi ce n'est pas exposé publiquement"
     L'IP `100.x` (CGNAT, RFC 6598) n'est **pas routable** depuis Internet : un client hors VPN ne peut
@@ -45,14 +61,18 @@ Dans `hosts/vps-prod/stacks/komodo/compose.yaml`, service `core` :
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend"
-      - "traefik.http.routers.komodo.rule=Host(`komodo.vindiesel.vip`)"
+      - "traefik.http.routers.komodo.rule=Host(`komodo.int.vindiesel.vip`)"
       - "traefik.http.routers.komodo.entrypoints=websecure"
       - "traefik.http.routers.komodo.tls=true"
-      - "traefik.http.routers.komodo.tls.certresolver=letsencrypt"
       - "traefik.http.routers.komodo.middlewares=komodo-vpn"
       - "traefik.http.middlewares.komodo-vpn.ipallowlist.sourcerange=100.64.0.0/10"
       - "traefik.http.services.komodo.loadbalancer.server.port=9120"
     ```
+
+    !!! warning "Pas de `tls.certresolver` sur ce router"
+        Le router est en `tls=true` **nu** : il consomme le wildcard `*.int.vindiesel.vip` déjà émis
+        par le routeur générateur (voir [Reverse proxy & TLS](reverse-proxy-tls.md)). Ne **jamais**
+        remettre `tls.certresolver` ici (règle d'or).
 
 - **Déclaration** du réseau externe en bas du fichier :
 
@@ -83,7 +103,7 @@ tailscale ip -4
 
 | Type | Nom | Valeur | Proxy |
 | --- | --- | --- | --- |
-| `A` | `komodo.vindiesel.vip` | `<IP Tailscale 100.x>` | **DNS-only** (gris, jamais proxifié) |
+| `A` | `komodo.int.vindiesel.vip` | `<IP Tailscale 100.x>` | **DNS-only** (gris, jamais proxifié) |
 
 !!! warning "Le proxy Cloudflare doit être désactivé"
     Une IP `100.x` ne peut pas être proxifiée par Cloudflare. L'enregistrement doit rester **DNS-only**.
@@ -96,7 +116,7 @@ Komodo doit connaître son URL externe (liens, webhooks). Dans le secret :
 
 ```bash
 sops secrets/vps/komodo.env
-# KOMODO_HOST=https://komodo.vindiesel.vip
+# KOMODO_HOST=https://komodo.int.vindiesel.vip
 ```
 
 Puis re-rendre `compose.env` (voir [Secrets](secrets-sops.md)) :
@@ -121,26 +141,26 @@ docker compose up -d
 sudo ss -tlpn 'sport = :9120'        # ne doit rien montrer côté 0.0.0.0 / IP publique
 
 # Résolution du nom -> IP Tailscale
-dig +short komodo.vindiesel.vip       # -> 100.x.y.z
+dig +short komodo.int.vindiesel.vip       # -> 100.x.y.z
 
 # Connecté au VPN : accès OK en HTTPS valide
-curl -I https://komodo.vindiesel.vip  # 200/302 attendu, cert *.vindiesel.vip
+curl -I https://komodo.int.vindiesel.vip  # 200/302 attendu, cert *.int.vindiesel.vip
 
 # Hors VPN (ou IP publique) : doit échouer / 403
 ```
 
-- Sur le VPN → l'UI Komodo répond avec un certificat valide `*.vindiesel.vip`.
+- Sur le VPN → l'UI Komodo répond avec un certificat valide `*.int.vindiesel.vip`.
 - Hors VPN → le nom ne mène à rien (IP non routable) ; et toute requête arrivant par l'IP publique
   est rejetée (403) par l'`ipAllowList`.
 
 ## Certificat
 
-Aucun cert supplémentaire : le wildcard `*.vindiesel.vip` est déjà demandé par Traefik via le
+Aucun cert supplémentaire : le wildcard `*.int.vindiesel.vip` est déjà demandé par Traefik via le
 challenge DNS acme-dns (voir [Reverse proxy & TLS](reverse-proxy-tls.md)). Le challenge DNS ne dépend
 pas de l'accessibilité du service, donc un service VPN-only obtient quand même un cert valide.
 
 !!! success "Certificats en production"
-    Traefik est en Let's Encrypt **production** : le certificat de `komodo.vindiesel.vip` est valide.
+    Traefik est en Let's Encrypt **production** : le certificat de `komodo.int.vindiesel.vip` est valide.
 
 ## Variante plus stricte (pour plus tard)
 

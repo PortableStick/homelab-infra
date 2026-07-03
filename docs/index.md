@@ -23,12 +23,14 @@ Concrètement :
   restauration de la base Komodo depuis une sauvegarde.
 
 !!! success "En place et fonctionnel"
-    - **HTTPS valide en production** : certificats wildcard `*.lucasmasse.net` / `*.vindiesel.vip`
-      via Traefik (v3.6) + acme-dns, en Let's Encrypt **production**.
+    - **HTTPS valide en production** : certificats wildcard `*.lucasmasse.net`, `*.vindiesel.vip` et
+      `*.int.vindiesel.vip` via Traefik (v3.6) + acme-dns, en Let's Encrypt **production**. Émission
+      pilotée par un routeur générateur dédié (voir [Reverse proxy & TLS](reverse-proxy-tls.md)).
     - **Services applicatifs déployés** : [Forgejo](forgejo.md) (forge Git) et
       [portfolio](portfolio.md) (site Astro public).
-    - **Accès admin durci** : pattern VPN-only documenté pour les services sensibles
-      (voir [Exposer un service en VPN-only](exposer-service-vpn-only.md)).
+    - **Accès admin en VPN-only** : Komodo est exposé sur `komodo.int.vindiesel.vip`, joignable
+      uniquement via Tailscale (`ipAllowList` + `userland-proxy: false` pour préserver l'IP source).
+      Voir [Exposer un service en VPN-only](exposer-service-vpn-only.md).
 
 !!! warning "Limites connues (à tenir à jour)"
     Deux éléments nécessaires à une restauration « perte totale du VPS » **n'existent pas encore**.

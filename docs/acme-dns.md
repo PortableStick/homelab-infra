@@ -83,14 +83,22 @@ de Traefik/lego) **s'enregistre** auprès de l'API acme-dns et reçoit un sous-d
 (`/data/traefik/acme-dns/storage.json`). Il faut alors créer, dans la zone du domaine à certifier, un
 **CNAME** qui pointe `_acme-challenge` vers ce sous-domaine acme-dns :
 
-Comme on utilise des certificats **wildcard** (`*.lucasmasse.net`, `*.vindiesel.vip`), **un seul**
-CNAME par domaine de base suffit — il couvre tous les sous-domaines présents et futurs. Valeurs
-réelles posées chez Cloudflare (DNS-only), lues depuis `storage.json` :
+Comme on utilise des certificats **wildcard** (`*.lucasmasse.net`, `*.vindiesel.vip`,
+`*.int.vindiesel.vip`), **un seul** CNAME par **zone** suffit — il couvre tous les sous-domaines
+présents et futurs de cette zone. Valeurs réelles posées chez Cloudflare (DNS-only), lues depuis
+`storage.json` :
 
 | Type | Nom (dans la zone) | Valeur |
 | --- | --- | --- |
 | `CNAME` | `_acme-challenge.lucasmasse.net` | `a2f5ff5b-dba9-4a7e-9144-9ad40f5ac009.acme.vindiesel.vip` |
 | `CNAME` | `_acme-challenge.vindiesel.vip` | `c08c5d9d-12de-4b5e-8f62-4886134fc30d.acme.vindiesel.vip` |
+| `CNAME` | `_acme-challenge.int.vindiesel.vip` | `00e52fc2-72a7-4000-a765-826597349c3d.acme.vindiesel.vip` |
+
+!!! warning "Une zone imbriquée = un CNAME dédié (le DNS ne cascade pas)"
+    `int.vindiesel.vip` est une **zone distincte** : le CNAME `_acme-challenge.vindiesel.vip` ne répond
+    **pas** pour `_acme-challenge.int.vindiesel.vip`. Il faut donc son propre CNAME (ligne 3 ci-dessus).
+    Ce CNAME doit rester **DNS-only** : proxifié (orange), Cloudflare masque la cible et le challenge
+    échoue. Même règle pour toute future zone `*.autre.vindiesel.vip`.
 
 !!! note "Ces CNAME sont permanents"
     Le compte acme-dns créé pour chaque domaine est conservé dans `storage.json` et **réutilisé** à

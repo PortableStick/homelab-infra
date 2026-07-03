@@ -51,6 +51,16 @@ docker-compose-plugin`.
 
 **Vérif :** `docker version` et `docker compose version` répondent ; `docker run --rm hello-world` OK.
 
+!!! warning "Désactiver le userland-proxy (obligatoire pour les services VPN-only)"
+    Écrire `{"userland-proxy": false}` dans `/etc/docker/daemon.json` puis `systemctl restart docker`,
+    **avant** de lancer les stacks. Sans ça, l'IP source des clients tailnet est masquée en
+    `172.20.0.1` et l'`ipAllowList` des services `*.int.vindiesel.vip` rejette tout en 403. C'est
+    fait automatiquement par `scripts/bootstrap.sh` (étape 2b). Voir
+    [Exposer un service en VPN-only](exposer-service-vpn-only.md).
+
+    **Vérif :** `docker info --format '{{.Driver}}'` répond, et après déploiement
+    `docker logs traefik | grep -i reject` ne montre **pas** `Rejecting IP 172.20.0.1`.
+
 ### 3. Libérer le port 53 (pour acme-dns)
 
 Sur Ubuntu, `systemd-resolved` occupe le port 53. acme-dns est mappé uniquement sur `116.202.22.50:53`,
@@ -181,7 +191,7 @@ recréer un `acme.json` vide `600`, redéployer Traefik.
 ## Ordre résumé
 
 ```text
-1 hôte+Tailscale → 2 Docker → 3 port 53 → 4 réseau frontend → 5 dossiers /data
+1 hôte+Tailscale → 2 Docker (+ userland-proxy off) → 3 port 53 → 4 réseau frontend → 5 dossiers /data
 → 6 clé age → 7 clone repo → 8 sops -d compose.env → 9 docker compose up komodo
 → 10 restore DB (si backup) → 11 resource sync → 12 DNS + certs → 13 LE prod
 ```
