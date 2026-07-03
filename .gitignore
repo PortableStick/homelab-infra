@@ -1,4 +1,5 @@
 *.log
+.claude/
 .venv/
 .DS_Store
 key.txt

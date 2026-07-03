@@ -21,6 +21,8 @@ services:
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.vindiesel.vip"
       - "--entrypoints.websecure.http.tls.domains[1].main=lucasmasse.net"
       - "--entrypoints.websecure.http.tls.domains[1].sans=*.lucasmasse.net"
+      - "--entrypoints.websecure.http.tls.domains[2].main=int.vindiesel.vip"
+      - "--entrypoints.websecure.http.tls.domains[2].sans=*.int.vindiesel.vip"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=acme-dns"
       - "--certificatesresolvers.letsencrypt.acme.email=kastu69@proton.me"
