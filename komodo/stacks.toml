@@ -3,6 +3,12 @@ name = "Local"
 [server.config]
 enabled = true
 
+[[server]]
+name = "docker-vindiesel"
+[server.config]
+enabled = true
+address = "https://100.65.11.58:8120"
+
 [[repo]]
 name = "homelab-infra"
 [repo.config]
@@ -119,3 +125,42 @@ server = "Local"
 git_provider = "github.com"
 repo = "PortableStick/homelab-infra"
 file_paths = ["hosts/vps-prod/stacks/whoami/compose.yaml"]
+
+[[stack]]
+name = "traefik-vindiesel"
+description = "Reverse proxy maison"
+deploy = true
+tags = ["edge", "vindiesel"]
+[stack.config]
+server = "docker-vindiesel"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vindiesel/stacks/traefik/compose.yaml"]
+
+[[stack]]
+name = "immich-1"
+description = "Immich photos"
+deploy = true
+after = ["traefik-vindiesel"]
+tags = ["app", "vindiesel"]
+[stack.config]
+server = "docker-vindiesel"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vindiesel/stacks/immich-1/compose.yaml"]
+pre_deploy.path = "hosts/vindiesel/stacks/immich-1"
+pre_deploy.command = "sops -d ../../../../secrets/vindiesel/immich.env > .env"
+
+[[stack]]
+name = "immich-2"
+description = "Immich pictures"
+deploy = true
+after = ["traefik-vindiesel"]
+tags = ["app", "vindiesel"]
+[stack.config]
+server = "docker-vindiesel"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vindiesel/stacks/immich-2/compose.yaml"]
+pre_deploy.path = "hosts/vindiesel/stacks/immich-2"
+pre_deploy.command = "sops -d ../../../../secrets/vindiesel/immich.env > .env"
