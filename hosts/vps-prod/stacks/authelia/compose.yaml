@@ -1,0 +1,29 @@
+services:
+  authelia:
+    image: authelia/authelia:4.39
+    container_name: authelia
+    restart: unless-stopped
+    # .env rendu par pre_deploy (sops -d) déclaré dans komodo/stacks.toml.
+    env_file: .env
+    volumes:
+      - ./configuration.yaml:/config/configuration.yml:ro
+      - /data/authelia:/data
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=frontend"
+      # --- Routeur du portail ---
+      - "traefik.http.routers.authelia.rule=Host(`auth.vindiesel.vip`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls=true"
+      - "traefik.http.services.authelia.loadbalancer.server.port=9091"
+      # --- Middleware forward-auth réutilisable ---
+      - "traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/authz/forward-auth"
+      - "traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
+
+networks:
+  frontend:
+    name: frontend
+    external: true

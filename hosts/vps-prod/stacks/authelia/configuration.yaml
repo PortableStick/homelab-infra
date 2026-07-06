@@ -1,0 +1,90 @@
+---
+theme: 'auto'
+
+log:
+  level: 'info'
+  format: 'text'
+
+totp:
+  issuer: 'vindiesel.vip'
+  algorithm: 'SHA1'
+  digits: 6
+  period: 30
+
+webauthn:
+  display_name: 'Homelab'
+  enable_passkey_login: true
+  timeout: '60 seconds'
+
+## lldap
+authentication_backend:
+  refresh_interval: '5 minutes'
+  ldap:
+    implementation: 'custom'
+    address: 'ldap://lldap:3890'
+    timeout: '5 seconds'
+    start_tls: false
+    base_dn: 'dc=vindiesel,dc=vip'
+    additional_users_dn: 'ou=people'
+    users_filter: '(&({username_attribute}={input})(objectClass=person))'
+    additional_groups_dn: 'ou=groups'
+    groups_filter: '(member={dn})'
+    group_search_mode: 'filter'
+    user: 'uid=Cassetout,ou=people,dc=vindiesel,dc=vip'
+    attributes:
+      username: 'uid'
+      display_name: 'displayName'
+      mail: 'mail'
+      group_name: 'cn'
+
+access_control:
+  default_policy: 'deny'
+  rules:
+    ## Le portail lui-même doit rester librement accessible.
+    - domain: 'auth.vindiesel.vip'
+      policy: 'bypass'
+    ## Accès admin Komodo (zone VPN-only int) : 2FA obligatoire.
+    - domain: 'komodo.int.vindiesel.vip'
+      policy: 'two_factor'
+    ## Futurs services *.int.vindiesel.vip protégés par le middleware forward-auth.
+    - domain: '*.int.vindiesel.vip'
+      policy: 'two_factor'
+
+##
+## Sessions. Le cookie est posé sur vindiesel.vip → couvre tous les
+## sous-domaines *.vindiesel.vip. (Le secret vient de AUTHELIA_SESSION_SECRET.)
+##
+session:
+  cookies:
+    - domain: 'vindiesel.vip'
+      authelia_url: 'https://auth.vindiesel.vip'
+      default_redirection_url: 'https://komodo.int.vindiesel.vip'
+      name: 'authelia_session'
+      same_site: 'lax'
+      inactivity: '1 hour'
+      expiration: '12 hours'
+      remember_me: '1 month'
+
+
+## Anti-bruteforce.
+regulation:
+  max_retries: 3
+  find_time: '2 minutes'
+  ban_time: '5 minutes'
+
+
+## Stockage local SQLite.
+storage:
+  local:
+    path: '/data/db.sqlite3'
+
+## Notifications par mail via le relais interne smtp-relay (→ Brevo).
+notifier:
+  disable_startup_check: false
+  smtp:
+    address: 'submission://smtp-relay:587'
+    sender: 'Authelia <lucasmasseh@outlook.com>'
+    subject: '[Authelia] {title}'
+    startup_check_address: 'lucasmasseh@outlook.com'
+    tls:
+      skip_verify: true

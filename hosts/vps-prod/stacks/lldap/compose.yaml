@@ -1,0 +1,34 @@
+services:
+  lldap:
+    image: lldap/lldap:v0.6.1-alpine
+    container_name: lldap
+    restart: unless-stopped
+    # .env rendu par pre_deploy (sops -d) déclaré dans komodo/stacks.toml.
+    env_file: .env
+    environment:
+      # Racine de l'arbre LDAP.
+      LLDAP_LDAP_BASE_DN: "dc=vindiesel,dc=vip"
+      LLDAP_LDAP_USER_NAME: "Cassetout"
+      LLDAP_LDAP_USER_EMAIL: "lucasmasseh@outlook.com"
+      # Ports internes.
+      LLDAP_LDAP_PORT: "3890"
+      LLDAP_HTTP_PORT: "17170"
+      # LLDAP_JWT_SECRET / LLDAP_KEY_SEED / LLDAP_LDAP_USER_PASS / TZ -> compose.env
+    volumes:
+      - /data/lldap:/data
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=frontend"
+      - "traefik.http.routers.lldap.rule=Host(`ldap.int.vindiesel.vip`)"
+      - "traefik.http.routers.lldap.entrypoints=websecure"
+      - "traefik.http.routers.lldap.tls=true"
+      - "traefik.http.routers.lldap.middlewares=lldap-vpn"
+      - "traefik.http.middlewares.lldap-vpn.ipallowlist.sourcerange=100.64.0.0/10"
+      - "traefik.http.services.lldap.loadbalancer.server.port=17170"
+
+networks:
+  frontend:
+    name: frontend
+    external: true
