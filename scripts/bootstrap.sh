@@ -39,6 +39,7 @@ need git
 need docker
 need sops
 need age-keygen
+need openssl
 
 # --- (Optionnel) Installation Docker -----------------------------------------
 # Décommenter si Docker n'est pas présent. Méthode dépôt officiel Docker (Ubuntu).
@@ -78,10 +79,19 @@ docker network inspect frontend >/dev/null 2>&1 || docker network create fronten
 
 # --- Étape 5 : répertoires de données ----------------------------------------
 log "Création des répertoires de données"
-mkdir -p /data/acme-dns /data/traefik/acme /data/traefik/acme-dns "${PERIPHERY_ROOT}/age"
+mkdir -p /data/acme-dns /data/traefik/acme /data/traefik/acme-dns \
+         /data/authelia /data/lldap "${PERIPHERY_ROOT}/age"
 if [ ! -f /data/traefik/acme/acme.json ]; then
   touch /data/traefik/acme/acme.json
   chmod 600 /data/traefik/acme/acme.json
+fi
+
+# Clé privée de signature OIDC d'Authelia (hors git, comme la clé age).
+# Sa perte n'invalide que les sessions OIDC en cours. Voir docs/authelia.md.
+if [ ! -f /data/authelia/oidc-issuer.pem ]; then
+  log "Génération de la clé de signature OIDC Authelia"
+  openssl genrsa -out /data/authelia/oidc-issuer.pem 4096
+  chmod 600 /data/authelia/oidc-issuer.pem
 fi
 
 # --- Étape 6 : clé privée age ------------------------------------------------

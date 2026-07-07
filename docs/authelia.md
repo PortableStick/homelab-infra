@@ -165,7 +165,8 @@ Komodo n'utilise **pas** son login intégré : il est client OIDC d'Authelia
 !!! danger "Clé de signature OIDC = fichier sur l'hôte (hors git), à sauvegarder"
     Authelia signe les jetons OIDC avec une clé RSA privée, montée depuis `/data/authelia/oidc-issuer.pem`
     (`AUTHELIA_IDENTITY_PROVIDERS_OIDC_JWKS_0_KEY_FILE=/data/oidc-issuer.pem`). Comme la clé age, elle
-    **vit sur l'hôte**, pas dans le dépôt. À générer avant déploiement et à sauvegarder (Bitwarden) :
+    **vit sur l'hôte**, pas dans le dépôt. `scripts/bootstrap.sh` la génère automatiquement (idempotent)
+    en même temps que les dossiers de données ; à sauvegarder (Bitwarden). Génération manuelle si besoin :
 
     ```bash
     openssl genrsa -out /data/authelia/oidc-issuer.pem 4096
