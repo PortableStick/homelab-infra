@@ -150,12 +150,37 @@ des règles `access_control` plus fines.
     `uid=Cassetout,ou=people,dc=vindiesel,dc=vip` matche donc quelle que soit la casse stockée. Si un
     bind échoue au démarrage, essayer l'identifiant en minuscules.
 
-## Phase 2 — OIDC (Forgejo) *(à venir)*
+## OIDC — Komodo se logue via Authelia
 
-Prévu, non encore posé : activer `identity_providers.oidc` dans `configuration.yaml` (clé d'émission
-JWK stockée en secret SOPS dédié), déclarer un client `forgejo`, puis configurer l'authentification
-source OIDC côté Forgejo (`git.lucasmasse.net`). L'OIDC fonctionne car le portail est public
-(redirection cross-domaine), donc aucun changement de domaine côté Forgejo.
+Komodo n'utilise **pas** son login intégré : il est client OIDC d'Authelia
+([guide officiel](https://www.authelia.com/integration/openid-connect/clients/komodo/)).
+
+- Client `komodo` déclaré dans `identity_providers.oidc` de `configuration.yaml` (secret client sous forme
+  de **hash pbkdf2** ; le secret en clair est `KOMODO_OIDC_CLIENT_SECRET` dans `komodo.env`).
+- Komodo : `KOMODO_OIDC_ENABLED=true`, `KOMODO_OIDC_PROVIDER=https://auth.vindiesel.vip`,
+  `KOMODO_OIDC_CLIENT_ID/SECRET` (dans `komodo.env`). Callback `…/auth/oidc/callback`.
+- `hmac_secret` OIDC → `AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET` (`authelia.env`).
+- La route Komodo n'a **plus** `authelia@docker` (l'OIDC fait l'auth) — seulement `komodo-vpn`.
+
+!!! danger "Clé de signature OIDC = fichier sur l'hôte (hors git), à sauvegarder"
+    Authelia signe les jetons OIDC avec une clé RSA privée, montée depuis `/data/authelia/oidc-issuer.pem`
+    (`AUTHELIA_IDENTITY_PROVIDERS_OIDC_JWKS_0_KEY_FILE=/data/oidc-issuer.pem`). Comme la clé age, elle
+    **vit sur l'hôte**, pas dans le dépôt. À générer avant déploiement et à sauvegarder (Bitwarden) :
+
+    ```bash
+    openssl genrsa -out /data/authelia/oidc-issuer.pem 4096
+    chmod 600 /data/authelia/oidc-issuer.pem
+    ```
+
+    Sa perte n'est pas dramatique (regénérer invalide juste les sessions OIDC en cours).
+
+!!! note "Premier login OIDC : promouvoir l'utilisateur admin"
+    Le compte créé au 1ᵉʳ login OIDC n'est pas forcément admin. `KOMODO_LOCAL_AUTH` reste `true` comme
+    filet : se connecter en `admin` local pour activer/promouvoir l'utilisateur OIDC, puis (optionnel)
+    passer `KOMODO_LOCAL_AUTH=false` pour ne garder qu'Authelia.
+
+**Forgejo (à venir)** : même principe, déclarer un client `forgejo` et brancher l'auth source OIDC côté
+`git.lucasmasse.net` (portail public → redirection cross-domaine OK).
 
 ---
 

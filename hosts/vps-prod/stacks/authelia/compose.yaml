@@ -5,6 +5,9 @@ services:
     restart: unless-stopped
     # .env rendu par pre_deploy (sops -d) déclaré dans komodo/stacks.toml.
     env_file: .env
+    environment:
+      # Clé privée de signature OIDC (générée sur l'hôte, hors git) : /data/authelia -> /data
+      AUTHELIA_IDENTITY_PROVIDERS_OIDC_JWKS_0_KEY_FILE: /data/oidc-issuer.pem
     volumes:
       - ./configuration.yaml:/config/configuration.yml:ro
       - /data/authelia:/data

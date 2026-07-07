@@ -60,8 +60,9 @@ services:
       - "traefik.http.routers.komodo.rule=Host(`komodo.int.vindiesel.vip`)"
       - "traefik.http.routers.komodo.entrypoints=websecure"
       - "traefik.http.routers.komodo.tls=true"
-      # Double verrou : d'abord la plage Tailscale (VPN), puis l'authentification 2FA Authelia.
-      - "traefik.http.routers.komodo.middlewares=komodo-vpn,authelia@docker"
+      # VPN (Tailscale) uniquement : l'auth 2FA est faite par Komodo via OIDC Authelia,
+      # donc pas de forward-auth ici (sinon double login).
+      - "traefik.http.routers.komodo.middlewares=komodo-vpn"
       # N'accepte que les connexions venant de la plage Tailscale
       - "traefik.http.middlewares.komodo-vpn.ipallowlist.sourcerange=100.64.0.0/10"
       - "traefik.http.services.komodo.loadbalancer.server.port=9120"
