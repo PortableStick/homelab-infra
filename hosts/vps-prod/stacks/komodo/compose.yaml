@@ -87,6 +87,9 @@ services:
     depends_on:
       - core
     env_file: ./compose.env
+    environment:
+      # clé age pour le pre_deploy `sops -d` des stacks (déjà montée via /etc/komodo)
+      SOPS_AGE_KEY_FILE: /etc/komodo/age/key.txt
     volumes:
       ## Attach the Core / Periphery communication keys
       - keys:/config/keys
@@ -94,6 +97,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       ## Allow Periphery to see processes outside of container
       - /proc:/proc
+      # sops absent de l'image : on monte le binaire de l'hôte
+      - /usr/local/bin/sops:/usr/local/bin/sops:ro
       ## Specify the Periphery agent root directory.
       ## All your configs / repos must be children of this directory for Periphery to be able to see it.
       ## Must be the same inside and outside the container,
