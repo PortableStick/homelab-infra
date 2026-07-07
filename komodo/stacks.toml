@@ -164,3 +164,43 @@ repo = "PortableStick/homelab-infra"
 file_paths = ["hosts/vindiesel/stacks/immich-2/compose.yaml"]
 pre_deploy.path = "hosts/vindiesel/stacks/immich-2"
 pre_deploy.command = "sops -d ../../../../secrets/vindiesel/immich.env > .env"
+
+[[stack]]
+name = "smtp-relay"
+description = "Relais Postfix interne -> smarthost Brevo"
+deploy = true
+tags = ["infra"]
+[stack.config]
+server = "Local"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vps-prod/stacks/smtp-relay/compose.yaml"]
+pre_deploy.path = "hosts/vps-prod/stacks/smtp-relay"
+pre_deploy.command = "sops -d ../../../../secrets/vps/smtp-relay.env > .env"
+
+[[stack]]
+name = "lldap"
+description = "Annuaire LDAP leger - backend Authelia"
+deploy = true
+tags = ["auth"]
+[stack.config]
+server = "Local"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vps-prod/stacks/lldap/compose.yaml"]
+pre_deploy.path = "hosts/vps-prod/stacks/lldap"
+pre_deploy.command = "sops -d ../../../../secrets/vps/lldap.env > .env"
+
+[[stack]]
+name = "authelia"
+description = "Portail d'authentification (forward-auth + OIDC)"
+deploy = true
+after = ["traefik", "lldap", "smtp-relay"]
+tags = ["auth"]
+[stack.config]
+server = "Local"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vps-prod/stacks/authelia/compose.yaml"]
+pre_deploy.path = "hosts/vps-prod/stacks/authelia"
+pre_deploy.command = "sops -d ../../../../secrets/vps/authelia.env > .env"

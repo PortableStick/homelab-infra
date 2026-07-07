@@ -71,6 +71,7 @@ nav:
   - acme-dns: acme-dns.md
   - Forgejo: forgejo.md
   - Portfolio: portfolio.md
+  - Authelia (SSO / 2FA): authelia.md
   - Secrets (SOPS/age): secrets-sops.md
   - Sécurité & CI: securite-ci.md
   - Procédures planifiées: procedures-planifiees.md

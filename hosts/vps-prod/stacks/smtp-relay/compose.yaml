@@ -1,0 +1,22 @@
+services:
+  smtp-relay:
+    image: boky/postfix:v4.3.0
+    container_name: smtp-relay
+    restart: unless-stopped
+    # .env rendu par pre_deploy (sops -d) déclaré dans komodo/stacks.toml.
+    env_file: .env
+    environment:
+      # Smarthost Brevo.
+      RELAYHOST: "[smtp-relay.brevo.com]:587"
+      # Domaines autorisés comme expéditeur.
+      ALLOWED_SENDER_DOMAINS: "vindiesel.vip lucasmasse.net outlook.com"
+      # Nom d'hôte annoncé par Postfix.
+      HOSTNAME: "mail.vindiesel.vip"
+      # RELAYHOST_USERNAME / RELAYHOST_PASSWORD / TZ -> compose.env
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    name: frontend
+    external: true

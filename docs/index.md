@@ -65,6 +65,7 @@ Concrètement :
 - **[acme-dns](acme-dns.md)** — serveur DNS dédié au challenge ACME.
 - **[Forgejo](forgejo.md)** — forge Git auto-hébergée (`git.lucasmasse.net`).
 - **[Portfolio](portfolio.md)** — site Astro public (`but.lucasmasse.net`).
+- **[Authelia (SSO / 2FA)](authelia.md)** — portail d'authentification (`auth.vindiesel.vip`), lldap, relais SMTP.
 - **[Secrets (SOPS/age)](secrets-sops.md)** — chiffrement, clé maître, workflow.
 - **[Sécurité & CI](securite-ci.md)** — gitleaks, hook pre-commit.
 - **[Procédures planifiées](procedures-planifiees.md)** — tâches automatiques de Komodo.
