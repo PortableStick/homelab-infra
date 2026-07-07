@@ -42,6 +42,9 @@ authentication_backend:
 ## cle de signature -> AUTHELIA_IDENTITY_PROVIDERS_OIDC_JWKS_0_KEY_FILE (fichier hote /data/oidc-issuer.pem)
 identity_providers:
   oidc:
+    ## Clé privée de signature, lue depuis le fichier hôte (X_AUTHELIA_CONFIG_FILTERS=template).
+    jwks:
+      - key: {{ secret "/data/oidc-issuer.pem" | mindent 10 "|" | msquote }}
     clients:
       - client_id: 'komodo'
         client_name: 'Komodo'
