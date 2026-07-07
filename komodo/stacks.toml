@@ -204,3 +204,17 @@ repo = "PortableStick/homelab-infra"
 file_paths = ["hosts/vps-prod/stacks/authelia/compose.yaml"]
 pre_deploy.path = "hosts/vps-prod/stacks/authelia"
 pre_deploy.command = "sops -d ../../../../secrets/vps/authelia.env > .env"
+
+[[stack]]
+name = "mangetout"
+description = "Mangetout (PocketBase + proxy IA)"
+deploy = true
+after = ["traefik-vindiesel"]
+tags = ["app", "vindiesel"]
+[stack.config]
+server = "docker-vindiesel"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vindiesel/stacks/mangetout/compose.yaml"]
+pre_deploy.path = "hosts/vindiesel/stacks/mangetout"
+pre_deploy.command = "sops -d ../../../../secrets/vindiesel/mangetout.env > .env"

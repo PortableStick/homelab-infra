@@ -1,0 +1,67 @@
+name: mangetout
+
+services:
+  pocketbase:
+    container_name: mangetout_pocketbase
+    image: ghcr.io/portablestick/mangetout-pocketbase:${PB_IMAGE_TAG:-latest}
+    networks:
+      - proxy
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # Public (TLS terminé au VPS) — PAS de forward-auth : PocketBase fait son propre OIDC.
+      - "traefik.http.routers.mangetout-pb.rule=Host(`pb.vindiesel.vip`)"
+      - "traefik.http.routers.mangetout-pb.entrypoints=web"
+      - "traefik.http.services.mangetout-pb.loadbalancer.server.port=8090"
+    volumes:
+      - /data/mangetout/pb_data:/pb/pb_data
+      # Migrations de schéma versionnées (montées en lecture, non incluses dans l'image).
+      - ./pb_migrations:/pb/pb_migrations:ro
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    healthcheck:
+      test: wget -qO- http://127.0.0.1:8090/api/health || exit 1
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ai-proxy:
+    container_name: mangetout_ai_proxy
+    image: ghcr.io/portablestick/mangetout-ai-proxy:${AI_IMAGE_TAG:-latest}
+    networks:
+      - proxy
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.mangetout-ai.rule=Host(`ai.vindiesel.vip`)"
+      - "traefik.http.routers.mangetout-ai.entrypoints=web"
+      - "traefik.http.services.mangetout-ai.loadbalancer.server.port=8787"
+    environment:
+      # Non-secrets. Secrets (OPENROUTER_API_KEY, PB_SERVICE_TOKEN) via env_file.
+      OPENROUTER_BASE_URL: "https://openrouter.ai/api/v1"
+      AI_MODEL_TEXT: "deepseek/deepseek-v4-flash"
+      AI_MODEL_TEXT_PRO: "deepseek/deepseek-v4-pro"
+      AI_MODEL_VISION: "google/gemini-2.5-flash"
+      PB_INTERNAL_URL: "http://pocketbase:8090"
+      AI_RATE_LIMIT_PER_MIN: "20"
+    env_file:
+      - .env
+    depends_on:
+      - pocketbase
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+  internal:
+    name: mangetout_internal

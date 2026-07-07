@@ -18,6 +18,21 @@ http:
         - int-vpn
       tls: {}
 
+    # mangetout : PUBLIC (backend app mobile) — pas de middleware int-vpn.
+    mangetout-pb:
+      rule: "Host(`pb.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-vindiesel
+      tls: {}
+
+    mangetout-ai:
+      rule: "Host(`ai.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-vindiesel
+      tls: {}
+
   services:
     home-vindiesel:
       loadBalancer:
