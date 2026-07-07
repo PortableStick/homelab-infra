@@ -80,9 +80,14 @@ docker network create frontend
 ### 5. Recréer les répertoires de données
 
 ```bash
-sudo mkdir -p /data/acme-dns /data/traefik/acme /data/traefik/acme-dns /etc/komodo/age
+sudo mkdir -p /data/acme-dns /data/traefik/acme /data/traefik/acme-dns \
+              /data/authelia /data/lldap /etc/komodo/age
 sudo touch /data/traefik/acme/acme.json && sudo chmod 600 /data/traefik/acme/acme.json
 ```
+
+Authelia a besoin en plus d'une clé de signature OIDC (fichier RSA, hors dépôt) — voir
+[Authelia](authelia.md) pour la commande de génération. `scripts/bootstrap.sh` fait les deux
+(dossiers + clé) automatiquement.
 
 **Vérif :** les chemins de la section « Chemins de données » de [Architecture](architecture.md)
 existent.
@@ -110,7 +115,8 @@ cd /etc/komodo
 sudo git clone https://github.com/PortableStick/homelab-infra.git
 ```
 
-**Vérif :** `ls /etc/komodo/homelab-infra/hosts/vps-prod/stacks` liste `acme-dns traefik komodo whoami`.
+**Vérif :** `ls /etc/komodo/homelab-infra/hosts/vps-prod/stacks` liste `acme-dns traefik komodo whoami
+portfolio forgejo lldap authelia smtp-relay`.
 
 ### 8. Rendre le `compose.env` de Komodo (déchiffrement manuel)
 
@@ -157,20 +163,27 @@ répond sur `http://<hôte>:9120` (ou via Tailscale). Connexion avec
 ### 11. Laisser Komodo appliquer le resource sync
 
 Une fois Komodo en route, le **resource sync `homelab-infra`** (défini dans `komodo/stacks.toml`)
-applique la configuration et déploie les stacks `acme-dns` et `traefik` depuis GitHub.
+applique la configuration et déploie toutes les stacks `[[stack]]` du fichier — sur `vps-prod` :
+`acme-dns`, `traefik`, `portfolio`, `forgejo`, `whoami`, `smtp-relay`, `lldap`, `authelia` (ordre
+géré par les `after`). Les stacks du serveur `docker-vindiesel` (Immich) ne se déploient qu'une fois
+sa Periphery rattachée — voir [Rattacher un hôte (Periphery)](rattacher-hote-periphery.md).
 
 !!! info "À compléter — déclenchement du 1er sync"
     Préciser ici le geste exact réalisé au premier boot (création/validation du resource sync via l'UI
     Komodo, ou via la connexion du compte Git + token de lecture). C'est l'étape « manuelle » de
     démarrage du GitOps qui n'est pas auto-documentée par le dépôt.
 
-**Vérif :** dans l'UI Komodo, le sync est *in sync* ; `docker ps` montre `acme-dns` et `traefik`.
+**Vérif :** dans l'UI Komodo, le sync est *in sync* ; `docker ps` montre les conteneurs des stacks
+`vps-prod` ci-dessus.
 
 ### 12. Vérifier le DNS et obtenir les certificats
 
 1. Délégation chez Cloudflare : `NS acme.vindiesel.vip → acmens.vindiesel.vip` et
    `A acmens.vindiesel.vip → 116.202.22.50` (voir [acme-dns](acme-dns.md)).
 2. CNAME `_acme-challenge.*` vers le sous-domaine acme-dns généré (lisible dans `storage.json`).
+3. Enregistrements `A` des services : `auth.vindiesel.vip` (public) et `ldap.int.vindiesel.vip`
+   (VPN-only) en plus des noms déjà couverts par les wildcards — voir la table DNS complète dans
+   [Authelia](authelia.md).
 
 **Vérif :**
 

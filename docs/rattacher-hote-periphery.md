@@ -120,6 +120,13 @@ pose et vérifie la clé privée age, installe la Periphery (binaire + systemd, 
 **inbound**), autorise le Core (`core_public_keys`), restreint l'accès au tailnet (`allowed_ips`), et
 expose `SOPS_AGE_KEY_FILE` au service (pour le `pre_deploy`).
 
+!!! info "Pourquoi ce script installe `sops` alors que le Core n'en a pas besoin de la sorte"
+    Ici la Periphery tourne en **binaire + systemd** directement sur l'hôte : `sops` est donc installé
+    sur l'hôte lui-même (étape 1 du script), rien de plus à faire. Sur le VPS, la Periphery du serveur
+    `Local` est **conteneurisée** (image `komodo-periphery`, qui n'embarque pas `sops`) : le
+    `pre_deploy` `sops -d` de ses stacks a besoin d'un bind-mount du binaire hôte — voir
+    [Komodo — pourquoi `sops` est monté à la main](komodo.md#volumes-et-chemins).
+
 Récupérer la **Core Public Key** (UI Komodo du VPS → **Settings**, commence par `MCow…`), puis en root
 sur l'hôte :
 

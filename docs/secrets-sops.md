@@ -12,14 +12,19 @@ secrets **dans le dépôt** et leur cycle de vie sur l'hôte.
 creation_rules:
   - path_regex: secrets[\\/]vps[\\/].*\.env$
     age: age16jmqm9c42x330uyvdf07lq2qy892c7hdj96t6dw4m9rmhy4cw96spyc5cr
+  - path_regex: secrets[\\/]vindiesel[\\/].*\.env$
+    age: age16jmqm9c42x330uyvdf07lq2qy892c7hdj96t6dw4m9rmhy4cw96spyc5cr
 ```
 
-- **Règle :** tout fichier `secrets/vps/*.env` est chiffré pour la clé publique age ci-dessus.
+- **Règle :** tout fichier `secrets/vps/*.env` **ou** `secrets/vindiesel/*.env` est chiffré pour la
+  clé publique age ci-dessus (même clé pour les deux hôtes — pas de séparation par périmètre, cf.
+  encadré en fin de page).
 - **Clé déclarée :** clé **publique** (sert à chiffrer). La clé **privée** correspondante (qui
   déchiffre) est la clé maître.
-- **Secret existant :** `secrets/vps/komodo.env`, chiffré (chaque valeur est un blob
-  `ENC[AES256_GCM,...]`). Les **noms** des variables restent en clair, seules les **valeurs** sont
-  chiffrées — c'est le comportement attendu de SOPS pour un `.env`.
+- **Secrets existants :** `secrets/vps/{komodo,authelia,lldap,smtp-relay}.env` et
+  `secrets/vindiesel/immich.env`, chiffrés (chaque valeur est un blob `ENC[AES256_GCM,...]`). Les
+  **noms** des variables restent en clair, seules les **valeurs** sont chiffrées — c'est le
+  comportement attendu de SOPS pour un `.env`.
 
 ## Où vit la clé privée maître
 
@@ -45,15 +50,24 @@ Le compose de Komodo charge `env_file: ./compose.env`, un fichier **non versionn
 sops -d secrets/vps/komodo.env > hosts/vps-prod/stacks/komodo/compose.env
 ```
 
-!!! warning "État actuel : déchiffrement manuel ; automatisation non testée"
-    Aujourd'hui, ce rendu se fait **à la main** pour bootstrapper Komodo. L'idée de faire **déchiffrer
-    automatiquement les secrets des autres stacks par Komodo** (au moment du déploiement) est
-    **envisagée mais pas testée**. Tant que ce n'est pas validé, partir du principe que **chaque secret
-    doit être rendu manuellement** sur l'hôte avant le déploiement de sa stack.
+!!! note "Komodo : rendu manuel (poule et œuf) ; les autres stacks : rendu automatique via `pre_deploy`"
+    Komodo lui-même n'existe pas encore au moment de son propre premier déploiement : son `.env` est
+    donc forcément rendu **à la main** (`scripts/bootstrap.sh`), une seule fois.
 
-    L'étape intermédiaire (dépôt `infra`) prévoyait un rendu automatique via un timer systemd
-    `render-secrets` ; ce mécanisme **n'est pas présent** dans `homelab-infra`. À implémenter et
-    documenter ici si tu pars sur cette voie.
+    Une fois Komodo démarré, les autres stacks (`authelia`, `lldap`, `smtp-relay`, `immich-1`,
+    `immich-2`) utilisent le **`pre_deploy`** de `komodo/stacks.toml` : à chaque déploiement, la
+    Periphery lance `sops -d ../../../../secrets/<host>/<stack>.env > .env` avant `docker compose up`.
+    Ça suppose que `sops` et `SOPS_AGE_KEY_FILE` sont disponibles **côté Periphery**, pas seulement sur
+    l'hôte :
+
+    - **Periphery conteneurisée** (serveur `Local`, VPS) : l'image ne fournit pas `sops` — le binaire de
+      l'hôte est monté (`/usr/local/bin/sops:/usr/local/bin/sops:ro`) et `SOPS_AGE_KEY_FILE` est passé en
+      variable d'environnement du service `periphery` (`hosts/vps-prod/stacks/komodo/compose.yaml`).
+    - **Periphery native** (serveur `docker-vindiesel`) : `scripts/bootstrap-periphery.sh` installe `sops`
+      et expose `SOPS_AGE_KEY_FILE` via un drop-in systemd (`periphery.service.d/sops.conf`).
+
+    Le timer systemd `render-secrets` évoqué par l'étape intermédiaire (dépôt `infra`) n'est donc plus
+    nécessaire : le rendu est intégré au cycle de déploiement Komodo.
 
 ## Filets de sécurité anti-fuite
 
@@ -69,10 +83,12 @@ Trois protections empêchent un secret en clair d'arriver dans Git (détaillées
 !!! info "À compléter — rotation / périmètre par hôte"
     Les commentaires de l'étape intermédiaire évoquaient l'ajout d'une **clé publique par hôte** pour
     borner le rayon de souffle (un secret d'un hôte n'est déchiffrable que par cet hôte). Aujourd'hui,
-    une seule clé couvre `secrets/vps/`. Documenter ici toute évolution (nouvelle clé, rotation,
-    `sops updatekeys`).
+    une seule clé couvre à la fois `secrets/vps/` et `secrets/vindiesel/`. Documenter ici toute
+    évolution (nouvelle clé, rotation, `sops updatekeys`).
 
 ---
 
-**Sources :** `.sops.yaml`, `secrets/vps/komodo.env`, `.gitignore`, `.githooks/pre-commit` du dépôt ·
+**Sources :** `.sops.yaml`, `secrets/{vps,vindiesel}/*.env`, `komodo/stacks.toml`,
+`hosts/vps-prod/stacks/komodo/compose.yaml`, `scripts/{bootstrap,bootstrap-periphery}.sh`,
+`.gitignore`, `.githooks/pre-commit` du dépôt ·
 [SOPS (getsops/sops)](https://github.com/getsops/sops) · [age (FiloSottile/age)](https://github.com/FiloSottile/age).

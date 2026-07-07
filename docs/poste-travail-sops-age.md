@@ -113,11 +113,14 @@ Crée le fichier au bon emplacement (pour qu'une règle `.sops.yaml` s'applique)
 sops secrets/vps/nouveau-service.env
 ```
 
-La règle actuelle de `.sops.yaml` couvre `secrets/vps/*.env` :
+Les règles actuelles de `.sops.yaml` couvrent `secrets/vps/*.env` et `secrets/vindiesel/*.env` (même
+clé pour les deux hôtes) :
 
 ```yaml
 creation_rules:
   - path_regex: secrets[\\/]vps[\\/].*\.env$
+    age: age16jmqm9c42x330uyvdf07lq2qy892c7hdj96t6dw4m9rmhy4cw96spyc5cr
+  - path_regex: secrets[\\/]vindiesel[\\/].*\.env$
     age: age16jmqm9c42x330uyvdf07lq2qy892c7hdj96t6dw4m9rmhy4cw96spyc5cr
 ```
 

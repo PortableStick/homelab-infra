@@ -1,7 +1,8 @@
 # Authelia (SSO / 2FA)
 
 Portail d'authentification centralisé, exposé **publiquement** sur **`auth.vindiesel.vip`**. Il protège
-les services sensibles via **forward-auth Traefik** et servira de **fournisseur OIDC** (phase 2).
+les services `*.int` sensibles via **forward-auth Traefik** et sert de **fournisseur OIDC** — Komodo s'y
+connecte déjà (voir [OIDC — Komodo se logue via Authelia](#oidc-komodo-se-logue-via-authelia)).
 Backend d'utilisateurs : **lldap**. Envoi de mail : stack **smtp-relay** (→ Brevo).
 
 Sources : `hosts/vps-prod/stacks/{authelia,lldap,smtp-relay}/`, `komodo/stacks.toml`,
@@ -9,17 +10,18 @@ Sources : `hosts/vps-prod/stacks/{authelia,lldap,smtp-relay}/`, `komodo/stacks.t
 
 !!! info "Pourquoi le portail est **public** (et pas en `*.int` VPN-only)"
     La zone `*.int.vindiesel.vip` est réservée aux services VPN-only. Le portail Authelia, lui, reste
-    **public** : le flux **OIDC de Forgejo** (service public sur `git.lucasmasse.net`) redirige les
-    utilisateurs vers le portail — s'il était VPN-only, l'OIDC public serait cassé. Le cookie de
-    session posé sur `vindiesel.vip` couvre malgré tout `komodo.int.vindiesel.vip` (correspondance par
-    suffixe RFC 6265), donc le forward-auth VPN-only fonctionne quand même.
+    **public** : les flux **OIDC** qui s'y connectent (Komodo aujourd'hui, **Forgejo** demain — service
+    public sur `git.lucasmasse.net`) impliquent une redirection navigateur cross-domaine vers le portail
+    — s'il était VPN-only, ces redirections publiques seraient cassées. Le cookie de session posé sur
+    `vindiesel.vip` couvre malgré tout les sous-domaines comme `ldap.int.vindiesel.vip` (correspondance
+    par suffixe RFC 6265), donc le forward-auth des services VPN-only fonctionne aussi.
 
 ## Vue d'ensemble
 
 | Élément | Choix | Source |
 | --- | --- | --- |
 | Portail | `auth.vindiesel.vip` (**public**, wildcard `*.vindiesel.vip`) | `authelia/compose.yaml` |
-| Rôles | forward-auth Traefik **+** OIDC (phase 2) | `authelia/compose.yaml` |
+| Rôles | forward-auth Traefik (services `*.int`) **+** fournisseur OIDC (Komodo) | `authelia/compose.yaml` |
 | Backend | **lldap** (`ldap://lldap:3890`), base DN `dc=vindiesel,dc=vip` | `configuration.yaml` |
 | Politique par défaut | `two_factor` (default_policy `deny`) | `configuration.yaml` |
 | 2FA | TOTP + WebAuthn/Passkeys | `configuration.yaml` |
@@ -51,17 +53,21 @@ La stack `authelia` définit un middleware Traefik réutilisable **`authelia@doc
 ```
 
 **Protéger un service** = ajouter `authelia@docker` à la liste `middlewares` de son routeur, et une
-règle dans `access_control` de `configuration.yaml`. Exemple sur Komodo
-(`hosts/vps-prod/stacks/komodo/compose.yaml`) :
+règle dans `access_control` de `configuration.yaml`. Exemple générique pour un futur service `*.int`
+(déjà couvert par la règle `access_control` `*.int.vindiesel.vip` → `two_factor`) :
 
 ```yaml
-- "traefik.http.routers.komodo.middlewares=komodo-vpn,authelia@docker"
+- "traefik.http.routers.monservice.middlewares=monservice-vpn,authelia@docker"
 ```
 
-!!! note "Komodo : double verrou VPN + 2FA"
-    Komodo (`komodo.int.vindiesel.vip`) garde son `ipAllowList` Tailscale (`komodo-vpn`) **et** ajoute
-    `authelia@docker`. Il faut donc être sur le tailnet **et** s'authentifier en 2FA. Rappel : la zone
-    `int` exige `userland-proxy: false` pour que l'`ipAllowList` voie la vraie IP source — cf.
+!!! note "Komodo n'utilise plus ce middleware"
+    Komodo (`komodo.int.vindiesel.vip`) gardait initialement ce double verrou VPN + forward-auth, mais
+    est passé à l'authentification **OIDC** native (voir
+    [OIDC — Komodo se logue via Authelia](#oidc-komodo-se-logue-via-authelia)) : sa route ne porte plus
+    que `komodo-vpn`, sinon l'utilisateur devrait se logger deux fois (forward-auth puis OIDC). Le
+    middleware `authelia@docker` reste disponible pour protéger d'autres services `*.int` qui n'ont pas
+    (ou pas encore) d'intégration OIDC propre. Rappel : la zone `int` exige `userland-proxy: false` pour
+    que l'`ipAllowList` voie la vraie IP source — cf.
     [Exposer un service en VPN-only](exposer-service-vpn-only.md).
 
 ## Chemins de données sur l'hôte (à créer avant déploiement)
@@ -81,7 +87,7 @@ Trois fichiers chiffrés SOPS/age (mêmes règles que le reste, cf. [Secrets](se
 
 | Fichier | Variables |
 | --- | --- |
-| `secrets/vps/authelia.env` | `AUTHELIA_SESSION_SECRET`, `AUTHELIA_STORAGE_ENCRYPTION_KEY`, `AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET`, `AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD` |
+| `secrets/vps/authelia.env` | `AUTHELIA_SESSION_SECRET`, `AUTHELIA_STORAGE_ENCRYPTION_KEY`, `AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET`, `AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD`, `AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET` |
 | `secrets/vps/lldap.env` | `LLDAP_JWT_SECRET`, `LLDAP_KEY_SEED`, `LLDAP_LDAP_USER_PASS` |
 | `secrets/vps/smtp-relay.env` | `RELAYHOST_USERNAME`, `RELAYHOST_PASSWORD` |
 
@@ -136,8 +142,10 @@ curl -I https://auth.vindiesel.vip       # 200, cert *.vindiesel.vip valide
 docker logs authelia 2>&1 | grep -i ldap # bind lldap OK au démarrage
 ```
 
-Accès à Komodo (`komodo.int.vindiesel.vip`, sur le VPN) : redirige désormais vers le portail Authelia
-avant d'afficher l'UI.
+Accès à Komodo (`komodo.int.vindiesel.vip`, sur le VPN) : la page Komodo propose un bouton de login
+OIDC qui redirige vers le portail Authelia (2FA), puis renvoie l'utilisateur connecté sur Komodo — pas
+de forward-auth Traefik sur cette route (voir [OIDC —
+Komodo se logue via Authelia](#oidc-komodo-se-logue-via-authelia)).
 
 ## Gestion des utilisateurs
 
@@ -163,10 +171,14 @@ Komodo n'utilise **pas** son login intégré : il est client OIDC d'Authelia
 - La route Komodo n'a **plus** `authelia@docker` (l'OIDC fait l'auth) — seulement `komodo-vpn`.
 
 !!! danger "Clé de signature OIDC = fichier sur l'hôte (hors git), à sauvegarder"
-    Authelia signe les jetons OIDC avec une clé RSA privée, montée depuis `/data/authelia/oidc-issuer.pem`
-    (`AUTHELIA_IDENTITY_PROVIDERS_OIDC_JWKS_0_KEY_FILE=/data/oidc-issuer.pem`). Comme la clé age, elle
-    **vit sur l'hôte**, pas dans le dépôt. `scripts/bootstrap.sh` la génère automatiquement (idempotent)
-    en même temps que les dossiers de données ; à sauvegarder (Bitwarden). Génération manuelle si besoin :
+    Authelia signe les jetons OIDC avec une clé RSA privée, montée depuis `/data/authelia/oidc-issuer.pem`.
+    Elle **ne se fournit pas par variable d'environnement** (`AUTHELIA_IDENTITY_PROVIDERS_OIDC_JWKS_0_KEY_FILE`
+    n'existe pas) : elle est déclarée en `jwks` dans `configuration.yaml`, lue via le filtre de template
+    Sprig `{{ secret "/data/oidc-issuer.pem" | mindent 10 "|" | msquote }}`, ce qui exige
+    `X_AUTHELIA_CONFIG_FILTERS=template` dans l'environnement du conteneur (`compose.yaml`). Comme la clé
+    age, elle **vit sur l'hôte**, pas dans le dépôt. `scripts/bootstrap.sh` la génère automatiquement
+    (idempotent) en même temps que les dossiers de données ; à sauvegarder (Bitwarden). Génération
+    manuelle si besoin :
 
     ```bash
     openssl genrsa -out /data/authelia/oidc-issuer.pem 4096
@@ -182,6 +194,15 @@ Komodo n'utilise **pas** son login intégré : il est client OIDC d'Authelia
 
 **Forgejo (à venir)** : même principe, déclarer un client `forgejo` et brancher l'auth source OIDC côté
 `git.lucasmasse.net` (portail public → redirection cross-domaine OK).
+
+## Dépannage (pièges rencontrés)
+
+| Symptôme | Cause | Correctif |
+| --- | --- | --- |
+| lldap crée l'admin sous `admin` au lieu du nom voulu ; bind Authelia en échec (`LDAP Result Code 49 "Invalid Credentials"`) | `LLDAP_LDAP_USER_NAME` n'existe pas côté lldap (variable ignorée) | utiliser `LLDAP_LDAP_USER_DN` pour fixer le nom de l'admin |
+| Notification mail Authelia/Brevo en échec : `535 5.7.8 Authentication failed` | `RELAYHOST_PASSWORD` = mot de passe du compte Brevo au lieu de la **clé SMTP** | `RELAYHOST_USERNAME` = login SMTP (`xxxxx@smtp-brevo.com`), `RELAYHOST_PASSWORD` = clé SMTP Brevo (`xsmtpsib-…`) |
+| `535` persiste après correction de la clé SMTP | `boky/postfix` écrit `/etc/postfix/sasl_passwd` sur un **volume anonyme persistant** : les lignes s'accumulent à chaque démarrage et l'ancienne valeur gagne au lookup `postmap` | `docker compose down -v` puis redéployer, pour repartir d'un `sasl_passwd` vierge |
+| Authelia refuse de démarrer : `identity_providers: oidc: option 'jwks' is required` (ou l'env `..._JWKS_0_KEY_FILE` signalé « not expected ») | la clé de signature OIDC ne se fournit pas par variable d'environnement | déclarer `jwks` dans `configuration.yaml` via `{{ secret "/data/oidc-issuer.pem" }}` + `X_AUTHELIA_CONFIG_FILTERS=template` (voir plus haut) |
 
 ---
 

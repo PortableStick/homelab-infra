@@ -1,25 +1,34 @@
 # Architecture
 
-## Hôte
+## Hôtes
 
-| Élément | Valeur | Source |
+Deux hôtes, deux serveurs Komodo distincts (`komodo/stacks.toml`) :
+
+| Élément | `vps-prod` (serveur `Local`) | `vindiesel` (serveur `docker-vindiesel`) |
 | --- | --- | --- |
-| Nom logique (Komodo) | `vps-prod` | `komodo/stacks.toml` (serveur `Local`) / ancien `komodo/server.toml` du dépôt `infra` |
-| Fournisseur | VPS Hetzner | indiqué par l'opérateur ; commentaire « VPS Hetzner — OS nu + Docker » (dépôt `infra`) |
+| Rôle | Core + Periphery Komodo, edge public (Traefik, acme-dns), Forgejo, portfolio, stack auth | Periphery distante rattachée au Core, hébergement Immich (2 instances) derrière un Traefik maison |
+| Fournisseur | VPS Hetzner | machine personnelle (« maison ») |
 | OS | Ubuntu Server | indiqué par l'opérateur |
-| Adresse IP publique | `116.202.22.50` | `hosts/vps-prod/stacks/acme-dns/compose.yaml` et `.../acme-dns/config.cfg` |
-| Moteur conteneurs | Docker + Docker Compose | tous les stacks sont des `compose.yaml` |
-| Accès admin | Tailscale installé sur le VPS | indiqué par l'opérateur |
+| Adresse | IP publique `116.202.22.50` | jointe via Tailscale (`https://100.65.11.58:8120` pour la Periphery) |
+| Moteur conteneurs | Docker + Docker Compose | Docker + Docker Compose |
+| Réseau Docker externe | `frontend` | `proxy` |
+
+*(Source : `komodo/stacks.toml`, `hosts/vps-prod/`, `hosts/vindiesel/`.)* Le rattachement d'un nouvel
+hôte Periphery suit une procédure documentée : voir [Rattacher un hôte (Periphery)](rattacher-hote-periphery.md).
+Cette page se concentre sur `vps-prod`, seul hôte ayant une documentation dédiée par service pour
+l'instant ; `vindiesel` (Traefik maison + Immich) n'a pas encore de page dédiée.
 
 !!! note "Komodo : serveur « Local »"
-    Dans `homelab-infra`, le serveur déclaré dans `komodo/stacks.toml` s'appelle **`Local`**
+    Dans `homelab-infra`, le serveur qui porte le Core Komodo s'appelle **`Local`**
     (la Periphery tourne sur le même hôte que le Core). Le nom `vps-prod` venait de l'étape
     intermédiaire (dépôt `infra`, fichier `komodo/server.toml`). À uniformiser si besoin — voir
     [Komodo](komodo.md).
 
 ## Réseau Docker
 
-Les stacks exposées (`acme-dns`, `traefik`) partagent un réseau Docker **externe** nommé `frontend` :
+Sur `vps-prod`, toutes les stacks exposées via Traefik (`acme-dns`, `traefik`, `portfolio`, `forgejo`,
+`whoami`, `komodo`, et la stack auth `lldap`/`authelia`/`smtp-relay`) partagent un réseau Docker
+**externe** nommé `frontend` :
 
 ```yaml
 networks:
@@ -36,8 +45,11 @@ quoi que ce soit :
 docker network create frontend
 ```
 
-*(Source : `hosts/vps-prod/stacks/{acme-dns,traefik}/compose.yaml`. La commande de création est la
-commande Docker standard pour un réseau externe.)*
+*(Source : `hosts/vps-prod/stacks/*/compose.yaml`. La commande de création est la commande Docker
+standard pour un réseau externe.)*
+
+Sur `vindiesel`, l'équivalent est le réseau externe `proxy` (`hosts/vindiesel/stacks/traefik/compose.yaml`),
+propre à cet hôte — les deux réseaux ne communiquent pas entre eux.
 
 ## Domaines & DNS
 
@@ -91,6 +103,8 @@ l'hôte lors d'une restauration.
 | `/data/traefik/acme` | `/acme` | Traefik (stockage des certificats `acme.json`) | `traefik/compose.yaml` |
 | `/data/traefik/acme-dns/storage.json` | `/acme-dns/storage.json` | Traefik (comptes acme-dns, **lecture-écriture**) | `traefik/compose.yaml` |
 | `/var/run/docker.sock` | `/var/run/docker.sock` | Traefik (ro) et Komodo Periphery | `traefik/` et `komodo/compose.yaml` |
+| `/data/authelia` | `/data` | Authelia (base SQLite, clé de signature OIDC) | `authelia/compose.yaml` |
+| `/data/lldap` | `/data` | lldap (annuaire) | `lldap/compose.yaml` |
 
 Komodo utilise par ailleurs des **volumes Docker nommés** (`postgres-data`, `ferretdb-state`, `keys`)
 et deux chemins paramétrés par variables (`${COMPOSE_KOMODO_BACKUPS_PATH}` pour les sauvegardes,
@@ -100,3 +114,10 @@ et deux chemins paramétrés par variables (`${COMPOSE_KOMODO_BACKUPS_PATH}` pou
     Les valeurs déchiffrées de `COMPOSE_KOMODO_BACKUPS_PATH` et `PERIPHERY_ROOT_DIRECTORY` vivent dans
     `secrets/vps/komodo.env` (chiffré). Renseigner ici les chemins réels une fois confirmés, car ils
     sont nécessaires à la restauration.
+
+## Authentification
+
+Trois stacks (`lldap`, `authelia`, `smtp-relay`, tag `auth` dans `komodo/stacks.toml`) forment le
+socle SSO/2FA de l'infra : portail Authelia public sur `auth.vindiesel.vip`, backend lldap en
+VPN-only (`ldap.int.vindiesel.vip`), mails via smtp-relay (→ Brevo). Komodo s'authentifie désormais en
+OIDC auprès d'Authelia. Détails complets : [Authelia (SSO / 2FA)](authelia.md).

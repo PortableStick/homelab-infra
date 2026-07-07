@@ -150,6 +150,13 @@ environment:
     `traefik-dashboard.lucasmasse.net`. Le `compose.yaml` actuel de `homelab-infra` **n'expose pas** de
     dashboard. Documenter ici si/quand il est réactivé.
 
+!!! note "Second Traefik sur l'hôte `vindiesel`"
+    `hosts/vindiesel/stacks/traefik/compose.yaml` déploie un **second** Traefik, indépendant, sur
+    l'hôte `vindiesel` (serveur Komodo `docker-vindiesel`) : réseau `proxy` (pas `frontend`), port `80`
+    lié uniquement à l'IP Tailscale de l'hôte (`100.65.11.58:80`), entrypoint `web` seul (pas de
+    `websecure`/TLS — trafic HTTP interne au tailnet, service Immich). Aucun rapport avec les
+    certificats wildcard ci-dessus. Pas encore de page dédiée pour cet hôte.
+
 ---
 
 **Sources :** `hosts/vps-prod/stacks/traefik/compose.yaml` du dépôt ·

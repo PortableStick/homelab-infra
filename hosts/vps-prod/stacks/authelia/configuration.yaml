@@ -39,7 +39,7 @@ authentication_backend:
 
 ## Fournisseur OIDC : Komodo se logue via Authelia (pas d'auth Komodo integree).
 ## hmac_secret -> AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET (secret SOPS)
-## cle de signature -> AUTHELIA_IDENTITY_PROVIDERS_OIDC_JWKS_0_KEY_FILE (fichier hote /data/oidc-issuer.pem)
+## cle de signature -> jwks ci-dessous, lue depuis /data/oidc-issuer.pem (template, cf. compose)
 identity_providers:
   oidc:
     ## Clé privée de signature, lue depuis le fichier hôte (X_AUTHELIA_CONFIG_FILTERS=template).
