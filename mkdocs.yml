@@ -76,5 +76,6 @@ nav:
   - Sécurité & CI: securite-ci.md
   - Procédures planifiées: procedures-planifiees.md
   - Exposer un service en VPN-only: exposer-service-vpn-only.md
+  - Pelican (Panel jeux): pelican.md
   - Rattacher un hôte (Periphery): rattacher-hote-periphery.md
   - Restauration complète: restauration.md

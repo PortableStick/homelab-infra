@@ -1,0 +1,111 @@
+name: pelican
+
+services:
+  panel:
+    container_name: pelican_panel
+    image: ghcr.io/pelican-dev/panel:latest
+    networks:
+      - proxy
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.pelican.rule=Host(`mcwings.int.vindiesel.vip`)"
+      - "traefik.http.routers.pelican.entrypoints=web"
+      - "traefik.http.services.pelican.loadbalancer.server.port=80"
+    environment:
+      XDG_DATA_HOME: /pelican-data
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "https://mcwings.int.vindiesel.vip"
+      APP_TIMEZONE: "Europe/Paris"
+      APP_LOCALE: "fr"
+      ADMIN_EMAIL: "kastu69@proton.me"
+      TRUSTED_PROXIES: "*"
+      DB_CONNECTION: mariadb
+      DB_HOST: database
+      DB_PORT: "3306"
+      DB_DATABASE: panel
+      DB_USERNAME: pelican
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      SESSION_SECURE_COOKIE: "true"
+      QUEUE_CONNECTION: redis
+      REDIS_HOST: cache
+      REDIS_PORT: "6379"
+      MAIL_MAILER: log
+    env_file:
+      - .env
+    volumes:
+      - /data/pelican/pelican-data:/pelican-data
+      - /data/pelican/logs:/var/www/html/storage/logs
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      database:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: wget -qO- http://127.0.0.1/up || exit 1
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  database:
+    container_name: pelican_mariadb
+    image: mariadb:11.4
+    networks:
+      - backend
+    environment:
+      MARIADB_DATABASE: panel
+      MARIADB_USER: pelican
+    env_file:
+      - .env
+    volumes:
+      - /data/pelican/database:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 10s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  cache:
+    container_name: pelican_redis
+    image: redis:7.4-alpine
+    networks:
+      - backend
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--save", "60", "1"]
+    env_file:
+      - .env
+    volumes:
+      - /data/pelican/redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep -q PONG"]
+      start_period: 10s
+      interval: 10s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  backend:
+    name: pelican_backend
+  proxy:
+    name: proxy
+    external: true

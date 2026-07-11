@@ -218,3 +218,17 @@ repo = "PortableStick/homelab-infra"
 file_paths = ["hosts/vindiesel/stacks/mangetout/compose.yaml"]
 pre_deploy.path = "hosts/vindiesel/stacks/mangetout"
 pre_deploy.command = "sops -d ../../../../secrets/vindiesel/mangetout.env > .env"
+
+[[stack]]
+name = "pelican"
+description = "Pelican Panel (jeux) - VPN-only"
+deploy = true
+after = ["traefik-vindiesel"]
+tags = ["app", "vindiesel"]
+[stack.config]
+server = "docker-vindiesel"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vindiesel/stacks/pelican/compose.yaml"]
+pre_deploy.path = "hosts/vindiesel/stacks/pelican"
+pre_deploy.command = "sops -d ../../../../secrets/vindiesel/pelican.env > .env"

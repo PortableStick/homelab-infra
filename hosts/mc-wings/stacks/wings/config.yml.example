@@ -1,0 +1,26 @@
+# NE PAS committer un vrai config.yml : il contient le token du node (secret).
+# Ce fichier n'est PAS écrit à la main : il est GÉNÉRÉ par le Panel Pelican.
+#
+# Phase 2 (après création du node dans le Panel) :
+#   1. Panel -> Admin -> Nodes -> (créer le node) -> onglet "Configuration".
+#   2. Copier le bloc YAML fourni dans /etc/pelican/config.yml sur mc-wings
+#      (ou utiliser le bouton "Auto Deploy Command").
+#   3. Démarrer Wings (voir README.md).
+#
+# Le contenu réel ressemble à ceci (valeurs d'exemple, à NE PAS réutiliser) :
+#
+# debug: false
+# uuid: <généré par le Panel>
+# token_id: <généré par le Panel>
+# token: <SECRET généré par le Panel>
+# api:
+#   host: 0.0.0.0
+#   port: 8080
+#   ssl:
+#     enabled: true
+#     cert: /etc/letsencrypt/live/<node-fqdn>/fullchain.pem
+#     key: /etc/letsencrypt/live/<node-fqdn>/privkey.pem
+# system:
+#   sftp:
+#     bind_port: 2022
+# remote: 'https://mcwings.int.vindiesel.vip'

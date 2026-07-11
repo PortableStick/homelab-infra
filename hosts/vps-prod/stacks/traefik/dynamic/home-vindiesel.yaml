@@ -18,6 +18,15 @@ http:
         - int-vpn
       tls: {}
 
+    pelican:
+      rule: "Host(`mcwings.int.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-vindiesel
+      middlewares:
+        - int-vpn
+      tls: {}
+
     # mangetout : PUBLIC (backend app mobile) — pas de middleware int-vpn.
     mangetout-pb:
       rule: "Host(`pb.vindiesel.vip`)"
