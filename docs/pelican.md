@@ -34,11 +34,21 @@ Sources : `hosts/vindiesel/stacks/pelican/`, `secrets/vindiesel/pelican.env`, `k
   `cache` restent sur `pelican_backend` (aucun port publié sur l'hôte).
 - `restart: unless-stopped`, `healthcheck` et `logging` (json-file, 10 m × 3) sur les trois services,
   comme les autres stacks vindiesel.
-- Données sur l'hôte (bind mounts, à créer avant le 1ᵉʳ déploiement) :
+- **Stockage — deux régimes** (choix imposé par l'image, cf. encadré) :
+    - `panel` : **volumes nommés** `pelican_data` (`/pelican-data`) et `pelican_logs`.
+    - `database` / `cache` : **bind mounts** sous `/data/pelican/` (à créer avant le 1ᵉʳ déploiement) :
 
-  ```bash
-  sudo mkdir -p /data/pelican/pelican-data /data/pelican/logs /data/pelican/database /data/pelican/redis
-  ```
+      ```bash
+      sudo mkdir -p /data/pelican/database /data/pelican/redis
+      ```
+
+!!! danger "Pourquoi `/pelican-data` est un volume nommé et non un bind mount"
+    L'image du Panel tourne en **`USER www-data`** et déclare `VOLUME /pelican-data` (propriété
+    `www-data`, `chmod 770`). Un **volume nommé** hérite de cette propriété → écriture OK. Un **bind
+    mount** vers un dossier hôte créé par `root` (`mkdir`) reste `root:root` → `www-data` ne peut pas y
+    écrire et l'entrypoint échoue (`touch: /pelican-data/.env: Permission denied`, conteneur en
+    crash-loop). MariaDB/Redis, eux, tournent en root et corrigent la propriété de leur bind mount, d'où
+    les deux régimes.
 
 ## Exposition Traefik (VPN-only) — **deux endroits**
 
@@ -82,17 +92,23 @@ forwarde vers vindiesel. Exposer un service vindiesel = **deux modifications** (
 | --- | --- | --- | --- |
 | `A` | `mcwings.int.vindiesel.vip` | `100.65.11.58` (IP Tailscale de **vindiesel**) | **DNS-only** |
 
-### Caddy derrière le reverse proxy
+### Caddy derrière le reverse proxy (`BEHIND_PROXY`)
 
-Le Panel embarque **Caddy**. Comme le TLS est terminé en amont (Traefik VPS), on bind-monte un
-`Caddyfile` custom (`hosts/vindiesel/stacks/pelican/Caddyfile`) qui écoute en `:80` **sans** demander de
-certificat, avec `trusted_proxies static private_ranges`.
+Le Panel embarque **Caddy**. Le TLS étant terminé en amont (Traefik VPS), on **ne bind-monte PAS** de
+Caddyfile custom : l'image gère nativement le mode reverse-proxy via **`BEHIND_PROXY: "true"`**, qui
+bascule Caddy en écoute `:80`, coupe l'auto-HTTPS (`auto_https off`) et n'exige plus d'email Let's
+Encrypt.
 
-!!! danger "`trusted_proxies` obligatoire, sinon les uploads cassent"
-    Sans `trusted_proxies` correctement réglé, Caddy ne fait pas confiance à l'IP du proxy et les
-    **uploads de fichiers échouent**. `private_ranges` couvre les IP des réseaux Docker (Traefik parle au
-    Panel via le réseau `proxy`). En complément, `TRUSTED_PROXIES: "*"` est passé côté Laravel pour que
-    le Panel construise ses URLs en `https://`.
+!!! danger "`BEHIND_PROXY=true` est obligatoire quand `APP_URL` est en `https://`"
+    L'entrypoint fait `exit 1` si `APP_URL` commence par `https://` **sans** `BEHIND_PROXY=true` ni
+    `LE_EMAIL` (message : *« when app url is https a lets encrypt email must be set when not behind a
+    proxy »*) → conteneur en crash-loop. Comme on est derrière Traefik, on met `BEHIND_PROXY=true`.
+
+!!! warning "`TRUSTED_PROXIES` : un CIDR, pas `*`"
+    L'entrypoint réinjecte `TRUSTED_PROXIES` dans la directive Caddy `trusted_proxies static …` (sinon
+    les **uploads de fichiers échouent**). Caddy attend un **CIDR** (ou `private_ranges`), pas `*` — et
+    Laravel accepte aussi le CIDR. On met donc `TRUSTED_PROXIES: "0.0.0.0/0"` (seul Traefik atteint le
+    Panel sur le réseau interne `proxy`), valide des deux côtés.
 
 ## Secrets (SOPS/age)
 
@@ -218,8 +234,10 @@ détaillé). Résumé du flux :
 
 | Symptôme | Cause probable | Correctif |
 | --- | --- | --- |
-| Uploads de fichiers en échec dans le Panel | `trusted_proxies` Caddy mal réglé (l'IP du proxy Docker n'est pas de confiance) | Vérifier `trusted_proxies static private_ranges` dans le `Caddyfile` bind-monté |
-| Le Panel construit des URLs en `http://` / boucles de redirection | `APP_URL` ou trusted proxies incorrects | `APP_URL=https://mcwings.int.vindiesel.vip` + `TRUSTED_PROXIES: "*"` (déjà dans `compose.yaml`) |
+| Conteneur `panel` en **crash-loop**, log *« when app url is https a lets encrypt email must be set when not behind a proxy »* | `APP_URL` en `https://` sans `BEHIND_PROXY` → l'entrypoint `exit 1` | `BEHIND_PROXY: "true"` (déjà dans `compose.yaml`) |
+| `touch: /pelican-data/.env: Permission denied` (crash-loop) | `/pelican-data` en bind mount root, non inscriptible par `www-data` | Utiliser un **volume nommé** pour `/pelican-data` et les logs (déjà dans `compose.yaml`) |
+| Uploads de fichiers en échec dans le Panel | `TRUSTED_PROXIES` absent/invalide → Caddy ne fait pas confiance au proxy | `TRUSTED_PROXIES: "0.0.0.0/0"` (CIDR valide Caddy + Laravel ; **pas** `*`) |
+| Le Panel construit des URLs en `http://` / boucles de redirection | `APP_URL` ou trusted proxies incorrects | `APP_URL=https://mcwings.int.vindiesel.vip` + `BEHIND_PROXY=true` + `TRUSTED_PROXIES` CIDR (déjà dans `compose.yaml`) |
 | `SQLSTATE… Access denied for user 'pelican'` | `DB_PASSWORD` ≠ `MARIADB_PASSWORD` | Aligner les deux dans le secret puis redéployer |
 | Accès refusé / 403 depuis le tailnet | `userland-proxy` masque l'IP source → `int-vpn` rejette | Prérequis `{"userland-proxy": false}`, cf. [Exposer un service en VPN-only](exposer-service-vpn-only.md) |
 | Node Wings reste **rouge** dans le Panel | Cert/URL du node, ou Wings derrière un proxy | Vérifier le `config.yml`, le cert du node, l'accès direct `:8080` sur le VPN (jamais via Traefik) |

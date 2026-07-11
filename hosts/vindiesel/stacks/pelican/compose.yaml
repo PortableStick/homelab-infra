@@ -20,8 +20,8 @@ services:
       APP_URL: "https://mcwings.int.vindiesel.vip"
       APP_TIMEZONE: "Europe/Paris"
       APP_LOCALE: "fr"
-      ADMIN_EMAIL: "kastu69@proton.me"
-      TRUSTED_PROXIES: "*"
+      BEHIND_PROXY: "true"
+      TRUSTED_PROXIES: "0.0.0.0/0"
       DB_CONNECTION: mariadb
       DB_HOST: database
       DB_PORT: "3306"
@@ -37,9 +37,8 @@ services:
     env_file:
       - .env
     volumes:
-      - /data/pelican/pelican-data:/pelican-data
-      - /data/pelican/logs:/var/www/html/storage/logs
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - pelican-data:/pelican-data
+      - pelican-logs:/var/www/html/storage/logs
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       database:
@@ -86,14 +85,14 @@ services:
     image: redis:7.4-alpine
     networks:
       - backend
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--save", "60", "1"]
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --save 60 1"]
     env_file:
       - .env
     volumes:
       - /data/pelican/redis:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep -q PONG"]
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
       start_period: 10s
       interval: 10s
       retries: 6
@@ -102,6 +101,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  pelican-data:
+    name: pelican_data
+  pelican-logs:
+    name: pelican_logs
 
 networks:
   backend:
