@@ -3,7 +3,7 @@ name: immich2
 services:
   immich-server:
     container_name: immich2_server
-    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-v2}
+    image: ghcr.io/immich-app/immich-server:v2.7.5@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
     networks:
       - proxy
       - backend
@@ -22,7 +22,7 @@ services:
       DB_DATABASE_NAME: immich
       DB_DATA_LOCATION: /data/immich-2/library/postgres
       UPLOAD_LOCATION: /data/immich-2/library
-      IMMICH_VERSION: v2
+      IMMICH_VERSION: v2.7.5
       LIBVA_DRIVER_NAME: iHD
     env_file:
       - .env
@@ -43,7 +43,7 @@ services:
 
   immich-machine-learning:
     container_name: immich2_machine_learning
-    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-v2}-openvino
+    image: ghcr.io/immich-app/immich-machine-learning:v2.7.5-openvino@sha256:71cd5a681823c4b818f4b24b3f05816eccc3d085559e7615f695bde77e64f1f2
     networks:
       - backend
     devices:
@@ -69,7 +69,7 @@ services:
 
   redis:
     container_name: immich2_redis
-    image: docker.io/valkey/valkey:9@sha256:546304417feac0874c3dd576e0952c6bb8f06bb4093ea0c9ca303c73cf458f63
+    image: docker.io/valkey/valkey:9@sha256:3b55fbaa0cd93cf0d9d961f405e4dfcc70efe325e2d84da207a0a8e6d8fde4f9
     networks:
       - backend
     healthcheck:
