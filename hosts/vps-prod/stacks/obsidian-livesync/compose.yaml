@@ -3,6 +3,10 @@ services:
     image: couchdb:3.5.2@sha256:7feb744b60195233219f3fa801cbc2384efa24b28c76a5d1f3e93efe6557f921
     container_name: obsidian-couchdb
     restart: unless-stopped
+    # Sans user, l'entrypoint (root) fait un `find … chown` sur /opt/couchdb qui échoue
+    # (exit 1, zéro log) à cause de local.ini monté en lecture seule. En 5984 (couchdb),
+    # ce bloc est sauté — /data/obsidian-livesync doit appartenir à 5984:5984.
+    user: "5984:5984"
     # .env rendu par pre_deploy (sops -d) déclaré dans komodo/stacks.toml.
     env_file: .env
     volumes:

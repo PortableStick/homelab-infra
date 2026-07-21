@@ -24,7 +24,8 @@ Sources : `hosts/vps-prod/stacks/obsidian-livesync/`, `secrets/vps/obsidian-live
     mkdir -p /data/obsidian-livesync && chown -R 5984:5984 /data/obsidian-livesync
     ```
 
-- `restart: unless-stopped`.
+- `restart: unless-stopped`, `user: "5984:5984"` (utilisateur `couchdb` de l'image — **ne pas retirer**,
+  voir Dépannage).
 
 ## Configuration CouchDB (`local.ini`)
 
@@ -126,6 +127,7 @@ ressaisir.
 | Erreurs sur gros fichiers / timeouts de sync | Limites de taille trop basses | `max_document_size` / `max_http_request_size` dans `local.ini` |
 | Disque qui gonfle avec le temps | Révisions CouchDB accumulées | Lancer une compaction (`POST /<db>/_compact`) ou utiliser *Rebuild everything* du plugin |
 | Conteneur en crash-loop au 1ᵉʳ boot | `/data/obsidian-livesync` absent ou mauvais propriétaire | `mkdir -p` + `chown -R 5984:5984` puis redéployer |
+| Crash-loop `exit 1` **sans aucun log** | `user: "5984:5984"` retiré du compose : l'entrypoint (root) fait un `find … chown` sur `/opt/couchdb` qui échoue (`set -e`) à cause de `local.ini` monté en `:ro` | Remettre `user: "5984:5984"` (le bloc chown/gosu de l'entrypoint est alors sauté) |
 
 ---
 
