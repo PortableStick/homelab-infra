@@ -18,8 +18,12 @@
 #   port: 8080
 #   ssl:
 #     enabled: true
-#     cert: /etc/letsencrypt/live/<node-fqdn>/fullchain.pem
-#     key: /etc/letsencrypt/live/<node-fqdn>/privkey.pem
+#     # Cert et clé sous /etc/pelican/certs/ : ce dossier est déjà couvert par le bind mount
+#     # `/etc/pelican:/etc/pelican` du compose.yaml, donc visible dans le conteneur sans mount
+#     # supplémentaire. (Si tu préfères pointer vers /etc/letsencrypt/live/<fqdn>/, il FAUT
+#     # ajouter le mount correspondant dans compose.yaml — cf. README.)
+#     cert: /etc/pelican/certs/fullchain.pem
+#     key: /etc/pelican/certs/privkey.pem
 # system:
 #   sftp:
 #     bind_port: 2022

@@ -221,6 +221,10 @@ détaillé). Résumé du flux :
    SSL activé.
 2. DNS `A node1.int.vindiesel.vip → IP Tailscale de mc-wings` (DNS-only).
 3. Fournir un **certificat valide** au node (le Panel étant en HTTPS, Wings doit l'être aussi).
+   **Convention du dépôt : `fullchain.pem` + `privkey.pem` sous `/etc/pelican/certs/`**, déjà couvert par
+   le bind mount `/etc/pelican:/etc/pelican` du compose (pas de mount à ajouter). Un chemin
+   `/etc/letsencrypt/live/<fqdn>/` imposerait, lui, d'ajouter `- /etc/letsencrypt:/etc/letsencrypt:ro`
+   au `compose.yaml`.
 4. Copier le `config.yml` **généré par le Panel** dans `/etc/pelican/config.yml` sur `mc-wings` (jamais
    committé : contient un token — ignoré par le `.gitignore` du dossier).
 5. `docker compose up -d` sur `mc-wings`.
@@ -240,7 +244,8 @@ détaillé). Résumé du flux :
 | Le Panel construit des URLs en `http://` / boucles de redirection | `APP_URL` ou trusted proxies incorrects | `APP_URL=https://mcwings.int.vindiesel.vip` + `BEHIND_PROXY=true` + `TRUSTED_PROXIES` CIDR (déjà dans `compose.yaml`) |
 | `SQLSTATE… Access denied for user 'pelican'` | `DB_PASSWORD` ≠ `MARIADB_PASSWORD` | Aligner les deux dans le secret puis redéployer |
 | Accès refusé / 403 depuis le tailnet | `userland-proxy` masque l'IP source → `int-vpn` rejette | Prérequis `{"userland-proxy": false}`, cf. [Exposer un service en VPN-only](exposer-service-vpn-only.md) |
-| Node Wings reste **rouge** dans le Panel | Cert/URL du node, ou Wings derrière un proxy | Vérifier le `config.yml`, le cert du node, l'accès direct `:8080` sur le VPN (jamais via Traefik) |
+| Node Wings reste **rouge** dans le Panel | Cert/URL du node, Wings derrière un proxy, **ou VM `mc-wings` éteinte** | Vérifier que la VM est allumée (`docker ps` → conteneur `wings` up), puis le `config.yml`, le cert du node, l'accès direct `:8080` sur le VPN (jamais via Traefik) |
+| Wings démarre mais listener SSL `:8080` absent / *cannot load certificate* | `api.ssl.cert`/`key` pointent hors des chemins montés dans le conteneur | Mettre le cert sous `/etc/pelican/certs/` (déjà monté) **ou** ajouter le mount du dossier visé (ex. `/etc/letsencrypt:ro`) |
 
 ---
 

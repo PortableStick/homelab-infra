@@ -37,8 +37,15 @@ une fois le node créé dans le Panel.
    proxifié — même principe que les autres `*.int`, voir
    [Exposer un service en VPN-only](../../../../docs/exposer-service-vpn-only.md)).
 3. **Certificat** du node : fournir un cert valide pour le FQDN dans le `config.yml` généré
-   (chemins `api.ssl.cert` / `api.ssl.key`). Voir la doc pour les options (cert dédié Let's Encrypt sur
-   `mc-wings`, ou copie du wildcard `*.int.vindiesel.vip`).
+   (chemins `api.ssl.cert` / `api.ssl.key`). **Convention du dépôt : déposer `fullchain.pem` et
+   `privkey.pem` sous `/etc/pelican/certs/`** (copie du wildcard `*.int.vindiesel.vip`, ou cert dédié).
+   Ce dossier est **déjà couvert** par le bind mount `/etc/pelican:/etc/pelican` du `compose.yaml`, donc
+   le cert est visible dans le conteneur **sans mount supplémentaire**.
+
+   > ⚠️ Si tu choisis plutôt de pointer `api.ssl.cert`/`key` vers `/etc/letsencrypt/live/<fqdn>/` (Let's
+   > Encrypt géré directement sur `mc-wings`), ce chemin **n'est pas monté** par défaut : ajoute alors
+   > `- /etc/letsencrypt:/etc/letsencrypt:ro` dans les `volumes:` du `compose.yaml`, sinon Wings ne
+   > trouvera pas son cert et le listener SSL `:8080` ne démarrera pas (node injoignable).
 4. **Config** : *Node → onglet Configuration* → copier le YAML dans `/etc/pelican/config.yml` sur
    `mc-wings` (ou bouton *Auto Deploy Command*). Voir [`config.yml.example`](config.yml.example).
    ⚠️ Le vrai `config.yml` contient un **token** : il est ignoré par `.gitignore` de ce dossier, ne
