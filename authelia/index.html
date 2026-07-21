@@ -1,0 +1,1461 @@
+
+<!doctype html>
+<html lang="fr" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation opérationnelle de l'infrastructure auto-hébergée gérée par Komodo. Référentiel de configuration et procédures de restauration.">
+      
+      
+        <meta name="author" content="PortableStick">
+      
+      
+      
+        <link rel="prev" href="../portfolio/">
+      
+      
+        <link rel="next" href="../secrets-sops/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Authelia (SSO / 2FA) - homelab-infra</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#authelia-sso-2fa" class="md-skip">
+          Aller au contenu
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="En-tête">
+    <a href=".." title="homelab-infra" class="md-header__button md-logo" aria-label="homelab-infra" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            homelab-infra
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Authelia (SSO / 2FA)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Passer en thème sombre"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Passer en thème sombre" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Passer en thème clair"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Passer en thème clair" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Recherche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initialisation de la recherche
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/PortableStick/homelab-infra" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PortableStick/homelab-infra
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="homelab-infra" class="md-nav__button md-logo" aria-label="homelab-infra" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    homelab-infra
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/PortableStick/homelab-infra" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PortableStick/homelab-infra
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../poste-travail-sops-age/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Poste de travail (SOPS/age)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../komodo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Komodo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reverse-proxy-tls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reverse proxy & TLS (Traefik)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acme-dns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acme-dns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../forgejo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forgejo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authelia (SSO / 2FA)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authelia (SSO / 2FA)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#vue-densemble" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vue d'ensemble
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#composants-3-stacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composants (3 stacks)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#le-middleware-forward-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le middleware forward-auth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chemins-de-donnees-sur-lhote-a-creer-avant-deploiement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chemins de données sur l'hôte (à créer avant déploiement)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets-dechiffrement-automatique-par-komodo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets (déchiffrement automatique par Komodo)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns-a-creer-chez-cloudflare-dns-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS à créer chez Cloudflare (DNS-only)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploiement-ordre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Déploiement (ordre)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gestion-des-utilisateurs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gestion des utilisateurs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oidc-komodo-se-logue-via-authelia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OIDC — Komodo se logue via Authelia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depannage-pieges-rencontres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dépannage (pièges rencontrés)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../secrets-sops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Secrets (SOPS/age)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../securite-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sécurité & CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../procedures-planifiees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Procédures planifiées
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exposer-service-vpn-only/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exposer un service en VPN-only
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pelican/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pelican (Panel jeux)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../obsidian-livesync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Obsidian LiveSync (CouchDB)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rattacher-hote-periphery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rattacher un hôte (Periphery)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../restauration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restauration complète
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#vue-densemble" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vue d'ensemble
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#composants-3-stacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composants (3 stacks)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#le-middleware-forward-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le middleware forward-auth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chemins-de-donnees-sur-lhote-a-creer-avant-deploiement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chemins de données sur l'hôte (à créer avant déploiement)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets-dechiffrement-automatique-par-komodo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets (déchiffrement automatique par Komodo)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns-a-creer-chez-cloudflare-dns-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS à créer chez Cloudflare (DNS-only)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploiement-ordre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Déploiement (ordre)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gestion-des-utilisateurs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gestion des utilisateurs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oidc-komodo-se-logue-via-authelia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OIDC — Komodo se logue via Authelia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depannage-pieges-rencontres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dépannage (pièges rencontrés)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/PortableStick/homelab-infra/edit/main/docs/authelia.md" title="Editer cette page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="authelia-sso-2fa">Authelia (SSO / 2FA)<a class="headerlink" href="#authelia-sso-2fa" title="Permanent link">&para;</a></h1>
+<p>Portail d'authentification centralisé, exposé <strong>publiquement</strong> sur <strong><code>auth.vindiesel.vip</code></strong>. Il protège
+les services <code>*.int</code> sensibles via <strong>forward-auth Traefik</strong> et sert de <strong>fournisseur OIDC</strong> — Komodo s'y
+connecte déjà (voir <a href="#oidc-komodo-se-logue-via-authelia">OIDC — Komodo se logue via Authelia</a>).
+Backend d'utilisateurs : <strong>lldap</strong>. Envoi de mail : stack <strong>smtp-relay</strong> (→ Brevo).</p>
+<p>Sources : <code>hosts/vps-prod/stacks/{authelia,lldap,smtp-relay}/</code>, <code>komodo/stacks.toml</code>,
+<code>secrets/vps/{authelia,lldap,smtp-relay}.env</code>.</p>
+<div class="admonition info">
+<p class="admonition-title">Pourquoi le portail est <strong>public</strong> (et pas en <code>*.int</code> VPN-only)</p>
+<p>La zone <code>*.int.vindiesel.vip</code> est réservée aux services VPN-only. Le portail Authelia, lui, reste
+<strong>public</strong> : les flux <strong>OIDC</strong> qui s'y connectent (Komodo aujourd'hui, <strong>Forgejo</strong> demain — service
+public sur <code>git.lucasmasse.net</code>) impliquent une redirection navigateur cross-domaine vers le portail
+— s'il était VPN-only, ces redirections publiques seraient cassées. Le cookie de session posé sur
+<code>vindiesel.vip</code> couvre malgré tout les sous-domaines comme <code>ldap.int.vindiesel.vip</code> (correspondance
+par suffixe RFC 6265), donc le forward-auth des services VPN-only fonctionne aussi.</p>
+</div>
+<h2 id="vue-densemble">Vue d'ensemble<a class="headerlink" href="#vue-densemble" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Choix</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Portail</td>
+<td><code>auth.vindiesel.vip</code> (<strong>public</strong>, wildcard <code>*.vindiesel.vip</code>)</td>
+<td><code>authelia/compose.yaml</code></td>
+</tr>
+<tr>
+<td>Rôles</td>
+<td>forward-auth Traefik (services <code>*.int</code>) <strong>+</strong> fournisseur OIDC (Komodo)</td>
+<td><code>authelia/compose.yaml</code></td>
+</tr>
+<tr>
+<td>Backend</td>
+<td><strong>lldap</strong> (<code>ldap://lldap:3890</code>), base DN <code>dc=vindiesel,dc=vip</code></td>
+<td><code>configuration.yaml</code></td>
+</tr>
+<tr>
+<td>Politique par défaut</td>
+<td><code>two_factor</code> (default_policy <code>deny</code>)</td>
+<td><code>configuration.yaml</code></td>
+</tr>
+<tr>
+<td>2FA</td>
+<td>TOTP + WebAuthn/Passkeys</td>
+<td><code>configuration.yaml</code></td>
+</tr>
+<tr>
+<td>Sessions</td>
+<td>cookie sur <code>vindiesel.vip</code>, stockage mémoire</td>
+<td><code>configuration.yaml</code></td>
+</tr>
+<tr>
+<td>Stockage</td>
+<td>SQLite local (<code>/data/db.sqlite3</code>)</td>
+<td><code>configuration.yaml</code></td>
+</tr>
+<tr>
+<td>Mail</td>
+<td>relais interne <code>smtp-relay:587</code> → Brevo</td>
+<td><code>configuration.yaml</code>, <code>smtp-relay/compose.yaml</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="composants-3-stacks">Composants (3 stacks)<a class="headerlink" href="#composants-3-stacks" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Stack</th>
+<th>Image</th>
+<th>Rôle</th>
+<th>Exposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authelia</code></td>
+<td><code>authelia/authelia:4.39</code></td>
+<td>Portail + moteur d'autorisation</td>
+<td><code>auth.vindiesel.vip</code> (<strong>public</strong>)</td>
+</tr>
+<tr>
+<td><code>lldap</code></td>
+<td><code>lldap/lldap:v0.6.1-alpine</code></td>
+<td>Annuaire LDAP + UI d'admin</td>
+<td><code>ldap.int.vindiesel.vip</code> (<strong>VPN-only</strong>)</td>
+</tr>
+<tr>
+<td><code>smtp-relay</code></td>
+<td><code>boky/postfix:v4.3.0</code></td>
+<td>Relais Postfix → smarthost Brevo</td>
+<td>interne uniquement (aucun port publié)</td>
+</tr>
+</tbody>
+</table>
+<p>Toutes partagent le réseau Docker externe <strong><code>frontend</code></strong> : Authelia joint lldap en <code>ldap://lldap:3890</code>
+et le relais en <code>submission://smtp-relay:587</code>, sans publier ces ports sur l'hôte. Les certificats
+(<code>*.vindiesel.vip</code>, <code>*.int.vindiesel.vip</code>) sont déjà émis par le routeur générateur
+(voir <a href="../reverse-proxy-tls/">Reverse proxy &amp; TLS</a>) : <strong>aucun <code>certresolver</code></strong> sur nos routeurs.</p>
+<h2 id="le-middleware-forward-auth">Le middleware forward-auth<a class="headerlink" href="#le-middleware-forward-auth" title="Permanent link">&para;</a></h2>
+<p>La stack <code>authelia</code> définit un middleware Traefik réutilisable <strong><code>authelia@docker</code></strong> :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/authz/forward-auth&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email&quot;</span>
+</code></pre></div>
+<p><strong>Protéger un service</strong> = ajouter <code>authelia@docker</code> à la liste <code>middlewares</code> de son routeur, et une
+règle dans <code>access_control</code> de <code>configuration.yaml</code>. Exemple générique pour un futur service <code>*.int</code>
+(déjà couvert par la règle <code>access_control</code> <code>*.int.vindiesel.vip</code> → <code>two_factor</code>) :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.monservice.middlewares=monservice-vpn,authelia@docker&quot;</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Komodo n'utilise plus ce middleware</p>
+<p>Komodo (<code>komodo.int.vindiesel.vip</code>) gardait initialement ce double verrou VPN + forward-auth, mais
+est passé à l'authentification <strong>OIDC</strong> native (voir
+<a href="#oidc-komodo-se-logue-via-authelia">OIDC — Komodo se logue via Authelia</a>) : sa route ne porte plus
+que <code>komodo-vpn</code>, sinon l'utilisateur devrait se logger deux fois (forward-auth puis OIDC). Le
+middleware <code>authelia@docker</code> reste disponible pour protéger d'autres services <code>*.int</code> qui n'ont pas
+(ou pas encore) d'intégration OIDC propre. Rappel : la zone <code>int</code> exige <code>userland-proxy: false</code> pour
+que l'<code>ipAllowList</code> voie la vraie IP source — cf.
+<a href="../exposer-service-vpn-only/">Exposer un service en VPN-only</a>.</p>
+</div>
+<h2 id="chemins-de-donnees-sur-lhote-a-creer-avant-deploiement">Chemins de données sur l'hôte (à créer avant déploiement)<a class="headerlink" href="#chemins-de-donnees-sur-lhote-a-creer-avant-deploiement" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Chemin hôte</th>
+<th>Monté dans</th>
+<th>Service</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/data/authelia</code></td>
+<td><code>/data</code></td>
+<td>Authelia (base SQLite <code>db.sqlite3</code>)</td>
+</tr>
+<tr>
+<td><code>/data/lldap</code></td>
+<td><code>/data</code></td>
+<td>lldap (base + config)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/data/authelia<span class="w"> </span>/data/lldap
+</code></pre></div>
+<h2 id="secrets-dechiffrement-automatique-par-komodo">Secrets (déchiffrement automatique par Komodo)<a class="headerlink" href="#secrets-dechiffrement-automatique-par-komodo" title="Permanent link">&para;</a></h2>
+<p>Trois fichiers chiffrés SOPS/age (mêmes règles que le reste, cf. <a href="../secrets-sops/">Secrets</a>) :</p>
+<table>
+<thead>
+<tr>
+<th>Fichier</th>
+<th>Variables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>secrets/vps/authelia.env</code></td>
+<td><code>AUTHELIA_SESSION_SECRET</code>, <code>AUTHELIA_STORAGE_ENCRYPTION_KEY</code>, <code>AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET</code>, <code>AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD</code>, <code>AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET</code></td>
+</tr>
+<tr>
+<td><code>secrets/vps/lldap.env</code></td>
+<td><code>LLDAP_JWT_SECRET</code>, <code>LLDAP_KEY_SEED</code>, <code>LLDAP_LDAP_USER_PASS</code></td>
+</tr>
+<tr>
+<td><code>secrets/vps/smtp-relay.env</code></td>
+<td><code>RELAYHOST_USERNAME</code>, <code>RELAYHOST_PASSWORD</code></td>
+</tr>
+</tbody>
+</table>
+<p>Contrairement au bootstrap manuel de Komodo, ces stacks utilisent le <strong><code>pre_deploy</code></strong> de
+<code>komodo/stacks.toml</code> : à chaque déploiement, Komodo rend le <code>.env</code> de la stack avant <code>docker compose up</code>
+(même mécanisme que les stacks Immich) :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">[[stack]]</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;authelia&quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># ...</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">pre_deploy</span><span class="p">.</span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;hosts/vps-prod/stacks/authelia&quot;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">pre_deploy</span><span class="p">.</span><span class="n">command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;sops -d ../../../../secrets/vps/authelia.env &gt; .env&quot;</span>
+</code></pre></div>
+<p>Le compose consomme ce fichier via <code>env_file: .env</code> (ignoré par <code>.gitignore</code>). Pour Authelia, les
+variables <code>AUTHELIA_*</code> <strong>surchargent</strong> la configuration YAML (les secrets ne sont donc jamais en clair
+dans <code>configuration.yaml</code>).</p>
+<div class="admonition danger">
+<p class="admonition-title">Mot de passe admin = mot de passe de bind</p>
+<p><code>LLDAP_LDAP_USER_PASS</code> (mot de passe de l'admin lldap <strong>Cassetout</strong>) et
+<code>AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD</code> (mot de passe de bind d'Authelia) doivent être
+<strong>identiques</strong> : Authelia se connecte à lldap avec le compte admin pour rechercher les
+utilisateurs.</p>
+</div>
+<h2 id="dns-a-creer-chez-cloudflare-dns-only">DNS à créer chez Cloudflare (DNS-only)<a class="headerlink" href="#dns-a-creer-chez-cloudflare-dns-only" title="Permanent link">&para;</a></h2>
+<p>Le wildcard <code>*.vindiesel.vip</code> et <code>*.int.vindiesel.vip</code> couvrent déjà les certificats — <strong>aucun CNAME
+<code>_acme-challenge</code> supplémentaire</strong>. Il faut seulement les enregistrements d'adresse :</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Nom</th>
+<th>Valeur</th>
+<th>Proxy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A</code></td>
+<td><code>auth.vindiesel.vip</code></td>
+<td><code>116.202.22.50</code> (IP publique — le portail doit être joignable)</td>
+<td>DNS-only</td>
+</tr>
+<tr>
+<td><code>A</code></td>
+<td><code>ldap.int.vindiesel.vip</code></td>
+<td><code>&lt;IP Tailscale 100.x du VPS&gt;</code> (UI d'admin VPN-only)</td>
+<td>DNS-only</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deploiement-ordre">Déploiement (ordre)<a class="headerlink" href="#deploiement-ordre" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Créer les dossiers de données (ci-dessus) et les enregistrements DNS.</li>
+<li>Déployer via Komodo dans l'ordre <strong>smtp-relay → lldap → authelia</strong> (le <code>after</code> de <code>stacks.toml</code>
+   gère l'ordre : <code>authelia</code> after <code>["traefik","lldap","smtp-relay"]</code>). Le <code>pre_deploy</code> rend les <code>.env</code>
+   automatiquement.</li>
+<li><strong>Brevo</strong> : vérifier que l'expéditeur <code>lucasmasseh@outlook.com</code> est <strong>validé</strong> comme sender dans
+   l'interface Brevo, sinon les mails sont rejetés.</li>
+<li>Premier login : ouvrir <code>https://auth.vindiesel.vip</code>, se connecter avec <strong>Cassetout</strong> + le mot de
+   passe admin, puis <strong>enrôler un TOTP et/ou une passkey</strong>.</li>
+</ol>
+<p><strong>Vérifications :</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>dig<span class="w"> </span>+short<span class="w"> </span>auth.vindiesel.vip<span class="w">            </span><span class="c1"># -&gt; 116.202.22.50</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>curl<span class="w"> </span>-I<span class="w"> </span>https://auth.vindiesel.vip<span class="w">       </span><span class="c1"># 200, cert *.vindiesel.vip valide</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>docker<span class="w"> </span>logs<span class="w"> </span>authelia<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>ldap<span class="w"> </span><span class="c1"># bind lldap OK au démarrage</span>
+</code></pre></div>
+<p>Accès à Komodo (<code>komodo.int.vindiesel.vip</code>, sur le VPN) : la page Komodo propose un bouton de login
+OIDC qui redirige vers le portail Authelia (2FA), puis renvoie l'utilisateur connecté sur Komodo — pas
+de forward-auth Traefik sur cette route (voir <a href="#oidc-komodo-se-logue-via-authelia">OIDC —
+Komodo se logue via Authelia</a>).</p>
+<h2 id="gestion-des-utilisateurs">Gestion des utilisateurs<a class="headerlink" href="#gestion-des-utilisateurs" title="Permanent link">&para;</a></h2>
+<p>Les utilisateurs et groupes se gèrent dans l'<strong>UI lldap</strong> (<code>https://ldap.int.vindiesel.vip</code>,
+VPN-only), pas dans Authelia. Un groupe <code>admins</code> peut ensuite servir de <code>subject: 'group:admins'</code> dans
+des règles <code>access_control</code> plus fines.</p>
+<div class="admonition note">
+<p class="admonition-title">Casse du nom d'utilisateur</p>
+<p>lldap traite les identifiants sans tenir compte de la casse ; le bind DN
+<code>uid=Cassetout,ou=people,dc=vindiesel,dc=vip</code> matche donc quelle que soit la casse stockée. Si un
+bind échoue au démarrage, essayer l'identifiant en minuscules.</p>
+</div>
+<h2 id="oidc-komodo-se-logue-via-authelia">OIDC — Komodo se logue via Authelia<a class="headerlink" href="#oidc-komodo-se-logue-via-authelia" title="Permanent link">&para;</a></h2>
+<p>Komodo n'utilise <strong>pas</strong> son login intégré : il est client OIDC d'Authelia
+(<a href="https://www.authelia.com/integration/openid-connect/clients/komodo/">guide officiel</a>).</p>
+<ul>
+<li>Client <code>komodo</code> déclaré dans <code>identity_providers.oidc</code> de <code>configuration.yaml</code> (secret client sous forme
+  de <strong>hash pbkdf2</strong> ; le secret en clair est <code>KOMODO_OIDC_CLIENT_SECRET</code> dans <code>komodo.env</code>).</li>
+<li>Komodo : <code>KOMODO_OIDC_ENABLED=true</code>, <code>KOMODO_OIDC_PROVIDER=https://auth.vindiesel.vip</code>,
+  <code>KOMODO_OIDC_CLIENT_ID/SECRET</code> (dans <code>komodo.env</code>). Callback <code>…/auth/oidc/callback</code>.</li>
+<li><code>hmac_secret</code> OIDC → <code>AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET</code> (<code>authelia.env</code>).</li>
+<li>La route Komodo n'a <strong>plus</strong> <code>authelia@docker</code> (l'OIDC fait l'auth) — seulement <code>komodo-vpn</code>.</li>
+</ul>
+<div class="admonition danger">
+<p class="admonition-title">Clé de signature OIDC = fichier sur l'hôte (hors git), à sauvegarder</p>
+<p>Authelia signe les jetons OIDC avec une clé RSA privée, montée depuis <code>/data/authelia/oidc-issuer.pem</code>.
+Elle <strong>ne se fournit pas par variable d'environnement</strong> (<code>AUTHELIA_IDENTITY_PROVIDERS_OIDC_JWKS_0_KEY_FILE</code>
+n'existe pas) : elle est déclarée en <code>jwks</code> dans <code>configuration.yaml</code>, lue via le filtre de template
+Sprig <code>{{ secret "/data/oidc-issuer.pem" | mindent 10 "|" | msquote }}</code>, ce qui exige
+<code>X_AUTHELIA_CONFIG_FILTERS=template</code> dans l'environnement du conteneur (<code>compose.yaml</code>). Comme la clé
+age, elle <strong>vit sur l'hôte</strong>, pas dans le dépôt. <code>scripts/bootstrap.sh</code> la génère automatiquement
+(idempotent) en même temps que les dossiers de données ; à sauvegarder (Bitwarden). Génération
+manuelle si besoin :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>/data/authelia/oidc-issuer.pem<span class="w"> </span><span class="m">4096</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/data/authelia/oidc-issuer.pem
+</code></pre></div>
+<p>Sa perte n'est pas dramatique (regénérer invalide juste les sessions OIDC en cours).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Premier login OIDC : promouvoir l'utilisateur admin</p>
+<p>Le compte créé au 1ᵉʳ login OIDC n'est pas forcément admin. <code>KOMODO_LOCAL_AUTH</code> reste <code>true</code> comme
+filet : se connecter en <code>admin</code> local pour activer/promouvoir l'utilisateur OIDC, puis (optionnel)
+passer <code>KOMODO_LOCAL_AUTH=false</code> pour ne garder qu'Authelia.</p>
+</div>
+<p><strong>Forgejo (à venir)</strong> : même principe, déclarer un client <code>forgejo</code> et brancher l'auth source OIDC côté
+<code>git.lucasmasse.net</code> (portail public → redirection cross-domaine OK).</p>
+<h2 id="depannage-pieges-rencontres">Dépannage (pièges rencontrés)<a class="headerlink" href="#depannage-pieges-rencontres" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptôme</th>
+<th>Cause</th>
+<th>Correctif</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lldap crée l'admin sous <code>admin</code> au lieu du nom voulu ; bind Authelia en échec (<code>LDAP Result Code 49 "Invalid Credentials"</code>)</td>
+<td><code>LLDAP_LDAP_USER_NAME</code> n'existe pas côté lldap (variable ignorée)</td>
+<td>utiliser <code>LLDAP_LDAP_USER_DN</code> pour fixer le nom de l'admin</td>
+</tr>
+<tr>
+<td>Notification mail Authelia/Brevo en échec : <code>535 5.7.8 Authentication failed</code></td>
+<td><code>RELAYHOST_PASSWORD</code> = mot de passe du compte Brevo au lieu de la <strong>clé SMTP</strong></td>
+<td><code>RELAYHOST_USERNAME</code> = login SMTP (<code>xxxxx@smtp-brevo.com</code>), <code>RELAYHOST_PASSWORD</code> = clé SMTP Brevo (<code>xsmtpsib-…</code>)</td>
+</tr>
+<tr>
+<td><code>535</code> persiste après correction de la clé SMTP</td>
+<td><code>boky/postfix</code> écrit <code>/etc/postfix/sasl_passwd</code> sur un <strong>volume anonyme persistant</strong> : les lignes s'accumulent à chaque démarrage et l'ancienne valeur gagne au lookup <code>postmap</code></td>
+<td><code>docker compose down -v</code> puis redéployer, pour repartir d'un <code>sasl_passwd</code> vierge</td>
+</tr>
+<tr>
+<td>Authelia refuse de démarrer : <code>identity_providers: oidc: option 'jwks' is required</code> (ou l'env <code>..._JWKS_0_KEY_FILE</code> signalé « not expected »)</td>
+<td>la clé de signature OIDC ne se fournit pas par variable d'environnement</td>
+<td>déclarer <code>jwks</code> dans <code>configuration.yaml</code> via <code>{{ secret "/data/oidc-issuer.pem" }}</code> + <code>X_AUTHELIA_CONFIG_FILTERS=template</code> (voir plus haut)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Sources :</strong> <code>hosts/vps-prod/stacks/{authelia,lldap,smtp-relay}/</code>, <code>komodo/stacks.toml</code>,
+<code>secrets/vps/*.env</code> du dépôt · <a href="https://www.authelia.com/">Authelia</a> ·
+<a href="https://github.com/lldap/lldap">lldap</a> · <a href="https://github.com/bokysan/docker-postfix">boky/postfix</a> ·
+<a href="https://www.brevo.com/">Brevo SMTP</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Pied de page" >
+        
+          
+          <a href="../portfolio/" class="md-footer__link md-footer__link--prev" aria-label="Précédent: Portfolio">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Précédent
+              </span>
+              <div class="md-ellipsis">
+                Portfolio
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../secrets-sops/" class="md-footer__link md-footer__link--next" aria-label="Suivant: Secrets (SOPS/age)">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Suivant
+              </span>
+              <div class="md-ellipsis">
+                Secrets (SOPS/age)
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Documentation interne — homelab-infra
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

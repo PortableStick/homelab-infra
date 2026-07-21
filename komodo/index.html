@@ -1,0 +1,1301 @@
+
+<!doctype html>
+<html lang="fr" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation opérationnelle de l'infrastructure auto-hébergée gérée par Komodo. Référentiel de configuration et procédures de restauration.">
+      
+      
+        <meta name="author" content="PortableStick">
+      
+      
+      
+        <link rel="prev" href="../poste-travail-sops-age/">
+      
+      
+        <link rel="next" href="../reverse-proxy-tls/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Komodo - homelab-infra</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#komodo" class="md-skip">
+          Aller au contenu
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="En-tête">
+    <a href=".." title="homelab-infra" class="md-header__button md-logo" aria-label="homelab-infra" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            homelab-infra
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Komodo
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Passer en thème sombre"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Passer en thème sombre" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Passer en thème clair"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Passer en thème clair" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Recherche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initialisation de la recherche
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/PortableStick/homelab-infra" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PortableStick/homelab-infra
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="homelab-infra" class="md-nav__button md-logo" aria-label="homelab-infra" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    homelab-infra
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/PortableStick/homelab-infra" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PortableStick/homelab-infra
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../poste-travail-sops-age/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Poste de travail (SOPS/age)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Komodo
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Komodo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#composants-compose-komodo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composants (compose Komodo)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#volumes-et-chemins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Volumes et chemins
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets-composeenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets (compose.env)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gitops-komodostackstoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitOps : komodo/stacks.toml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sauvegarde-restauration-de-la-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sauvegarde &amp; restauration de la base
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depannage-pieges-rencontres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dépannage (pièges rencontrés)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reverse-proxy-tls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reverse proxy & TLS (Traefik)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acme-dns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acme-dns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../forgejo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forgejo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authelia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authelia (SSO / 2FA)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../secrets-sops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Secrets (SOPS/age)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../securite-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sécurité & CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../procedures-planifiees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Procédures planifiées
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exposer-service-vpn-only/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exposer un service en VPN-only
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pelican/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pelican (Panel jeux)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../obsidian-livesync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Obsidian LiveSync (CouchDB)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rattacher-hote-periphery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rattacher un hôte (Periphery)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../restauration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restauration complète
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#composants-compose-komodo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composants (compose Komodo)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#volumes-et-chemins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Volumes et chemins
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets-composeenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets (compose.env)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gitops-komodostackstoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitOps : komodo/stacks.toml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sauvegarde-restauration-de-la-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sauvegarde &amp; restauration de la base
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depannage-pieges-rencontres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dépannage (pièges rencontrés)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/PortableStick/homelab-infra/edit/main/docs/komodo.md" title="Editer cette page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="komodo">Komodo<a class="headerlink" href="#komodo" title="Permanent link">&para;</a></h1>
+<p><a href="https://komo.do">Komodo</a> est le système de build &amp; déploiement qui orchestre l'infra en mode
+GitOps : il lit la configuration depuis ce dépôt et lance les stacks <code>docker compose</code>.</p>
+<p>Source principale : <code>hosts/vps-prod/stacks/komodo/compose.yaml</code> et <code>komodo/stacks.toml</code>.</p>
+<h2 id="composants-compose-komodo">Composants (compose Komodo)<a class="headerlink" href="#composants-compose-komodo" title="Permanent link">&para;</a></h2>
+<p>Le <code>compose.yaml</code> de Komodo déploie quatre services :</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Image</th>
+<th>Rôle</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>postgres</code></td>
+<td><code>ghcr.io/ferretdb/postgres-documentdb</code></td>
+<td>Stockage sous-jacent de FerretDB</td>
+<td>Volume <code>postgres-data</code>. Label <code>komodo.skip</code> pour que Komodo ne l'arrête pas avec <em>StopAllContainers</em>.</td>
+</tr>
+<tr>
+<td><code>ferretdb</code></td>
+<td><code>ghcr.io/ferretdb/ferretdb</code></td>
+<td>Adaptateur compatible MongoDB au-dessus de Postgres</td>
+<td>Volume <code>ferretdb-state</code>. Dépend de <code>postgres</code>. Label <code>komodo.skip</code>.</td>
+</tr>
+<tr>
+<td><code>core</code></td>
+<td><code>ghcr.io/moghtech/komodo-core:${COMPOSE_KOMODO_IMAGE_TAG:-2}</code></td>
+<td>UI + API Komodo</td>
+<td>Port <code>9120</code>. Dépend de <code>ferretdb</code>. <code>KOMODO_DATABASE_ADDRESS: ferretdb:27017</code>.</td>
+</tr>
+<tr>
+<td><code>periphery</code></td>
+<td><code>ghcr.io/moghtech/komodo-periphery:${COMPOSE_KOMODO_IMAGE_TAG:-2}</code></td>
+<td>Agent qui exécute Docker sur l'hôte</td>
+<td>Accède à <code>docker.sock</code>, <code>/proc</code>, au répertoire racine Periphery, et monte le binaire <code>sops</code> de l'hôte + <code>SOPS_AGE_KEY_FILE</code> (voir plus bas <em>pourquoi</em>). Dépend de <code>core</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Versions d'images</p>
+<p>Les tags <code>core</code>/<code>periphery</code> utilisent <code>${COMPOSE_KOMODO_IMAGE_TAG:-2}</code> (par défaut la série
+majeure <code>2</code>). Les images <strong><code>postgres-documentdb</code> et <code>ferretdb</code> ne sont pas épinglées</strong> — le compte
+le signale lui-même : <em>« 🚨 Pin to a specific version. Updates can be breaking. »</em>. Une mise à jour
+automatique de ces deux images peut casser la base. À épingler avant de fiabiliser la prod.</p>
+</div>
+<h2 id="volumes-et-chemins">Volumes et chemins<a class="headerlink" href="#volumes-et-chemins" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Volume / chemin</th>
+<th>Monté dans</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>postgres-data</code> (nommé)</td>
+<td><code>/var/lib/postgresql/data</code></td>
+<td>Données Postgres (donc toute la base Komodo)</td>
+</tr>
+<tr>
+<td><code>ferretdb-state</code> (nommé)</td>
+<td><code>/state</code></td>
+<td>État FerretDB</td>
+</tr>
+<tr>
+<td><code>keys</code> (nommé)</td>
+<td><code>/config/keys</code> (core <strong>et</strong> periphery)</td>
+<td>Clés de communication Core ↔ Periphery</td>
+</tr>
+<tr>
+<td><code>${COMPOSE_KOMODO_BACKUPS_PATH}</code></td>
+<td><code>/backups</code></td>
+<td>Sauvegardes datées de la base (voir <a href="../procedures-planifiees/">Procédures</a>)</td>
+</tr>
+<tr>
+<td><code>${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}</code></td>
+<td>identique dans le conteneur</td>
+<td>Racine Periphery : <strong>tous</strong> les repos/configs gérés doivent être enfants de ce dossier</td>
+</tr>
+<tr>
+<td><code>/var/run/docker.sock</code></td>
+<td><code>/var/run/docker.sock</code></td>
+<td>Permet à Periphery de piloter Docker</td>
+</tr>
+<tr>
+<td><code>/proc</code></td>
+<td><code>/proc</code></td>
+<td>Permet à Periphery de voir les process hôte</td>
+</tr>
+<tr>
+<td><code>/usr/local/bin/sops</code> (hôte, <code>:ro</code>)</td>
+<td><code>/usr/local/bin/sops</code></td>
+<td>Binaire <code>sops</code> de l'hôte, absent de l'image <code>komodo-periphery</code> (voir ci-dessous)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Le répertoire racine Periphery doit être identique dedans et dehors</p>
+<p>Le compose le rappelle : le chemin doit être le <strong>même</strong> à l'intérieur et à l'extérieur du
+conteneur, sinon Docker se mélange (réf. discussion Komodo #180 citée en commentaire). Défaut :
+<code>/etc/komodo</code>.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Pourquoi <code>sops</code> est monté à la main dans la Periphery du serveur <code>Local</code></p>
+<p>Les stacks <code>lldap</code>, <code>authelia</code> et <code>smtp-relay</code> (serveur <code>Local</code>, voir <code>komodo/stacks.toml</code>) ont un
+<code>pre_deploy.command</code> qui lance <code>sops -d ...</code>. Mais l'image <code>ghcr.io/moghtech/komodo-periphery</code>
+<strong>n'embarque pas</strong> <code>sops</code> : sans ce montage, le <code>pre_deploy</code> échoue (<code>sops: command not found</code>).
+Le compose monte donc <code>/usr/local/bin/sops</code> de l'hôte VPS en lecture seule et expose
+<code>SOPS_AGE_KEY_FILE=/etc/komodo/age/key.txt</code> (clé déjà présente via le montage du répertoire racine
+Periphery). Sur <code>docker-vindiesel</code>, la Periphery tourne en <strong>binaire systemd</strong> (pas conteneurisée,
+voir <a href="../rattacher-hote-periphery/">Rattacher un hôte</a>) : <code>scripts/bootstrap-periphery.sh</code> y
+installe <code>sops</code> directement sur l'hôte, donc pas de bind-mount à prévoir dans ce cas — c'est
+uniquement la Periphery <strong>conteneurisée</strong> qui a besoin de ce contournement.</p>
+</div>
+<h2 id="secrets-composeenv">Secrets (compose.env)<a class="headerlink" href="#secrets-composeenv" title="Permanent link">&para;</a></h2>
+<p>Le Core et la Periphery chargent leurs variables via <code>env_file: ./compose.env</code>. Ce fichier
+<strong>n'est pas dans Git</strong> : il est produit en déchiffrant <code>secrets/vps/komodo.env</code> (SOPS/age).</p>
+<p>Variables présentes dans <code>secrets/vps/komodo.env</code> (noms visibles, valeurs chiffrées) :</p>
+<p><code>COMPOSE_KOMODO_IMAGE_TAG</code>, <code>COMPOSE_KOMODO_BACKUPS_PATH</code>, <code>KOMODO_DATABASE_USERNAME</code>,
+<code>KOMODO_DATABASE_PASSWORD</code>, <code>TZ</code>, <code>KOMODO_HOST</code>, <code>KOMODO_TITLE</code>, <code>KOMODO_PERIPHERY_PUBLIC_KEY</code>,
+<code>KOMODO_LOCAL_AUTH</code>, <code>KOMODO_INIT_ADMIN_USERNAME</code>, <code>KOMODO_INIT_ADMIN_PASSWORD</code>,
+<code>KOMODO_FIRST_SERVER_NAME</code>, <code>KOMODO_DISABLE_CONFIRM_DIALOG</code>, <code>KOMODO_DISABLE_INIT_RESOURCES</code>,
+<code>KOMODO_WEBHOOK_SECRET</code>, <code>KOMODO_JWT_SECRET</code>, <code>KOMODO_JWT_TTL</code>, <code>KOMODO_MONITORING_INTERVAL</code>,
+<code>KOMODO_RESOURCE_POLL_INTERVAL</code>, <code>KOMODO_DISABLE_USER_REGISTRATION</code>,
+<code>KOMODO_ENABLE_NEW_USERS</code>, <code>KOMODO_DISABLE_NON_ADMIN_CREATE</code>, <code>KOMODO_TRANSPARENT_MODE</code>,
+<code>KOMODO_LOGGING_PRETTY</code>, <code>KOMODO_PRETTY_STARTUP_CONFIG</code>, <code>KOMODO_GITHUB_OAUTH_ENABLED</code>,
+<code>KOMODO_GOOGLE_OAUTH_ENABLED</code>, <code>KOMODO_AWS_ACCESS_KEY_ID</code>, <code>KOMODO_AWS_SECRET_ACCESS_KEY</code>,
+<code>KOMODO_OIDC_ENABLED</code>, <code>KOMODO_OIDC_PROVIDER</code>, <code>KOMODO_OIDC_CLIENT_ID</code>, <code>KOMODO_OIDC_CLIENT_SECRET</code>,
+<code>PERIPHERY_CORE_ADDRESS</code>, <code>PERIPHERY_CONNECT_AS</code>, <code>PERIPHERY_CORE_PUBLIC_KEYS</code>,
+<code>PERIPHERY_ROOT_DIRECTORY</code>, <code>PERIPHERY_DISABLE_TERMINALS</code>, <code>PERIPHERY_DISABLE_CONTAINER_TERMINALS</code>,
+<code>PERIPHERY_INCLUDE_DISK_MOUNTS</code>, <code>PERIPHERY_LOGGING_PRETTY</code>, <code>PERIPHERY_PRETTY_STARTUP_CONFIG</code>.</p>
+<p>Les quatre <code>KOMODO_OIDC_*</code> configurent le login via <strong>Authelia</strong> (SSO/OIDC) — voir
+<a href="../authelia/">Authelia (SSO / 2FA)</a>.</p>
+<div class="admonition danger">
+<p class="admonition-title"><code>KOMODO_HOST</code> doit correspondre au domaine réellement routé par Traefik</p>
+<p>Piège vécu : <code>KOMODO_HOST</code> valait <code>komodo.vindiesel.vip</code> (sans <code>.int</code>) alors que le routeur
+Traefik du <code>core</code> route sur le domaine <code>komodo.int.vindiesel.vip</code> (label
+<code>traefik.http.routers.komodo.rule</code> dans le compose). Le frontend Komodo s'appuie sur
+<code>KOMODO_HOST</code> pour construire ses appels API ; avec la mauvaise valeur, il vise une URL non
+routée et <strong>la page de login s'affiche sans aucun champ à remplir</strong> (pas d'erreur explicite).
+Correctif : aligner <code>KOMODO_HOST</code> sur le domaine du label Traefik de <code>core</code> dans
+<code>hosts/vps-prod/stacks/komodo/compose.yaml</code>.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Rendu du compose.env à partir du secret chiffré (étape manuelle actuelle)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>sops<span class="w"> </span>-d<span class="w"> </span>secrets/vps/komodo.env<span class="w"> </span>&gt;<span class="w"> </span>hosts/vps-prod/stacks/komodo/compose.env
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Bootstrap manuel, pas géré par Komodo lui-même</p>
+<p>La stack Komodo (Core + Periphery + base) <strong>ne figure pas</strong> dans la liste des <code>[[stack]]</code> de
+<code>komodo/stacks.toml</code> : Komodo ne se déploie pas lui-même. Au premier boot, on lance Komodo <strong>à la
+main</strong> (<code>docker compose up -d</code> dans <code>hosts/vps-prod/stacks/komodo/</code>), après avoir rendu
+<code>compose.env</code>. Ensuite seulement, Komodo reprend la main sur les autres stacks via le resource
+sync. <code>scripts/bootstrap.sh</code> automatise ces étapes sur un VPS nu : réseau <code>frontend</code>, répertoires
+de données (dont <code>/data/authelia</code> et <code>/data/lldap</code> pour la stack auth), clé age, rendu du
+<code>compose.env</code> et <code>docker compose up -d</code>. Il génère aussi, de façon idempotente,
+<code>/data/authelia/oidc-issuer.pem</code> (<code>openssl genrsa</code>) : la clé privée de signature OIDC d'Authelia,
+qui ne peut pas venir de Git au même titre que la clé age. Voir
+<a href="../restauration/">Restauration complète</a>.</p>
+</div>
+<h2 id="gitops-komodostackstoml">GitOps : <code>komodo/stacks.toml</code><a class="headerlink" href="#gitops-komodostackstoml" title="Permanent link">&para;</a></h2>
+<p>Ce fichier est la <strong>source de vérité</strong> que Komodo applique. Il déclare :</p>
+<ul>
+<li><strong>Serveurs</strong> : <code>Local</code> (Periphery conteneurisée, même hôte que le Core) et <code>docker-vindiesel</code>
+  (Periphery binaire+systemd distante, voir <a href="../rattacher-hote-periphery/">Rattacher un hôte</a>).</li>
+<li><strong>Repo <code>homelab-infra</code></strong> lié à <code>PortableStick/homelab-infra</code>, builder <code>Local</code>.</li>
+<li><strong>Builder <code>Local</code></strong> de type <code>Server</code>.</li>
+<li><strong>Resource sync <code>homelab-infra</code></strong> : <code>linked_repo = "homelab-infra"</code>,
+  <code>resource_path = ["komodo/stacks.toml"]</code>, <strong><code>delete = true</code></strong>.</li>
+<li>Les <strong>stacks</strong> déployées par Komodo, par tag :<ul>
+<li><code>edge</code> : <code>acme-dns</code>, <code>traefik</code> (serveur <code>Local</code>), <code>traefik-vindiesel</code> (serveur
+  <code>docker-vindiesel</code>).</li>
+<li><code>app</code> : <code>portfolio</code>, <code>forgejo</code>, <code>whoami</code> (après <code>traefik</code>), <code>immich-1</code>, <code>immich-2</code> (après
+  <code>traefik-vindiesel</code>, serveur <code>docker-vindiesel</code>).</li>
+<li><code>auth</code> : <code>lldap</code>, <code>authelia</code> (après <code>traefik</code>, <code>lldap</code>, <code>smtp-relay</code>).</li>
+<li><code>infra</code> : <code>smtp-relay</code>.</li>
+<li>Chaque stack pointe vers son <code>compose.yaml</code> dans <code>hosts/&lt;serveur&gt;/stacks/...</code> ; celles avec un
+  secret chiffré déclarent un <code>pre_deploy.command = "sops -d ... &gt; .env"</code>.</li>
+</ul>
+</li>
+<li>Trois <strong>procédures planifiées</strong> (voir page dédiée).</li>
+</ul>
+<div class="admonition danger">
+<p class="admonition-title"><code>delete = true</code> sur le resource sync</p>
+<p>Avec <code>delete = true</code>, toute ressource gérée par Komodo qui <strong>n'est plus</strong> dans <code>stacks.toml</code> est
+<strong>supprimée</strong> lors de la synchronisation. C'est voulu (config déclarative stricte), mais ça veut
+dire qu'éditer ce fichier peut détruire des stacks. Modifier en connaissance de cause.</p>
+</div>
+<h2 id="sauvegarde-restauration-de-la-base">Sauvegarde &amp; restauration de la base<a class="headerlink" href="#sauvegarde-restauration-de-la-base" title="Permanent link">&para;</a></h2>
+<p>La base Komodo (dans <code>postgres-data</code>) est sauvegardée par la procédure <strong>Backup Core Database</strong>
+(quotidienne, 01:00) vers <code>/backups</code>. La sauvegarde et la restauration passent par la <strong>CLI Komodo</strong>
+(<code>km</code>), incluse dans l'image Core :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Restauration depuis une sauvegarde (image komodo-cli)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">services</span><span class="p">:</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">cli</span><span class="p">:</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/moghtech/komodo-cli</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">km database restore -y</span><span class="w">   </span><span class="c1"># --restore-folder 2025-08-14_03-00-01 pour cibler un dossier</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/chemin/vers/backups:/backups</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">      </span><span class="nt">KOMODO_CLI_DATABASE_TARGET_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hôte:27017&gt;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">      </span><span class="nt">KOMODO_CLI_DATABASE_TARGET_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;db username&gt;</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">      </span><span class="nt">KOMODO_CLI_DATABASE_TARGET_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;db password&gt;</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">      </span><span class="nt">KOMODO_CLI_DATABASE_TARGET_DB_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">komodo</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">La restauration ne vide pas la base cible</p>
+<p>D'après la doc officielle : <code>km database restore</code> n'efface pas la base avant de restaurer. Si la
+cible contient déjà des documents, ils subsistent. Restaurer dans une base <strong>vide</strong> (ou la
+supprimer avant). Les sauvegardes <strong>ne sont pas chiffrées</strong> par Komodo — c'est à prévoir si on les
+pousse hors-site.</p>
+</div>
+<h2 id="depannage-pieges-rencontres">Dépannage (pièges rencontrés)<a class="headerlink" href="#depannage-pieges-rencontres" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptôme</th>
+<th>Cause</th>
+<th>Correctif</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pre_deploy</code> échoue : <code>sops: command not found</code> (stacks <code>lldap</code>/<code>authelia</code>/<code>smtp-relay</code>, serveur <code>Local</code>)</td>
+<td>L'image <code>komodo-periphery</code> n'embarque pas <code>sops</code></td>
+<td>Monter le binaire <code>sops</code> de l'hôte + <code>SOPS_AGE_KEY_FILE</code> sur le service <code>periphery</code> (déjà fait dans <code>hosts/vps-prod/stacks/komodo/compose.yaml</code>)</td>
+</tr>
+<tr>
+<td>Page de login Komodo affichée <strong>sans aucun champ</strong> à remplir</td>
+<td><code>KOMODO_HOST</code> ne correspond pas au domaine réellement routé par Traefik (<code>komodo.int.vindiesel.vip</code>) : le frontend appelle une URL non routée</td>
+<td>Aligner <code>KOMODO_HOST</code> sur le <code>Host()</code> du label Traefik de <code>core</code></td>
+</tr>
+<tr>
+<td>Après un <code>docker compose up</code>, le conteneur ne voit pas les variables attendues</td>
+<td>Confusion entre <code>--env-file</code> (CLI) et <code>env_file:</code> (compose) : <code>--env-file</code> ne sert <strong>qu'à</strong> l'interpolation <code>${...}</code> dans le YAML, ce n'est pas lui qui injecte les variables dans le conteneur</td>
+<td>Vérifier que le fichier déclaré par <code>env_file:</code> dans le <code>compose.yaml</code> (<code>compose.env</code> pour <code>core</code>/<code>periphery</code>, <code>.env</code> pour les autres stacks) existe bien et est à jour — c'est lui qui compte pour le conteneur</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Sources :</strong> <code>hosts/vps-prod/stacks/komodo/compose.yaml</code>, <code>komodo/stacks.toml</code>,
+<code>secrets/vps/komodo.env</code>, <code>scripts/bootstrap.sh</code> du dépôt ·
+<a href="https://komo.do/docs/setup/backup">Komodo — Backup and Restore</a> ·
+<a href="https://komo.do/docs/ecosystem/cli">Komodo — CLI</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Pied de page" >
+        
+          
+          <a href="../poste-travail-sops-age/" class="md-footer__link md-footer__link--prev" aria-label="Précédent: Poste de travail (SOPS/age)">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Précédent
+              </span>
+              <div class="md-ellipsis">
+                Poste de travail (SOPS/age)
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../reverse-proxy-tls/" class="md-footer__link md-footer__link--next" aria-label="Suivant: Reverse proxy &amp; TLS (Traefik)">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Suivant
+              </span>
+              <div class="md-ellipsis">
+                Reverse proxy & TLS (Traefik)
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Documentation interne — homelab-infra
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

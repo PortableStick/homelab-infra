@@ -1,0 +1,1454 @@
+
+<!doctype html>
+<html lang="fr" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation opérationnelle de l'infrastructure auto-hébergée gérée par Komodo. Référentiel de configuration et procédures de restauration.">
+      
+      
+        <meta name="author" content="PortableStick">
+      
+      
+      
+        <link rel="prev" href="../rattacher-hote-periphery/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Restauration complète - homelab-infra</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#restauration-complete" class="md-skip">
+          Aller au contenu
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="En-tête">
+    <a href=".." title="homelab-infra" class="md-header__button md-logo" aria-label="homelab-infra" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            homelab-infra
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Restauration complète
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Passer en thème sombre"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Passer en thème sombre" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Passer en thème clair"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Passer en thème clair" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Recherche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initialisation de la recherche
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/PortableStick/homelab-infra" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PortableStick/homelab-infra
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="homelab-infra" class="md-nav__button md-logo" aria-label="homelab-infra" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    homelab-infra
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/PortableStick/homelab-infra" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PortableStick/homelab-infra
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../poste-travail-sops-age/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Poste de travail (SOPS/age)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../komodo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Komodo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reverse-proxy-tls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reverse proxy & TLS (Traefik)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acme-dns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acme-dns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../forgejo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forgejo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authelia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authelia (SSO / 2FA)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../secrets-sops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Secrets (SOPS/age)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../securite-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sécurité & CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../procedures-planifiees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Procédures planifiées
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exposer-service-vpn-only/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exposer un service en VPN-only
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pelican/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pelican (Panel jeux)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../obsidian-livesync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Obsidian LiveSync (CouchDB)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rattacher-hote-periphery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rattacher un hôte (Periphery)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restauration complète
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restauration complète
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequis-hors-vps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prérequis (hors VPS)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#etapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Étapes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Étapes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-provisionner-lhote" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Provisionner l'hôte
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-installer-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Installer Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-liberer-le-port-53-pour-acme-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Libérer le port 53 (pour acme-dns)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-creer-le-reseau-docker-externe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Créer le réseau Docker externe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-recreer-les-repertoires-de-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Recréer les répertoires de données
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-restaurer-la-cle-privee-age" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Restaurer la clé privée age
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-cloner-le-depot-sous-la-racine-periphery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Cloner le dépôt sous la racine Periphery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-rendre-le-composeenv-de-komodo-dechiffrement-manuel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Rendre le compose.env de Komodo (déchiffrement manuel)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-bootstrapper-komodo-core-periphery-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Bootstrapper Komodo (Core + Periphery + base)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-restaurer-la-base-komodo-quand-backup-hors-site-disponible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Restaurer la base Komodo (quand backup hors-site disponible)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-laisser-komodo-appliquer-le-resource-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Laisser Komodo appliquer le resource sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-verifier-le-dns-et-obtenir-les-certificats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Vérifier le DNS et obtenir les certificats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-passer-lets-encrypt-en-production-quand-la-chaine-staging-est-validee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Passer Let's Encrypt en production (quand la chaîne staging est validée)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ordre-resume" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordre résumé
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequis-hors-vps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prérequis (hors VPS)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#etapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Étapes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Étapes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-provisionner-lhote" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Provisionner l'hôte
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-installer-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Installer Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-liberer-le-port-53-pour-acme-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Libérer le port 53 (pour acme-dns)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-creer-le-reseau-docker-externe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Créer le réseau Docker externe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-recreer-les-repertoires-de-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Recréer les répertoires de données
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-restaurer-la-cle-privee-age" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Restaurer la clé privée age
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-cloner-le-depot-sous-la-racine-periphery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Cloner le dépôt sous la racine Periphery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-rendre-le-composeenv-de-komodo-dechiffrement-manuel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Rendre le compose.env de Komodo (déchiffrement manuel)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-bootstrapper-komodo-core-periphery-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Bootstrapper Komodo (Core + Periphery + base)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-restaurer-la-base-komodo-quand-backup-hors-site-disponible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Restaurer la base Komodo (quand backup hors-site disponible)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-laisser-komodo-appliquer-le-resource-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Laisser Komodo appliquer le resource sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-verifier-le-dns-et-obtenir-les-certificats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Vérifier le DNS et obtenir les certificats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-passer-lets-encrypt-en-production-quand-la-chaine-staging-est-validee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Passer Let's Encrypt en production (quand la chaîne staging est validée)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ordre-resume" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordre résumé
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/PortableStick/homelab-infra/edit/main/docs/restauration.md" title="Editer cette page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="restauration-complete">Restauration complète<a class="headerlink" href="#restauration-complete" title="Permanent link">&para;</a></h1>
+<p>Objectif : remonter l'infrastructure <strong>depuis un VPS nu</strong> après une perte totale. Chaque étape
+indique la commande <strong>et</strong> comment vérifier qu'elle a réussi.</p>
+<div class="admonition danger">
+<p class="admonition-title">Limite actuelle — restauration partielle</p>
+<p>Une restauration <strong>complète</strong> suppose deux choses qui <strong>n'existent pas encore</strong> :</p>
+<ol>
+<li><strong>Une sauvegarde hors-site de la base Komodo.</strong> Aujourd'hui les sauvegardes sont <strong>locales</strong> au
+   VPS ; si le VPS est perdu, elles le sont aussi. La Storage Box Hetzner réservée est <strong>vide</strong>.
+   → En l'état, on ne peut <strong>pas</strong> restaurer l'historique Komodo : on <strong>réinitialise</strong> une instance
+   Komodo neuve (admin recréé via <code>KOMODO_INIT_ADMIN_*</code>), et c'est le <strong>dépôt Git</strong> qui reconstruit
+   la configuration des stacks. Les étapes de restauration de base sont marquées
+   <em>(quand backup hors-site disponible)</em>.</li>
+<li><strong>Le déchiffrement automatique des secrets par Komodo</strong> (non testé). On part donc sur un
+   <strong>déchiffrement manuel</strong> (<code>sops -d</code>).</li>
+</ol>
+</div>
+<h2 id="prerequis-hors-vps">Prérequis (hors VPS)<a class="headerlink" href="#prerequis-hors-vps" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Où</th>
+<th>Vérification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dépôt <code>homelab-infra</code></td>
+<td>GitHub <code>PortableStick/homelab-infra</code></td>
+<td><code>git clone</code> fonctionne</td>
+</tr>
+<tr>
+<td>Clé privée age maître</td>
+<td>Bitwarden (break-glass)</td>
+<td><code>age-keygen -y</code> redonne <code>age16jmqm9c…</code> (voir <a href="../poste-travail-sops-age/">Poste de travail</a>)</td>
+</tr>
+<tr>
+<td>Accès DNS</td>
+<td>Cloudflare (DNS-only)</td>
+<td>Tu peux éditer les zones <code>vindiesel.vip</code> et <code>lucasmasse.net</code></td>
+</tr>
+<tr>
+<td>Sauvegarde base Komodo</td>
+<td><em>(à venir)</em> Storage Box Hetzner</td>
+<td><strong>N'existe pas encore</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="etapes">Étapes<a class="headerlink" href="#etapes" title="Permanent link">&para;</a></h2>
+<h3 id="1-provisionner-lhote">1. Provisionner l'hôte<a class="headerlink" href="#1-provisionner-lhote" title="Permanent link">&para;</a></h3>
+<p>Commander un VPS Hetzner sous <strong>Ubuntu Server</strong>. Idéalement réattribuer l'IP <code>116.202.22.50</code> (sinon il
+faut la remplacer dans <code>acme-dns/compose.yaml</code>, <code>acme-dns/config.cfg</code> et les enregistrements
+Cloudflare). Installer Tailscale.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://tailscale.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>sudo<span class="w"> </span>tailscale<span class="w"> </span>up
+</code></pre></div>
+<p><strong>Vérif :</strong> <code>tailscale status</code> montre le nœud connecté ; <code>ip a</code> montre l'IP publique attendue.</p>
+<div class="admonition info">
+<p class="admonition-title">À compléter — durcissement hôte</p>
+<p>Documenter ici la config réelle : utilisateur non-root, SSH (clé only ?), pare-feu (ufw / Hetzner
+firewall), quels ports ouverts au public (80/443, 53 sur l'IP) vs réservés à Tailscale.</p>
+</div>
+<h3 id="2-installer-docker">2. Installer Docker<a class="headerlink" href="#2-installer-docker" title="Permanent link">&para;</a></h3>
+<p>Suivre le dépôt officiel Docker pour Ubuntu (méthode utilisée dans l'ancien <code>Scripts/preparation.sh</code>
+du dépôt <code>Infra-VPS</code>) : paquets <code>docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+docker-compose-plugin</code>.</p>
+<p><strong>Vérif :</strong> <code>docker version</code> et <code>docker compose version</code> répondent ; <code>docker run --rm hello-world</code> OK.</p>
+<div class="admonition warning">
+<p class="admonition-title">Désactiver le userland-proxy (obligatoire pour les services VPN-only)</p>
+<p>Écrire <code>{"userland-proxy": false}</code> dans <code>/etc/docker/daemon.json</code> puis <code>systemctl restart docker</code>,
+<strong>avant</strong> de lancer les stacks. Sans ça, l'IP source des clients tailnet est masquée en
+<code>172.20.0.1</code> et l'<code>ipAllowList</code> des services <code>*.int.vindiesel.vip</code> rejette tout en 403. C'est
+fait automatiquement par <code>scripts/bootstrap.sh</code> (étape 2b). Voir
+<a href="../exposer-service-vpn-only/">Exposer un service en VPN-only</a>.</p>
+<p><strong>Vérif :</strong> <code>docker info --format '{{.Driver}}'</code> répond, et après déploiement
+<code>docker logs traefik | grep -i reject</code> ne montre <strong>pas</strong> <code>Rejecting IP 172.20.0.1</code>.</p>
+</div>
+<h3 id="3-liberer-le-port-53-pour-acme-dns">3. Libérer le port 53 (pour acme-dns)<a class="headerlink" href="#3-liberer-le-port-53-pour-acme-dns" title="Permanent link">&para;</a></h3>
+<p>Sur Ubuntu, <code>systemd-resolved</code> occupe le port 53. acme-dns est mappé uniquement sur <code>116.202.22.50:53</code>,
+mais il faut s'assurer qu'aucun autre service ne tient ce couple IP:port.</p>
+<p><strong>Vérif :</strong> <code>sudo ss -ulpn 'sport = :53'</code> ne montre rien d'autre lié à <code>116.202.22.50:53</code>.
+Voir <a href="../acme-dns/">acme-dns</a> pour le contexte du conflit.</p>
+<h3 id="4-creer-le-reseau-docker-externe">4. Créer le réseau Docker externe<a class="headerlink" href="#4-creer-le-reseau-docker-externe" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>frontend
+</code></pre></div>
+<p><strong>Vérif :</strong> <code>docker network ls | grep frontend</code>.</p>
+<h3 id="5-recreer-les-repertoires-de-donnees">5. Recréer les répertoires de données<a class="headerlink" href="#5-recreer-les-repertoires-de-donnees" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/data/acme-dns<span class="w"> </span>/data/traefik/acme<span class="w"> </span>/data/traefik/acme-dns<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">              </span>/data/authelia<span class="w"> </span>/data/lldap<span class="w"> </span>/etc/komodo/age
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>sudo<span class="w"> </span>touch<span class="w"> </span>/data/traefik/acme/acme.json<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/data/traefik/acme/acme.json
+</code></pre></div>
+<p>Authelia a besoin en plus d'une clé de signature OIDC (fichier RSA, hors dépôt) — voir
+<a href="../authelia/">Authelia</a> pour la commande de génération. <code>scripts/bootstrap.sh</code> fait les deux
+(dossiers + clé) automatiquement.</p>
+<p><strong>Vérif :</strong> les chemins de la section « Chemins de données » de <a href="../architecture/">Architecture</a>
+existent.</p>
+<h3 id="6-restaurer-la-cle-privee-age">6. Restaurer la clé privée age<a class="headerlink" href="#6-restaurer-la-cle-privee-age" title="Permanent link">&para;</a></h3>
+<p>Récupérer la clé depuis Bitwarden et l'écrire sur l'hôte :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span><span class="nv">$EDITOR</span><span class="w"> </span>/etc/komodo/age/key.txt<span class="w">      </span><span class="c1"># coller la clé privée</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/etc/komodo/age/key.txt
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SOPS_AGE_KEY_FILE</span><span class="o">=</span>/etc/komodo/age/key.txt
+</code></pre></div>
+<p><strong>Vérif :</strong> <code>age-keygen -y /etc/komodo/age/key.txt</code> affiche
+<code>age16jmqm9c42x330uyvdf07lq2qy892c7hdj96t6dw4m9rmhy4cw96spyc5cr</code>.</p>
+<h3 id="7-cloner-le-depot-sous-la-racine-periphery">7. Cloner le dépôt sous la racine Periphery<a class="headerlink" href="#7-cloner-le-depot-sous-la-racine-periphery" title="Permanent link">&para;</a></h3>
+<p>Le dépôt doit être sous le répertoire racine Periphery (<code>/etc/komodo</code> par défaut, voir
+<a href="../komodo/">Komodo</a>).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>/etc/komodo
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sudo<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/PortableStick/homelab-infra.git
+</code></pre></div>
+<p><strong>Vérif :</strong> <code>ls /etc/komodo/homelab-infra/hosts/vps-prod/stacks</code> liste <code>acme-dns traefik komodo whoami
+portfolio forgejo lldap authelia smtp-relay</code>.</p>
+<h3 id="8-rendre-le-composeenv-de-komodo-dechiffrement-manuel">8. Rendre le <code>compose.env</code> de Komodo (déchiffrement manuel)<a class="headerlink" href="#8-rendre-le-composeenv-de-komodo-dechiffrement-manuel" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">cd</span><span class="w"> </span>/etc/komodo/homelab-infra
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sops<span class="w"> </span>-d<span class="w"> </span>secrets/vps/komodo.env<span class="w"> </span>&gt;<span class="w"> </span>hosts/vps-prod/stacks/komodo/compose.env
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>hosts/vps-prod/stacks/komodo/compose.env
+</code></pre></div>
+<p><strong>Vérif :</strong> le fichier <code>compose.env</code> contient des valeurs <strong>en clair</strong> (plus de <code>ENC[</code>).</p>
+<h3 id="9-bootstrapper-komodo-core-periphery-base">9. Bootstrapper Komodo (Core + Periphery + base)<a class="headerlink" href="#9-bootstrapper-komodo-core-periphery-base" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">cd</span><span class="w"> </span>/etc/komodo/homelab-infra/hosts/vps-prod/stacks/komodo
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+<p><strong>Vérif :</strong> <code>docker compose ps</code> montre <code>postgres</code>, <code>ferretdb</code>, <code>core</code>, <code>periphery</code> en route ; l'UI
+répond sur <code>http://&lt;hôte&gt;:9120</code> (ou via Tailscale). Connexion avec
+<code>KOMODO_INIT_ADMIN_USERNAME</code>/<code>KOMODO_INIT_ADMIN_PASSWORD</code> (issus du secret).</p>
+<h3 id="10-restaurer-la-base-komodo-quand-backup-hors-site-disponible">10. Restaurer la base Komodo <em>(quand backup hors-site disponible)</em><a class="headerlink" href="#10-restaurer-la-base-komodo-quand-backup-hors-site-disponible" title="Permanent link">&para;</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Étape non réalisable aujourd'hui (pas de backup hors-site)</p>
+<p>Tant que la Storage Box n'est pas alimentée, <strong>sauter cette étape</strong> : Komodo démarre vide et l'admin
+est recréé par les variables <code>KOMODO_INIT_ADMIN_*</code>. Quand un backup existera :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Récupérer le dossier de backup depuis la Storage Box vers /data/komodo/backups</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># puis restaurer avec la CLI Komodo (base cible vide impérativement)</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>-v<span class="w"> </span>/data/komodo/backups:/backups<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">KOMODO_CLI_DATABASE_TARGET_ADDRESS</span><span class="o">=</span>ferretdb:27017<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">KOMODO_CLI_DATABASE_TARGET_USERNAME</span><span class="o">=</span>&lt;db<span class="w"> </span>user&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">KOMODO_CLI_DATABASE_TARGET_PASSWORD</span><span class="o">=</span>&lt;db<span class="w"> </span>pass&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">KOMODO_CLI_DATABASE_TARGET_DB_NAME</span><span class="o">=</span>komodo<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span>ghcr.io/moghtech/komodo-cli<span class="w"> </span>km<span class="w"> </span>database<span class="w"> </span>restore<span class="w"> </span>-y
+</code></pre></div>
+<p>Voir <a href="https://komo.do/docs/setup/backup">Komodo — Backup and Restore</a>. Rappel : <code>restore</code> ne vide
+pas la base cible — restaurer dans une base vide.</p>
+</div>
+<h3 id="11-laisser-komodo-appliquer-le-resource-sync">11. Laisser Komodo appliquer le resource sync<a class="headerlink" href="#11-laisser-komodo-appliquer-le-resource-sync" title="Permanent link">&para;</a></h3>
+<p>Une fois Komodo en route, le <strong>resource sync <code>homelab-infra</code></strong> (défini dans <code>komodo/stacks.toml</code>)
+applique la configuration et déploie toutes les stacks <code>[[stack]]</code> du fichier — sur <code>vps-prod</code> :
+<code>acme-dns</code>, <code>traefik</code>, <code>portfolio</code>, <code>forgejo</code>, <code>whoami</code>, <code>smtp-relay</code>, <code>lldap</code>, <code>authelia</code> (ordre
+géré par les <code>after</code>). Les stacks du serveur <code>docker-vindiesel</code> (Immich) ne se déploient qu'une fois
+sa Periphery rattachée — voir <a href="../rattacher-hote-periphery/">Rattacher un hôte (Periphery)</a>.</p>
+<div class="admonition info">
+<p class="admonition-title">À compléter — déclenchement du 1er sync</p>
+<p>Préciser ici le geste exact réalisé au premier boot (création/validation du resource sync via l'UI
+Komodo, ou via la connexion du compte Git + token de lecture). C'est l'étape « manuelle » de
+démarrage du GitOps qui n'est pas auto-documentée par le dépôt.</p>
+</div>
+<p><strong>Vérif :</strong> dans l'UI Komodo, le sync est <em>in sync</em> ; <code>docker ps</code> montre les conteneurs des stacks
+<code>vps-prod</code> ci-dessus.</p>
+<h3 id="12-verifier-le-dns-et-obtenir-les-certificats">12. Vérifier le DNS et obtenir les certificats<a class="headerlink" href="#12-verifier-le-dns-et-obtenir-les-certificats" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Délégation chez Cloudflare : <code>NS acme.vindiesel.vip → acmens.vindiesel.vip</code> et
+   <code>A acmens.vindiesel.vip → 116.202.22.50</code> (voir <a href="../acme-dns/">acme-dns</a>).</li>
+<li>CNAME <code>_acme-challenge.*</code> vers le sous-domaine acme-dns généré (lisible dans <code>storage.json</code>).</li>
+<li>Enregistrements <code>A</code> des services : <code>auth.vindiesel.vip</code> (public) et <code>ldap.int.vindiesel.vip</code>
+   (VPN-only) en plus des noms déjà couverts par les wildcards — voir la table DNS complète dans
+   <a href="../authelia/">Authelia</a>.</li>
+</ol>
+<p><strong>Vérif :</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>dig<span class="w"> </span>+short<span class="w"> </span>NS<span class="w"> </span>acme.vindiesel.vip
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>dig<span class="w"> </span>+short<span class="w"> </span>A<span class="w"> </span>acmens.vindiesel.vip<span class="w">            </span><span class="c1"># -&gt; 116.202.22.50</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>docker<span class="w"> </span>logs<span class="w"> </span>traefik<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>acme<span class="w">       </span><span class="c1"># suivi de l&#39;obtention des certs</span>
+</code></pre></div>
+<h3 id="13-passer-lets-encrypt-en-production-quand-la-chaine-staging-est-validee">13. Passer Let's Encrypt en production <em>(quand la chaîne staging est validée)</em><a class="headerlink" href="#13-passer-lets-encrypt-en-production-quand-la-chaine-staging-est-validee" title="Permanent link">&para;</a></h3>
+<p>Voir <a href="../reverse-proxy-tls/">Reverse proxy &amp; TLS</a> : remplacer le <code>caserver</code> staging par
+<code>https://acme-v02.api.letsencrypt.org/directory</code>, supprimer l'ancien <code>acme.json</code> (certs staging),
+recréer un <code>acme.json</code> vide <code>600</code>, redéployer Traefik.</p>
+<p><strong>Vérif :</strong> un navigateur affiche un certificat valide (émis par Let's Encrypt, pas « staging »).</p>
+<h2 id="ordre-resume">Ordre résumé<a class="headerlink" href="#ordre-resume" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>1 hôte+Tailscale → 2 Docker (+ userland-proxy off) → 3 port 53 → 4 réseau frontend → 5 dossiers /data
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>→ 6 clé age → 7 clone repo → 8 sops -d compose.env → 9 docker compose up komodo
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>→ 10 restore DB (si backup) → 11 resource sync → 12 DNS + certs → 13 LE prod
+</code></pre></div>
+<hr />
+<p><strong>Sources :</strong> dépôt <code>homelab-infra</code> (compose, <code>komodo/stacks.toml</code>, <code>secrets/</code>, <code>.sops.yaml</code>) ·
+ancien <code>Infra-VPS/Scripts/preparation.sh</code> (méthode Docker/Tailscale) ·
+<a href="https://komo.do/docs/setup/backup">Komodo — Backup and Restore</a> ·
+<a href="https://tailscale.com/download">Tailscale — install</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Pied de page" >
+        
+          
+          <a href="../rattacher-hote-periphery/" class="md-footer__link md-footer__link--prev" aria-label="Précédent: Rattacher un hôte (Periphery)">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Précédent
+              </span>
+              <div class="md-ellipsis">
+                Rattacher un hôte (Periphery)
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Documentation interne — homelab-infra
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

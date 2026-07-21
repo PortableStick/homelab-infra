@@ -1,0 +1,1287 @@
+
+<!doctype html>
+<html lang="fr" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation opérationnelle de l'infrastructure auto-hébergée gérée par Komodo. Référentiel de configuration et procédures de restauration.">
+      
+      
+        <meta name="author" content="PortableStick">
+      
+      
+      
+        <link rel="prev" href="../pelican/">
+      
+      
+        <link rel="next" href="../rattacher-hote-periphery/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Obsidian LiveSync (CouchDB) - homelab-infra</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#obsidian-livesync-couchdb" class="md-skip">
+          Aller au contenu
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="En-tête">
+    <a href=".." title="homelab-infra" class="md-header__button md-logo" aria-label="homelab-infra" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            homelab-infra
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Obsidian LiveSync (CouchDB)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Passer en thème sombre"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Passer en thème sombre" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Passer en thème clair"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Passer en thème clair" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Recherche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initialisation de la recherche
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/PortableStick/homelab-infra" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PortableStick/homelab-infra
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="homelab-infra" class="md-nav__button md-logo" aria-label="homelab-infra" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    homelab-infra
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/PortableStick/homelab-infra" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PortableStick/homelab-infra
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../poste-travail-sops-age/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Poste de travail (SOPS/age)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../komodo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Komodo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reverse-proxy-tls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reverse proxy & TLS (Traefik)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acme-dns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acme-dns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../forgejo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forgejo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../portfolio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portfolio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authelia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authelia (SSO / 2FA)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../secrets-sops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Secrets (SOPS/age)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../securite-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sécurité & CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../procedures-planifiees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Procédures planifiées
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exposer-service-vpn-only/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exposer un service en VPN-only
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pelican/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pelican (Panel jeux)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Obsidian LiveSync (CouchDB)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Obsidian LiveSync (CouchDB)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#composants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-couchdb-localini" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration CouchDB (local.ini)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exposition-traefik-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exposition Traefik &amp; DNS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets-sopsage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets (SOPS/age)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploiement-komodo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Déploiement (Komodo)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-du-plugin-cote-obsidian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration du plugin (côté Obsidian)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depannage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dépannage
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rattacher-hote-periphery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rattacher un hôte (Periphery)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../restauration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restauration complète
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#composants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-couchdb-localini" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration CouchDB (local.ini)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exposition-traefik-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exposition Traefik &amp; DNS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets-sopsage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets (SOPS/age)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploiement-komodo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Déploiement (Komodo)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-du-plugin-cote-obsidian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration du plugin (côté Obsidian)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depannage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dépannage
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/PortableStick/homelab-infra/edit/main/docs/obsidian-livesync.md" title="Editer cette page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="obsidian-livesync-couchdb">Obsidian LiveSync (CouchDB)<a class="headerlink" href="#obsidian-livesync-couchdb" title="Permanent link">&para;</a></h1>
+<p>Synchronisation des coffres <a href="https://obsidian.md/">Obsidian</a> entre appareils via le plugin
+communautaire <a href="https://github.com/vrtmrz/obsidian-livesync">Self-hosted LiveSync</a>. Le plugin tourne
+<strong>côté clients</strong> (PC, mobile) : le seul composant serveur est un <strong>CouchDB</strong> dédié, exposé en
+<strong>public</strong> sur <code>obsidian.lucasmasse.net</code> (obligatoire pour la sync mobile hors du domicile). Déployé
+par Komodo sur l'hôte <strong><code>vps-prod</code></strong> (serveur <code>Local</code>) en GitOps.</p>
+<p>Sources : <code>hosts/vps-prod/stacks/obsidian-livesync/</code>, <code>secrets/vps/obsidian-livesync.env</code>,
+<code>komodo/stacks.toml</code>.</p>
+<h2 id="composants">Composants<a class="headerlink" href="#composants" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Image</th>
+<th>Rôle</th>
+<th>Exposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>couchdb</code></td>
+<td><code>couchdb:3.5.2@sha256:7feb744b…</code> (épinglée tag + digest)</td>
+<td>Base de sync (une base par coffre, créée par le plugin)</td>
+<td><code>obsidian.lucasmasse.net</code> (<strong>public</strong>), port interne <code>5984</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Réseau</strong> : <code>frontend</code> (externe), routé par le Traefik du VPS comme les autres services
+  <code>*.lucasmasse.net</code> — voir <a href="../reverse-proxy-tls/">Reverse proxy &amp; TLS</a>.</li>
+<li>
+<p><strong>Stockage</strong> : bind mount <code>/data/obsidian-livesync</code> → <code>/opt/couchdb/data</code> (convention <code>/data/&lt;stack&gt;</code>).
+  À créer avant le 1ᵉʳ déploiement, propriété de l'utilisateur CouchDB de l'image :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/data/obsidian-livesync<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">5984</span>:5984<span class="w"> </span>/data/obsidian-livesync
+</code></pre></div>
+</li>
+<li>
+<p><code>restart: unless-stopped</code>, <code>user: "5984:5984"</code> (utilisateur <code>couchdb</code> de l'image — <strong>ne pas retirer</strong>,
+  voir Dépannage).</p>
+</li>
+</ul>
+<h2 id="configuration-couchdb-localini">Configuration CouchDB (<code>local.ini</code>)<a class="headerlink" href="#configuration-couchdb-localini" title="Permanent link">&para;</a></h2>
+<p>Le fichier <code>hosts/vps-prod/stacks/obsidian-livesync/local.ini</code> est monté <strong>en lecture seule</strong> dans
+<code>/opt/couchdb/etc/local.d/</code>. Il applique les réglages <strong>requis par le plugin</strong> (repris de
+<a href="https://github.com/vrtmrz/obsidian-livesync/blob/main/utils/couchdb/local.ini"><code>utils/couchdb/local.ini</code></a>
+du dépôt vrtmrz) :</p>
+<table>
+<thead>
+<tr>
+<th>Réglage</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>single_node = true</code></td>
+<td>Mode mono-nœud (pas de cluster).</td>
+</tr>
+<tr>
+<td><code>require_valid_user = true</code> (<code>chttpd</code> + <code>chttpd_auth</code>)</td>
+<td><strong>Aucun accès anonyme</strong> — toute requête exige l'admin. C'est la seule barrière d'accès, il n'y a pas de forward-auth devant (voir plus bas).</td>
+</tr>
+<tr>
+<td><code>enable_cors</code> + section <code>[cors]</code></td>
+<td>Autorise les origines des clients Obsidian : <code>app://obsidian.md</code> (desktop) et <code>capacitor://localhost</code> (mobile). Sans ça, le plugin ne peut pas se connecter.</td>
+</tr>
+<tr>
+<td><code>max_document_size</code> / <code>max_http_request_size</code></td>
+<td>Limites relevées pour accepter les gros documents/chunks du plugin.</td>
+</tr>
+</tbody>
+</table>
+<p>L'admin (<code>COUCHDB_USER</code> / <code>COUCHDB_PASSWORD</code>, depuis le <code>.env</code> déchiffré) est écrit par l'entrypoint
+de l'image dans <code>local.d/docker.ini</code> au démarrage — c'est pour ça que <code>local.ini</code> peut rester en
+lecture seule.</p>
+<div class="admonition danger">
+<p class="admonition-title">Public, sans Authelia — c'est voulu</p>
+<p>Les clients Obsidian (desktop <strong>et</strong> mobile) parlent directement à l'API CouchDB en <strong>Basic auth</strong>.
+Un middleware forward-auth Authelia devant ce domaine <strong>casserait la synchronisation</strong> : ne pas en
+ajouter. La sécurité repose sur <code>require_valid_user = true</code> + mot de passe fort (SOPS), le TLS
+wildcard, et idéalement le <strong>chiffrement de bout en bout du plugin</strong> (passphrase E2E — le serveur
+ne voit alors que des blobs chiffrés). <strong>Activer l'E2E est fortement recommandé.</strong></p>
+</div>
+<h2 id="exposition-traefik-dns">Exposition Traefik &amp; DNS<a class="headerlink" href="#exposition-traefik-dns" title="Permanent link">&para;</a></h2>
+<p>Labels classiques dans <code>compose.yaml</code> (routeur <code>obsidian</code>, entrypoint <code>websecure</code>, <code>tls=true</code> — le
+wildcard <code>*.lucasmasse.net</code> déjà émis est servi, jamais de <code>certresolver</code> sur le routeur, cf.
+<a href="../reverse-proxy-tls/">Reverse proxy &amp; TLS</a>) :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.obsidian.rule=Host(`obsidian.lucasmasse.net`)&quot;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.obsidian.entrypoints=websecure&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.routers.obsidian.tls=true&quot;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;traefik.http.services.obsidian.loadbalancer.server.port=5984&quot;</span>
+</code></pre></div>
+<p><strong>DNS</strong> : créer l'enregistrement <code>obsidian.lucasmasse.net</code> → IP du VPS (comme <code>git.lucasmasse.net</code>),
+s'il n'existe pas déjà.</p>
+<div class="admonition warning">
+<p class="admonition-title">Jamais de proxy Cloudflare (nuage orange) sur ce domaine</p>
+<p>L'enregistrement doit être en <strong>« DNS only » (nuage gris)</strong>. Le proxy Cloudflare bufferise et coupe
+les connexions longues du flux <code>_changes</code> de CouchDB : la réplication manuelle passe, mais le mode
+<strong>LiveSync (temps réel) ne fonctionne pas</strong> (piège rencontré le 2026-07-21). Le TLS est de toute
+façon terminé par Traefik (wildcard Let's Encrypt), le proxy CF n'apporte rien ici.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">HTTPS valide obligatoire pour le mobile</p>
+<p>L'app Obsidian mobile (iOS surtout) refuse les connexions non-TLS ou en certificat auto-signé.
+Le wildcard Let's Encrypt production du VPS règle la question.</p>
+</div>
+<h2 id="secrets-sopsage">Secrets (SOPS/age)<a class="headerlink" href="#secrets-sopsage" title="Permanent link">&para;</a></h2>
+<p><code>secrets/vps/obsidian-livesync.env</code>, chiffré pour la clé age du dépôt (règle <code>secrets/vps/*.env</code>,
+cf. <a href="../secrets-sops/">Secrets</a>). Rendu en <code>.env</code> par le <code>pre_deploy</code> de Komodo, consommé par
+<code>env_file:</code> du service.</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COUCHDB_USER</code></td>
+<td>Admin CouchDB (aussi l'identifiant saisi dans le plugin).</td>
+</tr>
+<tr>
+<td><code>COUCHDB_PASSWORD</code></td>
+<td>Mot de passe associé.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deploiement-komodo">Déploiement (Komodo)<a class="headerlink" href="#deploiement-komodo" title="Permanent link">&para;</a></h2>
+<p>Entrée <code>[[stack]] obsidian-livesync</code> dans <code>komodo/stacks.toml</code> : <code>server = "Local"</code>,
+<code>after = ["traefik"]</code>, tags <code>["app"]</code>, <code>pre_deploy</code> SOPS (même mécanisme que les autres stacks) :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">[[stack]]</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;obsidian-livesync&quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># ...</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">file_paths</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;hosts/vps-prod/stacks/obsidian-livesync/compose.yaml&quot;</span><span class="p">]</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">pre_deploy</span><span class="p">.</span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;hosts/vps-prod/stacks/obsidian-livesync&quot;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">pre_deploy</span><span class="p">.</span><span class="n">command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;sops -d ../../../../secrets/vps/obsidian-livesync.env &gt; .env&quot;</span>
+</code></pre></div>
+<p><strong>Ordre :</strong> créer <code>/data/obsidian-livesync</code> (chown <code>5984:5984</code>) + l'enregistrement DNS, puis déployer
+via Komodo (le <code>pre_deploy</code> rend le <code>.env</code>, <code>after</code> garantit que <code>traefik</code> est up).</p>
+<p><strong>Vérification :</strong> <code>curl -u 'obsidian:…' https://obsidian.lucasmasse.net/_up</code> doit répondre
+<code>{"status":"ok"}</code>. Sans credentials, un <code>401</code> est <strong>normal</strong> (<code>require_valid_user</code>).</p>
+<h2 id="configuration-du-plugin-cote-obsidian">Configuration du plugin (côté Obsidian)<a class="headerlink" href="#configuration-du-plugin-cote-obsidian" title="Permanent link">&para;</a></h2>
+<p>Dans Obsidian → <em>Self-hosted LiveSync</em> → <strong>Setup wizard</strong> (ou <em>Remote configuration</em>) :</p>
+<ul>
+<li><strong>URI</strong> : <code>https://obsidian.lucasmasse.net</code> (sans port ni chemin)</li>
+<li><strong>Username / Password</strong> : les valeurs de <code>obsidian-livesync.env</code></li>
+<li><strong>Database name</strong> : au choix, ex. <code>obsidian</code> (une base <strong>par coffre</strong> — le plugin la crée tout seul)</li>
+<li><strong>End-to-end encryption</strong> : activer + passphrase (recommandé, cf. plus haut)</li>
+</ul>
+<p>Le bouton <strong>« Check database configuration »</strong> du plugin vérifie les réglages serveur ; tout doit être
+vert (les réglages sont déjà appliqués par <code>local.ini</code>). Pour rattacher les autres appareils, utiliser
+la <strong>Setup URI</strong> chiffrée générée par le premier appareil (<em>Copy setup URI</em>) plutôt que de tout
+ressaisir.</p>
+<h2 id="depannage">Dépannage<a class="headerlink" href="#depannage" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptôme</th>
+<th>Cause probable</th>
+<th>Correctif</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>401 Unauthorized</code> sur tout</td>
+<td>Normal sans credentials (<code>require_valid_user</code>)</td>
+<td>S'authentifier ; vérifier <code>COUCHDB_USER</code>/<code>COUCHDB_PASSWORD</code> du <code>.env</code> rendu</td>
+</tr>
+<tr>
+<td>Réplication manuelle OK mais <strong>LiveSync (temps réel) muet</strong></td>
+<td>Proxy Cloudflare (nuage orange) devant le domaine — il casse le flux <code>_changes</code> (les logs CouchDB montrent des IP clientes Cloudflare <code>104.x</code>/<code>172.x</code>)</td>
+<td>Passer l'enregistrement DNS en <strong>DNS only</strong> (nuage gris)</td>
+</tr>
+<tr>
+<td>Le plugin ne se connecte pas depuis le mobile mais OK sur PC</td>
+<td>CORS : origine <code>capacitor://localhost</code> manquante</td>
+<td>Vérifier la section <code>[cors]</code> de <code>local.ini</code> et que le fichier est bien monté</td>
+</tr>
+<tr>
+<td>« Check database configuration » signale des réglages manquants</td>
+<td><code>local.ini</code> non monté ou modifié</td>
+<td>Vérifier le bind mount <code>./local.ini:/opt/couchdb/etc/local.d/local.ini:ro</code> puis redéployer</td>
+</tr>
+<tr>
+<td>Erreurs sur gros fichiers / timeouts de sync</td>
+<td>Limites de taille trop basses</td>
+<td><code>max_document_size</code> / <code>max_http_request_size</code> dans <code>local.ini</code></td>
+</tr>
+<tr>
+<td>Disque qui gonfle avec le temps</td>
+<td>Révisions CouchDB accumulées</td>
+<td>Lancer une compaction (<code>POST /&lt;db&gt;/_compact</code>) ou utiliser <em>Rebuild everything</em> du plugin</td>
+</tr>
+<tr>
+<td>Conteneur en crash-loop au 1ᵉʳ boot</td>
+<td><code>/data/obsidian-livesync</code> absent ou mauvais propriétaire</td>
+<td><code>mkdir -p</code> + <code>chown -R 5984:5984</code> puis redéployer</td>
+</tr>
+<tr>
+<td>Crash-loop <code>exit 1</code> <strong>sans aucun log</strong></td>
+<td><code>user: "5984:5984"</code> retiré du compose : l'entrypoint (root) fait un <code>find … chown</code> sur <code>/opt/couchdb</code> qui échoue (<code>set -e</code>) à cause de <code>local.ini</code> monté en <code>:ro</code></td>
+<td>Remettre <code>user: "5984:5984"</code> (le bloc chown/gosu de l'entrypoint est alors sauté)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Sources :</strong> <code>hosts/vps-prod/stacks/obsidian-livesync/</code> (<code>compose.yaml</code>, <code>local.ini</code>),
+<code>secrets/vps/obsidian-livesync.env</code>, <code>komodo/stacks.toml</code> du dépôt ·
+<a href="https://github.com/vrtmrz/obsidian-livesync">Self-hosted LiveSync</a> ·
+<a href="https://github.com/vrtmrz/obsidian-livesync/blob/main/docs/setup_own_server.md">Setup CouchDB (doc du plugin)</a> ·
+<a href="https://docs.couchdb.org/en/stable/config/index.html">CouchDB — config reference</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Pied de page" >
+        
+          
+          <a href="../pelican/" class="md-footer__link md-footer__link--prev" aria-label="Précédent: Pelican (Panel jeux)">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Précédent
+              </span>
+              <div class="md-ellipsis">
+                Pelican (Panel jeux)
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../rattacher-hote-periphery/" class="md-footer__link md-footer__link--next" aria-label="Suivant: Rattacher un hôte (Periphery)">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Suivant
+              </span>
+              <div class="md-ellipsis">
+                Rattacher un hôte (Periphery)
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Documentation interne — homelab-infra
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
