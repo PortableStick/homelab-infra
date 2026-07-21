@@ -68,6 +68,12 @@ wildcard `*.lucasmasse.net` déjà émis est servi, jamais de `certresolver` sur
 **DNS** : créer l'enregistrement `obsidian.lucasmasse.net` → IP du VPS (comme `git.lucasmasse.net`),
 s'il n'existe pas déjà.
 
+!!! warning "Jamais de proxy Cloudflare (nuage orange) sur ce domaine"
+    L'enregistrement doit être en **« DNS only » (nuage gris)**. Le proxy Cloudflare bufferise et coupe
+    les connexions longues du flux `_changes` de CouchDB : la réplication manuelle passe, mais le mode
+    **LiveSync (temps réel) ne fonctionne pas** (piège rencontré le 2026-07-21). Le TLS est de toute
+    façon terminé par Traefik (wildcard Let's Encrypt), le proxy CF n'apporte rien ici.
+
 !!! note "HTTPS valide obligatoire pour le mobile"
     L'app Obsidian mobile (iOS surtout) refuse les connexions non-TLS ou en certificat auto-signé.
     Le wildcard Let's Encrypt production du VPS règle la question.
@@ -122,6 +128,7 @@ ressaisir.
 | Symptôme | Cause probable | Correctif |
 | --- | --- | --- |
 | `401 Unauthorized` sur tout | Normal sans credentials (`require_valid_user`) | S'authentifier ; vérifier `COUCHDB_USER`/`COUCHDB_PASSWORD` du `.env` rendu |
+| Réplication manuelle OK mais **LiveSync (temps réel) muet** | Proxy Cloudflare (nuage orange) devant le domaine — il casse le flux `_changes` (les logs CouchDB montrent des IP clientes Cloudflare `104.x`/`172.x`) | Passer l'enregistrement DNS en **DNS only** (nuage gris) |
 | Le plugin ne se connecte pas depuis le mobile mais OK sur PC | CORS : origine `capacitor://localhost` manquante | Vérifier la section `[cors]` de `local.ini` et que le fichier est bien monté |
 | « Check database configuration » signale des réglages manquants | `local.ini` non monté ou modifié | Vérifier le bind mount `./local.ini:/opt/couchdb/etc/local.d/local.ini:ro` puis redéployer |
 | Erreurs sur gros fichiers / timeouts de sync | Limites de taille trop basses | `max_document_size` / `max_http_request_size` dans `local.ini` |
