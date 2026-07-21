@@ -1,0 +1,25 @@
+services:
+  couchdb:
+    image: couchdb:3.5.2@sha256:7feb744b60195233219f3fa801cbc2384efa24b28c76a5d1f3e93efe6557f921
+    container_name: obsidian-couchdb
+    restart: unless-stopped
+    # .env rendu par pre_deploy (sops -d) déclaré dans komodo/stacks.toml.
+    env_file: .env
+    volumes:
+      # Réglages requis par Obsidian LiveSync (CORS, require_valid_user, tailles max).
+      - ./local.ini:/opt/couchdb/etc/local.d/local.ini:ro
+      - /data/obsidian-livesync:/opt/couchdb/data
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=frontend"
+      - "traefik.http.routers.obsidian.rule=Host(`obsidian.lucasmasse.net`)"
+      - "traefik.http.routers.obsidian.entrypoints=websecure"
+      - "traefik.http.routers.obsidian.tls=true"
+      - "traefik.http.services.obsidian.loadbalancer.server.port=5984"
+
+networks:
+  frontend:
+    name: frontend
+    external: true

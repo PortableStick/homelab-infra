@@ -77,5 +77,6 @@ nav:
   - Procédures planifiées: procedures-planifiees.md
   - Exposer un service en VPN-only: exposer-service-vpn-only.md
   - Pelican (Panel jeux): pelican.md
+  - Obsidian LiveSync (CouchDB): obsidian-livesync.md
   - Rattacher un hôte (Periphery): rattacher-hote-periphery.md
   - Restauration complète: restauration.md

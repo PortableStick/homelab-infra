@@ -72,6 +72,7 @@ Concrètement :
 - **[Sécurité & CI](securite-ci.md)** — gitleaks, hook pre-commit.
 - **[Procédures planifiées](procedures-planifiees.md)** — tâches automatiques de Komodo.
 - **[Exposer un service en VPN-only](exposer-service-vpn-only.md)** — pattern d'accès privé via Tailscale.
+- **[Obsidian LiveSync (CouchDB)](obsidian-livesync.md)** — sync des coffres Obsidian (`obsidian.lucasmasse.net`, **public**).
 - **[Restauration complète](restauration.md)** — remonter l'infra depuis un VPS nu.
 
 !!! note "Sources"

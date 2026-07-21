@@ -220,6 +220,20 @@ pre_deploy.path = "hosts/vindiesel/stacks/mangetout"
 pre_deploy.command = "sops -d ../../../../secrets/vindiesel/mangetout.env > .env"
 
 [[stack]]
+name = "obsidian-livesync"
+description = "CouchDB pour Obsidian LiveSync - public"
+deploy = true
+after = ["traefik"]
+tags = ["app"]
+[stack.config]
+server = "Local"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vps-prod/stacks/obsidian-livesync/compose.yaml"]
+pre_deploy.path = "hosts/vps-prod/stacks/obsidian-livesync"
+pre_deploy.command = "sops -d ../../../../secrets/vps/obsidian-livesync.env > .env"
+
+[[stack]]
 name = "pelican"
 description = "Pelican Panel (jeux) - VPN-only"
 deploy = true
