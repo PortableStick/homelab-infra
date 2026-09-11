@@ -212,6 +212,7 @@ consommé par PocketBase de la stack [mangetout](mangetout.md) :
 
 | Symptôme | Cause | Correctif |
 | --- | --- | --- |
+| Une nouvelle règle `access_control` reste sans effet : `403` au lieu d'une redirection vers le portail | Le conteneur tourne encore sur l'ancien `configuration.yaml` — le bind mount de fichier a capturé l'inode que `git` a remplacé | `docker compose up -d --force-recreate` ; vérifier avec `docker exec authelia grep -c '<domaine>' /config/configuration.yml` (voir [Komodo](komodo.md)) |
 | lldap crée l'admin sous `admin` au lieu du nom voulu ; bind Authelia en échec (`LDAP Result Code 49 "Invalid Credentials"`) | `LLDAP_LDAP_USER_NAME` n'existe pas côté lldap (variable ignorée) | utiliser `LLDAP_LDAP_USER_DN` pour fixer le nom de l'admin |
 | Notification mail Authelia/Brevo en échec : `535 5.7.8 Authentication failed` | `RELAYHOST_PASSWORD` = mot de passe du compte Brevo au lieu de la **clé SMTP** | `RELAYHOST_USERNAME` = login SMTP (`xxxxx@smtp-brevo.com`), `RELAYHOST_PASSWORD` = clé SMTP Brevo (`xsmtpsib-…`) |
 | `535` persiste après correction de la clé SMTP | `boky/postfix` écrit `/etc/postfix/sasl_passwd` sur un **volume anonyme persistant** : les lignes s'accumulent à chaque démarrage et l'ancienne valeur gagne au lookup `postmap` | `docker compose down -v` puis redéployer, pour repartir d'un `sasl_passwd` vierge |

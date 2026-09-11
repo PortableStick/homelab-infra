@@ -106,8 +106,9 @@ sops -d secrets/vps/komodo.env > hosts/vps-prod/stacks/komodo/compose.env
 
 Ce fichier est la **source de vérité** que Komodo applique. Il déclare :
 
-- **Serveurs** : `Local` (Periphery conteneurisée, même hôte que le Core) et `docker-vindiesel`
-  (Periphery binaire+systemd distante, voir [Rattacher un hôte](rattacher-hote-periphery.md)).
+- **Serveurs** : `Local` (Periphery conteneurisée, même hôte que le Core), `docker-vindiesel` et
+  `docker-tyron` (Periphery binaire+systemd distantes, voir
+  [Rattacher un hôte](rattacher-hote-periphery.md)).
 - **Repo `homelab-infra`** lié à `PortableStick/homelab-infra`, builder `Local`.
 - **Builder `Local`** de type `Server`.
 - **Resource sync `homelab-infra`** : `linked_repo = "homelab-infra"`,
@@ -119,9 +120,41 @@ Ce fichier est la **source de vérité** que Komodo applique. Il déclare :
       `traefik-vindiesel`, serveur `docker-vindiesel`).
     - `auth` : `lldap`, `authelia` (après `traefik`, `lldap`, `smtp-relay`).
     - `infra` : `smtp-relay`.
+    - `tyron` : `traefik-tyron`, puis `seedbox`, `jellyfin` et `filestash` (voir
+      [Seedbox](seedbox.md), [Jellyfin](jellyfin.md), [Filestash](filestash.md)).
     - Chaque stack pointe vers son `compose.yaml` dans `hosts/<serveur>/stacks/...` ; celles avec un
       secret chiffré déclarent un `pre_deploy.command = "sops -d ... > .env"`.
 - Trois **procédures planifiées** (voir page dédiée).
+
+!!! danger "Modifier un fichier de config bind-monté ne suffit pas : recréer le conteneur"
+    Plusieurs stacks montent un **fichier** (et non un répertoire) depuis le dépôt :
+
+    - `authelia` → `./configuration.yaml:/config/configuration.yml:ro`
+    - `obsidian-livesync` → `./local.ini:/opt/couchdb/etc/local.d/local.ini:ro`
+
+    Un bind mount de fichier capture l'**inode**. Or `git` ne modifie pas un fichier en place :
+    il en écrit un nouveau et le renomme par-dessus — **nouvel inode**. Le conteneur reste donc
+    accroché à l'ancienne version, indéfiniment. Un `docker compose up -d` ne le recrée pas non
+    plus, puisque sa définition n'a pas changé : **le déploiement réussit et ne change rien**.
+
+    Symptôme vécu le 2026-09-11 : de nouvelles règles `access_control` ajoutées à Authelia,
+    déploiement Komodo en succès, et pourtant `403` sur les domaines concernés (chute sur
+    `default_policy: deny`). Diagnostic en une commande — comparer hôte et conteneur :
+
+    ```bash
+    grep -c "seedbox.vindiesel.vip" /etc/komodo/stacks/authelia/hosts/vps-prod/stacks/authelia/configuration.yaml
+    docker exec authelia grep -c "seedbox.vindiesel.vip" /config/configuration.yml
+    ```
+
+    Des valeurs différentes confirment le problème. Correctif :
+
+    ```bash
+    cd /etc/komodo/stacks/authelia/hosts/vps-prod/stacks/authelia
+    docker compose up -d --force-recreate
+    ```
+
+    Les montages de **répertoire** (`./dynamic:/dynamic:ro` de Traefik) ne sont pas concernés :
+    le répertoire garde son inode, seuls les fichiers à l'intérieur changent.
 
 !!! danger "`delete = true` sur le resource sync"
     Avec `delete = true`, toute ressource gérée par Komodo qui **n'est plus** dans `stacks.toml` est
@@ -161,6 +194,7 @@ services:
 | --- | --- | --- |
 | `pre_deploy` échoue : `sops: command not found` (stacks `lldap`/`authelia`/`smtp-relay`, serveur `Local`) | L'image `komodo-periphery` n'embarque pas `sops` | Monter le binaire `sops` de l'hôte + `SOPS_AGE_KEY_FILE` sur le service `periphery` (déjà fait dans `hosts/vps-prod/stacks/komodo/compose.yaml`) |
 | Page de login Komodo affichée **sans aucun champ** à remplir | `KOMODO_HOST` ne correspond pas au domaine réellement routé par Traefik (`komodo.int.vindiesel.vip`) : le frontend appelle une URL non routée | Aligner `KOMODO_HOST` sur le `Host()` du label Traefik de `core` |
+| Un changement de `configuration.yaml` (Authelia) ou `local.ini` (CouchDB) n'a aucun effet, déploiement en succès | Bind mount de **fichier** : `git` remplace le fichier (nouvel inode), le conteneur reste sur l'ancien | `docker compose up -d --force-recreate` dans le répertoire de la stack (voir § GitOps) |
 | Après un `docker compose up`, le conteneur ne voit pas les variables attendues | Confusion entre `--env-file` (CLI) et `env_file:` (compose) : `--env-file` ne sert **qu'à** l'interpolation `${...}` dans le YAML, ce n'est pas lui qui injecte les variables dans le conteneur | Vérifier que le fichier déclaré par `env_file:` dans le `compose.yaml` (`compose.env` pour `core`/`periphery`, `.env` pour les autres stacks) existe bien et est à jour — c'est lui qui compte pour le conteneur |
 
 ---
