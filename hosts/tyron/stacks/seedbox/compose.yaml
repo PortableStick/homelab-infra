@@ -10,6 +10,15 @@ services:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
+    # Le tunnel est IPv4 uniquement (WIREGUARD_ADDRESSES ne porte que 10.2.0.2/32).
+    # Sans ça, le résolveur renvoie des AAAA, et les clients .NET (Prowlarr, Sonarr)
+    # tentent l'IPv6 en premier puis abandonnent sur
+    #   « The SSL connection could not be established »
+    # — sans jamais basculer en IPv4, contrairement à curl. On coupe donc l'IPv6
+    # dans l'espace de noms réseau partagé par toute la stack.
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+      - net.ipv6.conf.default.disable_ipv6=1
     networks:
       - proxy
     environment:
