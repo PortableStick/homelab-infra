@@ -22,5 +22,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
 networks:
+  # external: true — le réseau est créé une fois par scripts/bootstrap-tyron.sh, comme
+  # `frontend` sur le VPS. Sans ça, Compose voudrait le créer et le posséder : le deploy
+  # échoue avec « network proxy was found but has incorrect label » dès que le réseau
+  # préexiste, et un `compose down` sur Traefik le supprimerait sous les pieds des
+  # autres stacks (seedbox, jellyfin, filestash) qui, elles, le déclarent externe.
   proxy:
     name: proxy
+    external: true
