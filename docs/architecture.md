@@ -2,21 +2,21 @@
 
 ## Hôtes
 
-Deux hôtes, deux serveurs Komodo distincts (`komodo/stacks.toml`) :
+Trois hôtes, trois serveurs Komodo distincts (`komodo/stacks.toml`) :
 
-| Élément | `vps-prod` (serveur `Local`) | `vindiesel` (serveur `docker-vindiesel`) |
-| --- | --- | --- |
-| Rôle | Core + Periphery Komodo, edge public (Traefik, acme-dns), Forgejo, portfolio, stack auth | Periphery distante rattachée au Core, hébergement Immich (2 instances) derrière un Traefik maison |
-| Fournisseur | VPS Hetzner | machine personnelle (« maison ») |
-| OS | Ubuntu Server | indiqué par l'opérateur |
-| Adresse | IP publique `116.202.22.50` | jointe via Tailscale (`https://100.65.11.58:8120` pour la Periphery) |
-| Moteur conteneurs | Docker + Docker Compose | Docker + Docker Compose |
-| Réseau Docker externe | `frontend` | `proxy` |
+| Élément | `vps-prod` (serveur `Local`) | `vindiesel` (serveur `docker-vindiesel`) | `tyron` (serveur `docker-tyron`) |
+| --- | --- | --- | --- |
+| Rôle | Core + Periphery Komodo, edge public (Traefik, acme-dns), Forgejo, portfolio, stack auth | Periphery distante rattachée au Core, hébergement Immich (2 instances) derrière un Traefik maison | Periphery distante, seedbox (rTorrent derrière ProtonVPN), Jellyfin, Filestash |
+| Fournisseur | VPS Hetzner | machine personnelle (« maison ») | VM Docker sur l'hôte Proxmox `tyron` (« maison ») |
+| OS | Ubuntu Server | indiqué par l'opérateur | Debian 13 (trixie) |
+| Adresse | IP publique `116.202.22.50` | jointe via Tailscale (`https://100.65.11.58:8120` pour la Periphery) | jointe via Tailscale (`https://100.92.25.102:8120` pour la Periphery), LAN `192.168.1.21` |
+| Moteur conteneurs | Docker + Docker Compose | Docker + Docker Compose | Docker + Docker Compose |
+| Réseau Docker externe | `frontend` | `proxy` | `proxy` |
 
-*(Source : `komodo/stacks.toml`, `hosts/vps-prod/`, `hosts/vindiesel/`.)* Le rattachement d'un nouvel
+*(Source : `komodo/stacks.toml`, `hosts/vps-prod/`, `hosts/vindiesel/`, `hosts/tyron/`.)* Le rattachement d'un nouvel
 hôte Periphery suit une procédure documentée : voir [Rattacher un hôte (Periphery)](rattacher-hote-periphery.md).
-Cette page se concentre sur `vps-prod`, seul hôte ayant une documentation dédiée par service pour
-l'instant ; `vindiesel` (Traefik maison + Immich) n'a pas encore de page dédiée.
+`vindiesel` (Traefik maison + Immich) n'a pas encore de page dédiée ; `tyron` est documenté par
+service : [Seedbox](seedbox.md), [Jellyfin](jellyfin.md), [Filestash](filestash.md).
 
 !!! note "Komodo : serveur « Local »"
     Dans `homelab-infra`, le serveur qui porte le Core Komodo s'appelle **`Local`**
@@ -48,8 +48,9 @@ docker network create frontend
 *(Source : `hosts/vps-prod/stacks/*/compose.yaml`. La commande de création est la commande Docker
 standard pour un réseau externe.)*
 
-Sur `vindiesel`, l'équivalent est le réseau externe `proxy` (`hosts/vindiesel/stacks/traefik/compose.yaml`),
-propre à cet hôte — les deux réseaux ne communiquent pas entre eux.
+Sur `vindiesel` **et** sur `tyron`, l'équivalent est un réseau externe `proxy`
+(`hosts/vindiesel/stacks/traefik/compose.yaml`, `hosts/tyron/stacks/traefik/compose.yaml`), propre à
+chaque hôte — ces réseaux ne communiquent pas entre eux malgré leur nom identique.
 
 ## Domaines & DNS
 
@@ -105,6 +106,10 @@ l'hôte lors d'une restauration.
 | `/var/run/docker.sock` | `/var/run/docker.sock` | Traefik (ro) et Komodo Periphery | `traefik/` et `komodo/compose.yaml` |
 | `/data/authelia` | `/data` | Authelia (base SQLite, clé de signature OIDC) | `authelia/compose.yaml` |
 | `/data/lldap` | `/data` | lldap (annuaire) | `lldap/compose.yaml` |
+| `/srv/seedbox` | `/data`, `/downloads`, `/passwd` | seedbox — **disque dédié de 700 Go** (`/dev/sdb`) monté par UUID sur `tyron` | `tyron/stacks/seedbox/compose.yaml` |
+| `/data/seedbox/gluetun` | `/gluetun` | gluetun (état VPN, port forwardé) | `tyron/stacks/seedbox/compose.yaml` |
+| `/data/jellyfin/{config,cache}` | `/config`, `/cache` | Jellyfin (base + transcodage) | `tyron/stacks/jellyfin/compose.yaml` |
+| `/data/filestash` | `/app/data/state` | Filestash (config, mot de passe admin) | `tyron/stacks/filestash/compose.yaml` |
 
 Komodo utilise par ailleurs des **volumes Docker nommés** (`postgres-data`, `ferretdb-state`, `keys`)
 et deux chemins paramétrés par variables (`${COMPOSE_KOMODO_BACKUPS_PATH}` pour les sauvegardes,

@@ -27,7 +27,8 @@ Concrètement :
       `*.int.vindiesel.vip` via Traefik (v3.7.6) + acme-dns, en Let's Encrypt **production**. Émission
       pilotée par un routeur générateur dédié (voir [Reverse proxy & TLS](reverse-proxy-tls.md)).
     - **Services applicatifs déployés** : [Forgejo](forgejo.md) (forge Git), [portfolio](portfolio.md)
-      (site Astro public) et Immich (photos, deux instances sur l'hôte `vindiesel`).
+      (site Astro public), Immich (photos, deux instances sur l'hôte `vindiesel`) et la
+      [seedbox](seedbox.md) + [Jellyfin](jellyfin.md) + [Filestash](filestash.md) sur l'hôte `tyron`.
     - **Authentification centralisée** : [Authelia](authelia.md) (SSO/2FA, portail public
       `auth.vindiesel.vip`) protège Komodo — connecté en OIDC — et sert de forward-auth pour les
       futurs services. Backend lldap (VPN-only), mails via smtp-relay (→ Brevo).
@@ -42,14 +43,14 @@ Concrètement :
     2. **Le bootstrap initial de Komodo lui-même reste manuel.** Komodo n'existe pas encore au moment de
        son propre premier déploiement : son `.env` est rendu **à la main** (`scripts/bootstrap.sh`), une
        seule fois. Les autres stacks (`authelia`, `lldap`, `smtp-relay`, `immich-1`, `immich-2`,
-       `mangetout`, `pelican`), elles, déchiffrent leur secret **automatiquement** via le `pre_deploy`
+       `mangetout`, `pelican`, `seedbox`), elles, déchiffrent leur secret **automatiquement** via le `pre_deploy`
        de `komodo/stacks.toml` à chaque déploiement. Voir [Secrets (SOPS/age)](secrets-sops.md).
 
 ## Conventions du dépôt
 
 | Chemin | Rôle |
 | --- | --- |
-| `hosts/<hôte>/stacks/<nom>/` | Fichiers `compose.yaml` (et configs) d'une stack, rangés par hôte. Deux hôtes actuels : `vps-prod` (serveur Komodo `Local`) et `vindiesel` (serveur `docker-vindiesel`, Periphery distante — voir [Rattacher un hôte](rattacher-hote-periphery.md)). |
+| `hosts/<hôte>/stacks/<nom>/` | Fichiers `compose.yaml` (et configs) d'une stack, rangés par hôte. Trois hôtes actuels : `vps-prod` (serveur Komodo `Local`), `vindiesel` (serveur `docker-vindiesel`) et `tyron` (serveur `docker-tyron`), les deux derniers étant des Periphery distantes — voir [Rattacher un hôte](rattacher-hote-periphery.md). |
 | `komodo/stacks.toml` | Déclaration Komodo : serveur, repo lié, resource sync, procédures planifiées, builder, et les stacks à déployer. |
 | `secrets/<hôte>/*.env` | Secrets **chiffrés** SOPS/age. Jamais en clair dans Git. |
 | `.sops.yaml` | Règles de chiffrement SOPS (quels chemins, quelle clé age). |
@@ -75,6 +76,9 @@ Concrètement :
 - **[Pelican (Panel jeux)](pelican.md)** — panel de serveurs de jeu (Wings sur `mc-wings`).
 - **[Mangetout (PocketBase + IA)](mangetout.md)** — backend d'app mobile **public** (PocketBase + proxy IA).
 - **[Obsidian LiveSync (CouchDB)](obsidian-livesync.md)** — sync des coffres Obsidian (`obsidian.lucasmasse.net`, **public**).
+- **[Seedbox (rTorrent + VPN)](seedbox.md)** — rTorrent/ruTorrent derrière ProtonVPN sur l'hôte `tyron`.
+- **[Jellyfin](jellyfin.md)** — médiathèque lisant les téléchargements (`jellyfin.vindiesel.vip`).
+- **[Filestash](filestash.md)** — gestionnaire de fichiers du disque seedbox (`filestash.vindiesel.vip`).
 - **[Restauration complète](restauration.md)** — remonter l'infra depuis un VPS nu.
 
 !!! note "Sources"

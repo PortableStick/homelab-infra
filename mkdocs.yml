@@ -79,5 +79,8 @@ nav:
   - Pelican (Panel jeux): pelican.md
   - Mangetout (PocketBase + IA): mangetout.md
   - Obsidian LiveSync (CouchDB): obsidian-livesync.md
+  - Seedbox (rTorrent + VPN): seedbox.md
+  - Jellyfin: jellyfin.md
+  - Filestash: filestash.md
   - Rattacher un hôte (Periphery): rattacher-hote-periphery.md
   - Restauration complète: restauration.md
