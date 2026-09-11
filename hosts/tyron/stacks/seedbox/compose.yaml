@@ -46,8 +46,13 @@ services:
       # les labels Traefik. TLS + forward-auth Authelia sont assurés côté VPS.
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
+      # Le `.service=` explicite est OBLIGATOIRE dès qu'un conteneur porte plus
+      # d'un service : Traefik refuse alors de deviner et laisse le routeur mort
+      # (« Router seedbox cannot be linked automatically with multiple Services »),
+      # ce qui se traduit par un 404 sur le domaine.
       - "traefik.http.routers.seedbox.rule=Host(`seedbox.vindiesel.vip`)"
       - "traefik.http.routers.seedbox.entrypoints=web"
+      - "traefik.http.routers.seedbox.service=seedbox"
       - "traefik.http.services.seedbox.loadbalancer.server.port=8080"
       # Sonarr et Prowlarr partagent cette pile réseau : leurs routeurs vivent
       # donc aussi sur ce conteneur, chacun vers son port.
