@@ -1,0 +1,42 @@
+## Routes vers l'hote tyron (VM Docker seedbox), joint par le tunnel Tailscale.
+## Le TLS est termine ici (wildcard *.vindiesel.vip) ; le trafic repart en HTTP
+## dans le tailnet vers le Traefik local de la VM, qui dispatche par Host:.
+http:
+  routers:
+    ## ruTorrent : PUBLIC mais derriere le forward-auth Authelia (2FA).
+    seedbox:
+      rule: "Host(`seedbox.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-tyron
+      middlewares:
+        - authelia@docker
+      tls: {}
+
+    ## Filestash : PUBLIC mais derriere le forward-auth Authelia (2FA).
+    filestash:
+      rule: "Host(`filestash.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-tyron
+      middlewares:
+        - authelia@docker
+      tls: {}
+
+    ## Jellyfin : PUBLIC sans forward-auth. Les applications mobile / TV / console
+    ## ne savent pas traverser le portail Authelia (pas de navigateur) : le
+    ## middleware casserait tous les clients hors navigateur. L'authentification
+    ## est celle de Jellyfin. Voir docs/jellyfin.md.
+    jellyfin:
+      rule: "Host(`jellyfin.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-tyron
+      tls: {}
+
+  services:
+    home-tyron:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://100.92.25.102:80"

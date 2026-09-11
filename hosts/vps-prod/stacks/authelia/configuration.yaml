@@ -91,6 +91,13 @@ access_control:
     ## Futurs services *.int.vindiesel.vip protégés par le middleware forward-auth.
     - domain: '*.int.vindiesel.vip'
       policy: 'two_factor'
+    ## Seedbox (hôte tyron) : services publics mais réservés à l'opérateur.
+    ## Jellyfin n'est PAS listé : il n'a pas de middleware forward-auth devant lui
+    ## (les apps mobile/TV ne savent pas passer le portail) — voir docs/jellyfin.md.
+    - domain: 'seedbox.vindiesel.vip'
+      policy: 'two_factor'
+    - domain: 'filestash.vindiesel.vip'
+      policy: 'two_factor'
 
 ##
 ## Sessions. Le cookie est posé sur vindiesel.vip → couvre tous les
