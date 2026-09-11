@@ -86,7 +86,23 @@ mkdir -p /data/seedbox/gluetun /data/jellyfin/config /data/jellyfin/cache /data/
 # « FATAL ERROR - stat /app/data/state/log: no such file or directory ».
 chown -R "${PUID}:${PGID}" /data/jellyfin /data/filestash
 
-# --- 4. réseau Docker externe ----------------------------------------------
+# --- 4. bind sur l'IP tailnet au démarrage ----------------------------------
+# Traefik publie son port sur l'IP Tailscale (100.x). Or Docker démarre ses
+# conteneurs AVANT que tailscaled ait monté tailscale0 : le bind échoue avec
+#   failed to bind host port 100.x.x.x:80/tcp: cannot assign requested address
+# Docker abandonne (exit 128) et `restart: unless-stopped` ne rattrape pas ce
+# cas — le routage des trois services reste mort jusqu'à une intervention.
+# ip_nonlocal_bind autorise le bind sur une adresse pas encore assignée, ce qui
+# rend le démarrage indépendant de l'ordre entre Docker et Tailscale.
+log "sysctl : autoriser le bind sur une IP pas encore assignée"
+cat > /etc/sysctl.d/99-nonlocal-bind.conf <<'EOF'
+# Traefik publie sur l'IP Tailscale, qui n'existe pas encore quand Docker démarre.
+# Sans ça : « cannot assign requested address » à chaque redémarrage de l'hôte.
+net.ipv4.ip_nonlocal_bind = 1
+EOF
+sysctl -q -p /etc/sysctl.d/99-nonlocal-bind.conf
+
+# --- 5. réseau Docker externe ----------------------------------------------
 if docker network inspect proxy >/dev/null 2>&1; then
   log "Réseau Docker 'proxy' déjà présent"
 else
