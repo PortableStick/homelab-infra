@@ -100,8 +100,8 @@ Le mécanisme mis en place :
 3. À chaque négociation, gluetun exécute `VPN_PORT_FORWARDING_UP_COMMAND`, qui appelle le script
    versionné `set-rtorrent-port.sh` avec le port en argument.
 4. Le script pousse le port dans rTorrent **à chaud** via son API XMLRPC
-   (`network.port_range.set`), joignable sur `127.0.0.1:8000` puisque les deux conteneurs partagent
-   la même pile réseau.
+   (`network.port_range.set`), joignable sur `127.0.0.1` puisque les deux conteneurs partagent la
+   même pile réseau.
 
 ```yaml
 VPN_PORT_FORWARDING_UP_COMMAND: "/bin/sh /gluetun/set-rtorrent-port.sh {{PORTS}}"
@@ -109,6 +109,14 @@ VPN_PORT_FORWARDING_UP_COMMAND: "/bin/sh /gluetun/set-rtorrent-port.sh {{PORTS}}
 
 Le script retente 20 fois toutes les 6 s : au démarrage, gluetun obtient son port bien avant que
 rTorrent ait fini de démarrer, et sans cette boucle le premier réglage serait perdu.
+
+!!! warning "Viser le port 8001, pas le 8000"
+    Dans l'image `crazymax/rtorrent-rutorrent`, le serveur nginx du port XMLRPC (`8000`) impose
+    **toujours** un `auth_basic` sur `/passwd/rpc.htpasswd` — fichier qu'on laisse volontairement
+    vide puisque l'authentification est faite par Authelia. Une requête XMLRPC sur `8000`
+    échouerait donc en erreur d'authentification. L'image expose en parallèle un second serveur
+    sur `XMLRPC_PORT + 1` (donc **`8001`**), **sans auth** et limité à `127.0.0.1`, qui sert à son
+    propre healthcheck et donne accès au même socket SCGI. C'est celui-là que le script utilise.
 
 !!! note "`RT_INC_PORT: 50000` n'est qu'un repli"
     C'est le port d'écoute tant que NAT-PMP n'a rien attribué. Il n'est **pas** routé par Proton :
