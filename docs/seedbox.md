@@ -77,6 +77,24 @@ rTorrent continue de seeder son fichier, Jellyfin lit une arborescence propre.
     fichiers **renommés**, seuls exploitables par le détecteur de Jellyfin. `complete/` garde les
     noms de release bruts.
 
+### Tout se parle en `127.0.0.1` — pas par nom de conteneur
+
+!!! warning "`Name does not resolve (seedbox_sonarr:8989)`"
+    Les services qui partagent la pile de gluetun **n'ont aucun nom DNS Docker**. Le résolveur
+    interne de Docker ne connaît que les conteneurs attachés à un réseau ; ceux-ci n'en ont pas,
+    ils empruntent celui de gluetun. Saisir `http://seedbox_sonarr:8989` échoue donc toujours.
+
+    Ils sont en revanche tous sur la **même boucle locale** :
+
+    | À renseigner | Valeur |
+    | --- | --- |
+    | Prowlarr → *Apps → Sonarr* → Sonarr Server | `http://127.0.0.1:8989` |
+    | Prowlarr → *Apps → Sonarr* → Prowlarr Server | `http://127.0.0.1:9696` |
+    | Sonarr → *Download Clients → rTorrent* | `127.0.0.1`, port `8001` |
+
+    C'est la contrepartie de l'architecture — et sa raison d'être : aucune de leurs requêtes ne
+    peut emprunter un autre chemin que le tunnel.
+
 ### Connexion de Sonarr à rTorrent
 
 Dans Sonarr → *Settings → Download Clients → rTorrent* :
