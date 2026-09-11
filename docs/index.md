@@ -24,7 +24,7 @@ Concrètement :
 
 !!! success "En place et fonctionnel"
     - **HTTPS valide en production** : certificats wildcard `*.lucasmasse.net`, `*.vindiesel.vip` et
-      `*.int.vindiesel.vip` via Traefik (v3.6) + acme-dns, en Let's Encrypt **production**. Émission
+      `*.int.vindiesel.vip` via Traefik (v3.7.6) + acme-dns, en Let's Encrypt **production**. Émission
       pilotée par un routeur générateur dédié (voir [Reverse proxy & TLS](reverse-proxy-tls.md)).
     - **Services applicatifs déployés** : [Forgejo](forgejo.md) (forge Git), [portfolio](portfolio.md)
       (site Astro public) et Immich (photos, deux instances sur l'hôte `vindiesel`).
@@ -41,9 +41,9 @@ Concrètement :
        hors-site, mais **rien n'y est encore copié**. Voir [Restauration complète](restauration.md).
     2. **Le bootstrap initial de Komodo lui-même reste manuel.** Komodo n'existe pas encore au moment de
        son propre premier déploiement : son `.env` est rendu **à la main** (`scripts/bootstrap.sh`), une
-       seule fois. Les autres stacks (`authelia`, `lldap`, `smtp-relay`, `immich-1`, `immich-2`), elles,
-       déchiffrent leur secret **automatiquement** via le `pre_deploy` de `komodo/stacks.toml` à chaque
-       déploiement. Voir [Secrets (SOPS/age)](secrets-sops.md).
+       seule fois. Les autres stacks (`authelia`, `lldap`, `smtp-relay`, `immich-1`, `immich-2`,
+       `mangetout`, `pelican`), elles, déchiffrent leur secret **automatiquement** via le `pre_deploy`
+       de `komodo/stacks.toml` à chaque déploiement. Voir [Secrets (SOPS/age)](secrets-sops.md).
 
 ## Conventions du dépôt
 
@@ -55,7 +55,7 @@ Concrètement :
 | `.sops.yaml` | Règles de chiffrement SOPS (quels chemins, quelle clé age). |
 | `.gitleaks.toml` + `.github/workflows/gitleaks.yml` | Scan anti-fuite de secrets (CI + local). |
 | `.githooks/pre-commit` | Refuse le commit d'un secret non chiffré et lance `gitleaks protect`. |
-| `scripts/` | Scripts d'exploitation (actuellement vide hormis `.gitkeep`). |
+| `scripts/` | Scripts d'exploitation : `bootstrap.sh` (bootstrap manuel du VPS/Komodo) et `bootstrap-periphery.sh` (rattachement d'un hôte Periphery). |
 
 ## Carte de la documentation
 
@@ -72,6 +72,8 @@ Concrètement :
 - **[Sécurité & CI](securite-ci.md)** — gitleaks, hook pre-commit.
 - **[Procédures planifiées](procedures-planifiees.md)** — tâches automatiques de Komodo.
 - **[Exposer un service en VPN-only](exposer-service-vpn-only.md)** — pattern d'accès privé via Tailscale.
+- **[Pelican (Panel jeux)](pelican.md)** — panel de serveurs de jeu (Wings sur `mc-wings`).
+- **[Mangetout (PocketBase + IA)](mangetout.md)** — backend d'app mobile **public** (PocketBase + proxy IA).
 - **[Obsidian LiveSync (CouchDB)](obsidian-livesync.md)** — sync des coffres Obsidian (`obsidian.lucasmasse.net`, **public**).
 - **[Restauration complète](restauration.md)** — remonter l'infra depuis un VPS nu.
 

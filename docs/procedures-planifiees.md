@@ -42,9 +42,11 @@ La procédure **Backup Core Database** correspond exactement au modèle par déf
 
 !!! warning "Mise à jour automatique quotidienne"
     `GlobalAutoUpdate` avec `skip_auto_update = false` met à jour automatiquement les ressources
-    concernées chaque nuit. Combiné aux images non épinglées (`acme-dns:latest`, images FerretDB), une
-    mise à jour amont peut être tirée sans validation. À surveiller / restreindre si tu veux des
-    déploiements plus déterministes.
+    concernées chaque nuit. **Les images du dépôt sont désormais épinglées au digest `@sha256`**
+    (acme-dns, Traefik, FerretDB/postgres, authelia, lldap, postfix…) : la mise à jour ne peut donc
+    tirer qu'un tag *mobile* résiduel s'il en reste un. Attention néanmoins aux images encore en
+    `:latest` (ex. `pelican-dev/panel`, `mangetout-*` par défaut) — un bump amont y passera sans
+    validation. À surveiller / restreindre si tu veux des déploiements 100 % déterministes.
 
 !!! info "À compléter — supervision restic"
     L'étape intermédiaire (dépôt `infra`) prévoyait une procédure `restic-check` (Action côté hôte)

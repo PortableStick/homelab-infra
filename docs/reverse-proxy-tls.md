@@ -8,17 +8,18 @@ Source : `hosts/vps-prod/stacks/traefik/compose.yaml`. Déployé par Komodo (sta
 
 | Élément | Valeur |
 | --- | --- |
-| Image | `traefik:v3.6` |
+| Image | `traefik:v3.7.6` (épinglée au digest `@sha256:…`) |
 | Redémarrage | `unless-stopped` |
 | Durcissement | `security_opt: no-new-privileges:true` |
 | Réseau | `frontend` (externe — voir [Architecture](architecture.md)) |
 | Ports | `80:80`, `443:443` |
 
-!!! note "Pourquoi `v3.6` (et non `v3.3`)"
+!!! note "Pourquoi ≥ `v3.6` (et non `v3.3`)"
     Traefik v3.6+ **auto-négocie la version de l'API Docker**. Sans ça, le client Docker embarqué
     force l'API `1.24`, refusée par Docker 29+ (qui exige `>= 1.40`) — d'où l'erreur
-    *« client version 1.24 is too old »*. Le tag `v3.6` suit les correctifs de la branche 3.6 sans
-    saut de version mineure (important car la procédure `GlobalAutoUpdate` tire les images chaque nuit).
+    *« client version 1.24 is too old »*. On est aujourd'hui sur **`v3.7.6`, épinglée au digest** : la
+    procédure `GlobalAutoUpdate` (qui tire les images chaque nuit) ne peut donc pas faire dériver la
+    version ; un bump se fait en changeant explicitement tag + digest dans le `compose.yaml`.
 
 ## Découverte des services (provider Docker)
 

@@ -22,7 +22,8 @@ creation_rules:
 - **Clé déclarée :** clé **publique** (sert à chiffrer). La clé **privée** correspondante (qui
   déchiffre) est la clé maître.
 - **Secrets existants :** `secrets/vps/{komodo,authelia,lldap,smtp-relay}.env` et
-  `secrets/vindiesel/immich.env`, chiffrés (chaque valeur est un blob `ENC[AES256_GCM,...]`). Les
+  `secrets/vindiesel/{immich,mangetout,pelican}.env`, chiffrés (chaque valeur est un blob
+  `ENC[AES256_GCM,...]`). Les
   **noms** des variables restent en clair, seules les **valeurs** sont chiffrées — c'est le
   comportement attendu de SOPS pour un `.env`.
 
@@ -55,7 +56,7 @@ sops -d secrets/vps/komodo.env > hosts/vps-prod/stacks/komodo/compose.env
     donc forcément rendu **à la main** (`scripts/bootstrap.sh`), une seule fois.
 
     Une fois Komodo démarré, les autres stacks (`authelia`, `lldap`, `smtp-relay`, `immich-1`,
-    `immich-2`) utilisent le **`pre_deploy`** de `komodo/stacks.toml` : à chaque déploiement, la
+    `immich-2`, `mangetout`, `pelican`) utilisent le **`pre_deploy`** de `komodo/stacks.toml` : à chaque déploiement, la
     Periphery lance `sops -d ../../../../secrets/<host>/<stack>.env > .env` avant `docker compose up`.
     Ça suppose que `sops` et `SOPS_AGE_KEY_FILE` sont disponibles **côté Periphery**, pas seulement sur
     l'hôte :

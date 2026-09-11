@@ -11,15 +11,16 @@ Komodo (stack `acme-dns`, tag `edge`).
 
 | Élément | Valeur | Source |
 | --- | --- | --- |
-| Image | `joohoi/acme-dns:latest` | `compose.yaml` |
+| Image | `joohoi/acme-dns:v2.0.2` (épinglée au digest `@sha256:…`) | `compose.yaml` |
 | Ports | `116.202.22.50:53:53/udp` **et** `/tcp` | `compose.yaml` |
 | Config | `./config.cfg` → `/etc/acme-dns/config.cfg` (ro) | `compose.yaml` |
 | Données | `/data/acme-dns` → `/var/lib/acme-dns` (base SQLite) | `compose.yaml` |
 | Réseau | `frontend` (externe) | `compose.yaml` |
 
-!!! warning "Image en `:latest`"
-    `joohoi/acme-dns:latest` n'est pas épinglée. Pour de la prod, figer un tag/digest précis afin
-    d'éviter une mise à jour surprise (cohérent avec la même remarque côté Komodo).
+!!! info "Image épinglée"
+    `joohoi/acme-dns` est figée sur `v2.0.2@sha256:8d327df…` : pas de mise à jour surprise via
+    `GlobalAutoUpdate`. Pour monter de version, bumper explicitement tag **et** digest dans le
+    `compose.yaml`.
 
 ## Configuration (`config.cfg`)
 

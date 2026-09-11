@@ -33,9 +33,9 @@ Sources : `hosts/vps-prod/stacks/{authelia,lldap,smtp-relay}/`, `komodo/stacks.t
 
 | Stack | Image | Rôle | Exposition |
 | --- | --- | --- | --- |
-| `authelia` | `authelia/authelia:4.39` | Portail + moteur d'autorisation | `auth.vindiesel.vip` (**public**) |
-| `lldap` | `lldap/lldap:v0.6.1-alpine` | Annuaire LDAP + UI d'admin | `ldap.int.vindiesel.vip` (**VPN-only**) |
-| `smtp-relay` | `boky/postfix:v4.3.0` | Relais Postfix → smarthost Brevo | interne uniquement (aucun port publié) |
+| `authelia` | `authelia/authelia:4.39.20` | Portail + moteur d'autorisation | `auth.vindiesel.vip` (**public**) |
+| `lldap` | `lldap/lldap:v0.6.3-alpine` | Annuaire LDAP + UI d'admin | `ldap.int.vindiesel.vip` (**VPN-only**) |
+| `smtp-relay` | `boky/postfix:v5.1.0` | Relais Postfix → smarthost Brevo | interne uniquement (aucun port publié) |
 
 Toutes partagent le réseau Docker externe **`frontend`** : Authelia joint lldap en `ldap://lldap:3890`
 et le relais en `submission://smtp-relay:587`, sans publier ces ports sur l'hôte. Les certificats
@@ -191,6 +191,19 @@ Komodo n'utilise **pas** son login intégré : il est client OIDC d'Authelia
     Le compte créé au 1ᵉʳ login OIDC n'est pas forcément admin. `KOMODO_LOCAL_AUTH` reste `true` comme
     filet : se connecter en `admin` local pour activer/promouvoir l'utilisateur OIDC, puis (optionnel)
     passer `KOMODO_LOCAL_AUTH=false` pour ne garder qu'Authelia.
+
+### mangetout (PocketBase) — client OIDC actif
+
+Second client OIDC **déjà en production** (`configuration.yaml`, `identity_providers.oidc.clients`),
+consommé par PocketBase de la stack [mangetout](mangetout.md) :
+
+- `client_id: 'mangetout'`, `public: false`, `require_pkce: true` (S256), `authorization_policy: 'two_factor'`.
+- `client_secret` : **hash pbkdf2** dans `configuration.yaml` ; le secret en clair est
+  `OIDC_CLIENT_SECRET` dans `secrets/vindiesel/mangetout.env` (saisi dans l'UI OAuth2 de PocketBase).
+- `redirect_uris: ['https://pb.vindiesel.vip/api/oauth2-redirect']`, scopes `openid profile email`.
+- Particularité : `pb.vindiesel.vip` est **public** (pas de forward-auth Authelia devant) — c'est
+  **PocketBase qui pilote lui-même le flux OIDC** vers Authelia. Le cookie de session posé sur
+  `vindiesel.vip` couvre le sous-domaine, donc la redirection cross-domaine fonctionne.
 
 **Forgejo (à venir)** : même principe, déclarer un client `forgejo` et brancher l'auth source OIDC côté
 `git.lucasmasse.net` (portail public → redirection cross-domaine OK).
