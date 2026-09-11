@@ -23,6 +23,12 @@ services:
       # Port forwarding NAT-PMP (exige "NAT-PMP" activé sur la config Proton).
       VPN_PORT_FORWARDING: "on"
       VPN_PORT_FORWARDING_UP_COMMAND: "/bin/sh /gluetun/set-rtorrent-port.sh {{PORTS}}"
+      # Le serveur de controle de gluetun ecoute sur :8000 par defaut. rTorrent
+      # partage cette pile reseau et y expose son nginx XMLRPC, egalement sur
+      # 8000 : le nginx bouclait en "bind() failed (98: Address in use)" et le
+      # conteneur restait unhealthy. On deplace gluetun, rTorrent garde ses
+      # ports par defaut (8000 XMLRPC, 8001 sante, 8080 ruTorrent).
+      HTTP_CONTROL_SERVER_ADDRESS: ":8010"
       # DNS : on garde le resolveur DoT interne de gluetun (defaut). Il sort par le
       # tunnel, donc aucune requete DNS ne part chez le FAI. Ne PAS figer ici le
       # resolveur interne d'un serveur Proton donne (10.2.0.1) : gluetun choisit son

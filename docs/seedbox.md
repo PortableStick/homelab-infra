@@ -105,8 +105,9 @@ Le mécanisme mis en place :
 3. À chaque négociation, gluetun exécute `VPN_PORT_FORWARDING_UP_COMMAND`, qui appelle le script
    versionné `set-rtorrent-port.sh` avec le port en argument.
 4. Le script pousse le port dans rTorrent **à chaud** via son API XMLRPC
-   (`network.port_range.set`), joignable sur `127.0.0.1` puisque les deux conteneurs partagent la
-   même pile réseau.
+   (`network.listen.port.set`), joignable sur `127.0.0.1` puisque les deux conteneurs
+   partagent la même pile réseau, puis **vérifie** que `network.listen.port` renvoie bien
+   le port attendu.
 
 ```yaml
 VPN_PORT_FORWARDING_UP_COMMAND: "/bin/sh /gluetun/set-rtorrent-port.sh {{PORTS}}"
@@ -114,6 +115,22 @@ VPN_PORT_FORWARDING_UP_COMMAND: "/bin/sh /gluetun/set-rtorrent-port.sh {{PORTS}}
 
 Le script retente 20 fois toutes les 6 s : au démarrage, gluetun obtient son port bien avant que
 rTorrent ait fini de démarrer, et sans cette boucle le premier réglage serait perdu.
+
+!!! danger "Trois pièges vérifiés en conditions réelles"
+    Ces trois points ont été corrigés après un déploiement de validation le 2026-09-11.
+    Chacun cassait le seed **en silence** : les téléchargements marchaient, aucune erreur
+    visible dans ruTorrent, seuls les logs de gluetun trahissaient le problème.
+
+    1. **Port 8000 occupé par gluetun.** Le serveur de contrôle HTTP de gluetun écoute sur
+       `:8000` par défaut. Comme rTorrent partage sa pile réseau, son nginx XMLRPC (8000 lui
+       aussi) bouclait en `bind() failed (98: Address in use)` et le conteneur restait
+       *unhealthy*. D'où `HTTP_CONTROL_SERVER_ADDRESS: ":8010"` dans le compose.
+    2. **Méthodes XML-RPC renommées.** rTorrent 0.16 ne connaît plus `network.port_range.set`
+       (`faultCode -506`). Et régler la *plage* ne refait pas le bind de la socket : seul
+       **`network.listen.port.set`** change le port réellement écouté, à chaud.
+    3. **Un fault XML-RPC arrive en HTTP 200.** Se fier au code retour de `wget` faisait
+       conclure au succès alors que rTorrent refusait l'appel. Le script cherche désormais
+       `<fault>` dans la réponse, puis **revérifie** le port via `network.listen.port`.
 
 !!! warning "Viser le port 8001, pas le 8000"
     Dans l'image `crazymax/rtorrent-rutorrent`, le serveur nginx du port XMLRPC (`8000`) impose
