@@ -239,7 +239,7 @@ l'app mobile Immich.
 | `.env` rendu vide malgré un `pre_deploy` en succès | secret déchiffre en vide (`sops -d` sort rien, `EXIT=0`) | vérifier le contenu clair **avant** `sops -e -i` |
 | `Failed to connect to websocket \| wss://100.x:8120`, **rien** dans `journalctl -u periphery` | ACL Tailscale : le VPS (`tagged-devices`) n'a pas accès au nouvel hôte | ajouter l'hôte à la règle d'ACL — voir §2 bis |
 | La Periphery accepte toutes les IP alors que le script annonce « Restriction d'accès » | Bug corrigé le 2026-09-11 : le gabarit contient déjà `allowed_ips = []`, donc l'ancien test `grep -q '^allowed_ips'` réussissait et le script n'écrivait rien | relancer `bootstrap-periphery.sh` (version actuelle), ou corriger à la main puis `systemctl restart periphery` ; **vérifier les hôtes installés avant cette date** |
-| `allowed_ips` renseigné mais le Core est refusé | Periphery bindée sur `[::]` : une connexion IPv4 arrive en `::ffff:a.b.c.d` et ne matche pas un CIDR IPv4 | `bind_ip = "0.0.0.0"` (posé par le script depuis le 2026-09-11) |
+| `allowed_ips` renseigné mais le Core est refusé | Periphery bindée sur `[::]` : une connexion IPv4 arrive en `::ffff:a.b.c.d` et ne matche pas un CIDR IPv4. Vérifiable : `ss -tn state established sport = :8120` affiche `[::ffff:100.65.11.58]:8120 [::ffff:100.67.165.98]:…` | `bind_ip = "0.0.0.0"` (posé par le script depuis le 2026-09-11) |
 
 ---
 
