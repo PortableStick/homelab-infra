@@ -18,11 +18,20 @@ Sources : `hosts/tyron/stacks/filestash/compose.yaml`,
 | `/data/filestash` | `/app/data/state` | Configuration Filestash : mot de passe admin, backends déclarés, sessions |
 | `/srv/seedbox` | `/srv/seedbox` | Le disque seedbox, en **lecture-écriture**, exposé comme backend `local` |
 
-À créer avant le premier déploiement :
+À créer avant le premier déploiement — **avec le bon propriétaire** :
 
 ```bash
 mkdir -p /data/filestash
+chown -R 1000:1000 /data/filestash
 ```
+
+!!! danger "Le `chown` n'est pas optionnel"
+    L'image tourne en **uid 1000** et `/app/data/state` y est **vide** : c'est Filestash qui
+    crée son arborescence (`log/`, `config/`, `db/`, `search/`, `certs/`, `plugins/`) au premier
+    démarrage. Si le dossier hôte appartient à `root`, il n'y parvient pas et le conteneur
+    boucle sur `FATAL ERROR - stat /app/data/state/log: no such file or directory` — message
+    trompeur, le problème est un droit d'écriture, pas un fichier manquant. Rencontré le
+    2026-09-11 ; `scripts/bootstrap-tyron.sh` pose désormais ce `chown`.
 
 !!! warning "Image épinglée sur `latest` + digest"
     Filestash ne publie pas de tags de version sémantique utilisables (les seuls tags datés sont des
@@ -101,7 +110,8 @@ déployer via Komodo, puis faire la configuration initiale ci-dessus.
 | Boucle de redirection | `Force SSL` activé dans Filestash alors que le TLS est terminé au VPS | Le désactiver dans *Settings* |
 | Le backend local ne liste rien | `/srv/seedbox` non monté sur l'hôte au moment du déploiement | `findmnt /srv/seedbox` puis redéployer |
 | `Permission denied` à l'écriture | Droits du disque seedbox | `chown -R 1000:1000 /srv/seedbox` |
-| Le mot de passe admin est perdu | Il vit dans `/data/filestash` | Supprimer `/data/filestash/config.json` et redéployer : Filestash redemande la configuration initiale |
+| Le mot de passe admin est perdu | Il vit dans `/data/filestash` | Supprimer `/data/filestash/config/` et redéployer : Filestash redemande la configuration initiale |
+| Boucle de redémarrage, `FATAL ERROR - stat /app/data/state/log` | `/data/filestash` appartient à `root`, l'image tourne en uid 1000 | `chown -R 1000:1000 /data/filestash` puis redéployer |
 | Page blanche / assets non chargés | `APPLICATION_URL` ne correspond pas au nom réellement utilisé | Aligner la variable sur `filestash.vindiesel.vip` et redéployer |
 | Téléversement de gros fichiers qui échoue | Timeout du proxy | Augmenter les timeouts côté Traefik du VPS, ou passer par ruTorrent / SFTP pour les très gros volumes |
 

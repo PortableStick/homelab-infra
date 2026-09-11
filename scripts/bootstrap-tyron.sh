@@ -80,7 +80,11 @@ chown -R "${PUID}:${PGID}" "${MOUNT}"
 # --- 3. données des stacks (disque système) --------------------------------
 log "Répertoires /data des stacks"
 mkdir -p /data/seedbox/gluetun /data/jellyfin/config /data/jellyfin/cache /data/filestash
-chown -R "${PUID}:${PGID}" /data/jellyfin
+# Jellyfin ET Filestash tournent en uid 1000. Filestash crée lui-même son
+# arborescence d'état (log/, config/, db/…) au premier démarrage : si le dossier
+# hôte appartient à root, il n'y arrive pas et boucle en
+# « FATAL ERROR - stat /app/data/state/log: no such file or directory ».
+chown -R "${PUID}:${PGID}" /data/jellyfin /data/filestash
 
 # --- 4. réseau Docker externe ----------------------------------------------
 if docker network inspect proxy >/dev/null 2>&1; then
