@@ -49,6 +49,16 @@ services:
       - "traefik.http.routers.seedbox.rule=Host(`seedbox.vindiesel.vip`)"
       - "traefik.http.routers.seedbox.entrypoints=web"
       - "traefik.http.services.seedbox.loadbalancer.server.port=8080"
+      # Sonarr et Prowlarr partagent cette pile réseau : leurs routeurs vivent
+      # donc aussi sur ce conteneur, chacun vers son port.
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.vindiesel.vip`)"
+      - "traefik.http.routers.sonarr.entrypoints=web"
+      - "traefik.http.routers.sonarr.service=sonarr"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.vindiesel.vip`)"
+      - "traefik.http.routers.prowlarr.entrypoints=web"
+      - "traefik.http.routers.prowlarr.service=prowlarr"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
     restart: unless-stopped
     logging:
       driver: json-file
@@ -85,6 +95,60 @@ services:
       - /srv/seedbox/downloads:/downloads
       # htpasswd nginx. Laissé vide : l'authentification est faite par Authelia.
       - /srv/seedbox/passwd:/passwd
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Suivi des séries : sait ce qui manque, cherche via Prowlarr, puis IMPORTE par
+  # lien dur depuis downloads/complete vers media/ — rTorrent continue donc de
+  # seeder le fichier d'origine, sans duplication d'octets.
+  sonarr:
+    container_name: seedbox_sonarr
+    image: linuxserver/sonarr:4.0.19@sha256:4d9df314875e1249ab7d6170c2b9b3dc1d8e6383f168ceb10dc9a5ad9b324739
+    # Même pile réseau que rTorrent : l'API XMLRPC est sur 127.0.0.1, et surtout
+    # les requêtes aux trackers sortent par le VPN.
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      TZ: "Europe/Paris"
+      PUID: "1000"
+      PGID: "1000"
+    volumes:
+      - /data/sonarr:/config
+      # Ces deux montages doivent refléter EXACTEMENT la vue de rTorrent
+      # (/downloads/...), sinon Sonarr ne retrouve pas les fichiers termines et
+      # recopie au lieu de lier. Les deux sont sur le meme systeme de fichiers,
+      # condition sine qua non du lien dur.
+      - /srv/seedbox/downloads:/downloads
+      - /srv/seedbox/media:/media
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Gestionnaire d'indexeurs : centralise les trackers et les expose à Sonarr.
+  prowlarr:
+    container_name: seedbox_prowlarr
+    image: linuxserver/prowlarr:2.5.2@sha256:c7502a75b021d964481c129c84590b9cbc40f83aadd4e553f173871bc0deaa3c
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      TZ: "Europe/Paris"
+      PUID: "1000"
+      PGID: "1000"
+    volumes:
+      - /data/prowlarr:/config
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     logging:

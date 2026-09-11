@@ -15,9 +15,11 @@ services:
       - /data/jellyfin/config:/config
       # Cache + transcodage : sur le disque système, pas sur le disque seedbox.
       - /data/jellyfin/cache:/cache
-      # Les téléchargements terminés, en LECTURE SEULE : Jellyfin ne doit jamais
-      # pouvoir toucher aux fichiers que rTorrent est en train de seeder.
-      - /srv/seedbox/downloads/complete:/media:ro
+      # La bibliothèque PROPRE, remplie par Sonarr (liens durs vers
+      # downloads/complete), en LECTURE SEULE : Jellyfin ne doit jamais pouvoir
+      # toucher aux fichiers que rTorrent est en train de seeder — et un lien dur
+      # partage les mêmes octets que l'original.
+      - /srv/seedbox/media:/media:ro
       - /etc/localtime:/etc/localtime:ro
     # --- Transcodage matériel (désactivé) -----------------------------------
     # La VM n'expose pas de noeud de rendu DRI (/dev/dri/renderD128 absent) :

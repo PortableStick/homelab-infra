@@ -23,6 +23,25 @@ http:
         - authelia@docker
       tls: {}
 
+    ## Sonarr et Prowlarr : administration de la seedbox, Authelia 2FA obligatoire.
+    sonarr:
+      rule: "Host(`sonarr.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-tyron
+      middlewares:
+        - authelia@docker
+      tls: {}
+
+    prowlarr:
+      rule: "Host(`prowlarr.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-tyron
+      middlewares:
+        - authelia@docker
+      tls: {}
+
     ## Jellyfin : PUBLIC sans forward-auth. Les applications mobile / TV / console
     ## ne savent pas traverser le portail Authelia (pas de navigateur) : le
     ## middleware casserait tous les clients hors navigateur. L'authentification

@@ -98,6 +98,10 @@ access_control:
       policy: 'two_factor'
     - domain: 'filestash.vindiesel.vip'
       policy: 'two_factor'
+    - domain: 'sonarr.vindiesel.vip'
+      policy: 'two_factor'
+    - domain: 'prowlarr.vindiesel.vip'
+      policy: 'two_factor'
 
 ##
 ## Sessions. Le cookie est posé sur vindiesel.vip → couvre tous les

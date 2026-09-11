@@ -84,17 +84,20 @@ mkdir -p "${MOUNT}/config/rtorrent/watch" \
          "${MOUNT}/downloads/temp" \
          "${MOUNT}/downloads/complete/films" \
          "${MOUNT}/downloads/complete/series" \
-         "${MOUNT}/downloads/complete/musique"
+         "${MOUNT}/downloads/complete/musique" \
+         "${MOUNT}/media/series" \
+         "${MOUNT}/media/films"
 chown -R "${PUID}:${PGID}" "${MOUNT}"
 
 # --- 3. données des stacks (disque système) --------------------------------
 log "Répertoires /data des stacks"
-mkdir -p /data/seedbox/gluetun /data/jellyfin/config /data/jellyfin/cache /data/filestash
+mkdir -p /data/seedbox/gluetun /data/jellyfin/config /data/jellyfin/cache /data/filestash \
+         /data/sonarr /data/prowlarr
 # Jellyfin ET Filestash tournent en uid 1000. Filestash crée lui-même son
 # arborescence d'état (log/, config/, db/…) au premier démarrage : si le dossier
 # hôte appartient à root, il n'y arrive pas et boucle en
 # « FATAL ERROR - stat /app/data/state/log: no such file or directory ».
-chown -R "${PUID}:${PGID}" /data/jellyfin /data/filestash
+chown -R "${PUID}:${PGID}" /data/jellyfin /data/filestash /data/sonarr /data/prowlarr
 
 # --- 4. bind sur l'IP tailnet au démarrage ----------------------------------
 # Traefik publie son port sur l'IP Tailscale (100.x). Or Docker démarre ses

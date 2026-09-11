@@ -21,7 +21,7 @@ Sources : `hosts/tyron/stacks/jellyfin/compose.yaml`,
 | --- | --- | --- |
 | `/data/jellyfin/config` | `/config` | Base Jellyfin, utilisateurs, métadonnées |
 | `/data/jellyfin/cache` | `/cache` | Cache et fichiers de transcodage — **sur le disque système**, pas sur le disque seedbox |
-| `/srv/seedbox/downloads/complete` | `/media` (**`:ro`**) | La médiathèque |
+| `/srv/seedbox/media` | `/media` (**`:ro`**) | La bibliothèque **propre**, remplie par Sonarr (liens durs vers `downloads/complete`) |
 
 !!! danger "La médiathèque est montée en lecture seule — ne pas changer"
     rTorrent **seede** les fichiers de `complete/` : ils doivent rester bit-à-bit identiques. Si
@@ -160,7 +160,7 @@ nouvelle médiathèque côté Jellyfin pointant sur le sous-dossier du même nom
 
 | Symptôme | Cause probable | Correctif |
 | --- | --- | --- |
-| Médiathèque vide après le scan | `/srv/seedbox` non monté, ou rien dans `complete/` | `findmnt /srv/seedbox` ; `ls /srv/seedbox/downloads/complete` |
+| Médiathèque vide après le scan | `/srv/seedbox` non monté, ou Sonarr n'a encore rien importé | `findmnt /srv/seedbox` ; `ls /srv/seedbox/media/series` |
 | `Access denied` sur les fichiers | UID ≠ 1000 sur les fichiers téléchargés | `chown -R 1000:1000 /srv/seedbox` |
 | Lecture qui saccade / se coupe | Transcodage logiciel (pas d'accélération matérielle) | Vérifier dans *Tableau de bord → Activité* si la session est en *Transcode* ; forcer une qualité en direct play côté client, ou voir § Transcodage |
 | Les apps mobiles ne se connectent pas alors que le navigateur marche | Un middleware forward-auth a été ajouté au routeur | Le retirer — voir § Pourquoi Jellyfin n'est PAS derrière Authelia |

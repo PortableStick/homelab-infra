@@ -23,6 +23,57 @@ Sources : `hosts/tyron/stacks/seedbox/`, `secrets/tyron/seedbox.env`,
     (il n'est sur aucun réseau Docker) — c'est `gluetun` qui les porte, et qui est branché sur le
     réseau `proxy`.
 
+## Automatisation : Sonarr + Prowlarr
+
+Pour les séries suivies, le téléchargement et le rangement sont automatisés. Les deux services
+vivent **dans la stack `seedbox`** et non dans une stack à part : `network_mode: service:gluetun`
+ne fonctionne qu'à l'intérieur d'un même projet Compose. C'est aussi ce qu'on veut — leurs requêtes
+aux trackers sortent ainsi par le VPN, au même titre que le trafic BitTorrent.
+
+| Service | Rôle | URL |
+| --- | --- | --- |
+| `prowlarr` | Centralise les indexeurs (trackers privés) et les expose à Sonarr | `prowlarr.vindiesel.vip` (**Authelia 2FA**) |
+| `sonarr` | Suit chaque série, cherche les épisodes manquants, importe et **renomme** | `sonarr.vindiesel.vip` (**Authelia 2FA**) |
+
+### Le point qui compte : l'import par lien dur
+
+Sonarr n'a pas vocation à déplacer ce que rTorrent seede. Il crée un **lien dur** depuis
+`downloads/complete/` vers `media/` : un seul exemplaire des octets sur le disque, deux chemins.
+rTorrent continue de seeder son fichier, Jellyfin lit une arborescence propre.
+
+```
+/srv/seedbox/downloads/complete/series/Greys.Anatomy.S21E05.FRENCH.1080p-GRP/…mkv   ← rTorrent seede
+/srv/seedbox/media/series/Grey's Anatomy/Season 21/Grey's Anatomy - S21E05.mkv      ← même inode
+```
+
+Deux conditions, toutes deux vérifiées :
+
+1. **Même système de fichiers** — `downloads/` et `media/` sont sur `/srv/seedbox` (`stat -c %d`
+   renvoie le même numéro de périphérique). Un lien dur ne traverse pas une frontière de FS ; sinon
+   Sonarr recopie silencieusement et le disque double.
+2. **Mêmes chemins vus par les deux** — Sonarr monte `/srv/seedbox/downloads:/downloads`, exactement
+   comme rTorrent. Quand rTorrent annonce `/downloads/complete/series/…`, Sonarr trouve le fichier
+   au même endroit. Sans ça il faudrait un *Remote Path Mapping* dans Sonarr.
+
+!!! warning "Ne pas faire pointer Jellyfin sur `downloads/complete`"
+    C'était le montage initial, avant Sonarr. Il faut désormais `media/` : c'est là que vivent les
+    fichiers **renommés**, seuls exploitables par le détecteur de Jellyfin. `complete/` garde les
+    noms de release bruts.
+
+### Connexion de Sonarr à rTorrent
+
+Dans Sonarr → *Settings → Download Clients → rTorrent* :
+
+| Champ | Valeur |
+| --- | --- |
+| Host / Port | `127.0.0.1` / `8001` |
+| URL Path | `RPC2` |
+| Category | `series` (= le label ruTorrent, donc le sous-dossier de `complete/`) |
+
+`127.0.0.1` fonctionne parce que Sonarr partage la pile réseau de gluetun avec rTorrent. Et on vise
+**8001**, le port de santé sans authentification, pour la même raison que le script de port
+forwarding : le port 8000 impose un `auth_basic` sur un `/passwd/rpc.htpasswd` laissé vide.
+
 ## Disque dédié (`/dev/sdb` → `/srv/seedbox`)
 
 Un disque de **700 Go** est dédié aux téléchargements, séparé du disque système (128 Go) pour qu'un
