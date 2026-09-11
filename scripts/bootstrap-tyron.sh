@@ -76,10 +76,15 @@ fi
 # Ne pas inventer d'autres noms (incomplete/, downloads/watch/…) : rTorrent ne les
 # utiliserait pas, et Jellyfin comme Filestash pointent sur ces chemins précis.
 log "Arborescence de ${MOUNT}"
+# Les sous-dossiers de complete/ correspondent aux LABELS ruTorrent : rTorrent y range
+# tout seul en fin de téléchargement (`d.get_finished_dir` = complete/ + label). On les
+# crée d'avance pour pouvoir déclarer les médiathèques Jellyfin avant le 1er téléchargement.
 mkdir -p "${MOUNT}/config/rtorrent/watch" \
          "${MOUNT}/passwd" \
-         "${MOUNT}/downloads/complete" \
-         "${MOUNT}/downloads/temp"
+         "${MOUNT}/downloads/temp" \
+         "${MOUNT}/downloads/complete/films" \
+         "${MOUNT}/downloads/complete/series" \
+         "${MOUNT}/downloads/complete/musique"
 chown -R "${PUID}:${PGID}" "${MOUNT}"
 
 # --- 3. données des stacks (disque système) --------------------------------

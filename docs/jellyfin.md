@@ -115,8 +115,46 @@ secret.
 `/srv/seedbox` est monté, puis déployer via Komodo.
 
 **Première connexion :** l'assistant Jellyfin demande de créer le compte administrateur, puis
-d'ajouter une médiathèque pointant sur `/media` (choisir le bon type de contenu : *Films*, *Séries*…
-— le scan des métadonnées en dépend).
+d'ajouter les médiathèques (voir ci-dessous).
+
+## Plusieurs médiathèques, rangées automatiquement par rTorrent
+
+Le tri ne se fait pas dans Jellyfin mais **en amont**, par le **label ruTorrent**. L'image rTorrent
+calcule son répertoire de destination ainsi (`/data/rtorrent/.rtorrent.rc`) :
+
+```
+d.get_finished_dir = cfg.download_complete + d.custom1
+                   = /downloads/complete/  + <label>
+```
+
+`d.custom1` **est** le label ruTorrent. À la fin d'un téléchargement, `d.move_to_complete` fait un
+`mkdir -p` puis un `mv` : un torrent labellisé `series` part donc tout seul dans
+`/downloads/complete/series/`, dossier créé au besoin.
+
+**Côté ruTorrent** — poser le label au moment de l'ajout du torrent (champ *Label* de la boîte
+d'ajout), ou après coup par clic droit → *Label*. Sans label, le fichier reste à la racine de
+`complete/`.
+
+**Côté Jellyfin** — une médiathèque **par sous-dossier**, et non une seule sur `/media` :
+
+| Médiathèque | Type de contenu | Dossier |
+| --- | --- | --- |
+| Films | *Films* | `/media/films` |
+| Séries | *Séries TV* | `/media/series` |
+| Musique | *Musique* | `/media/musique` |
+
+!!! warning "Ne pas créer une seule médiathèque sur `/media`"
+    Le type de contenu pilote tout l'enrichissement (affiches, résumés, saisons/épisodes,
+    regroupement). Une médiathèque unique force un seul type pour l'ensemble : les séries seraient
+    traitées comme des films et jamais découpées en saisons. Une médiathèque par type, donc.
+
+Ajouter une catégorie plus tard ne demande rien de plus : un nouveau label côté ruTorrent, une
+nouvelle médiathèque côté Jellyfin pointant sur le sous-dossier du même nom.
+
+!!! tip "Automatiser l'attribution du label"
+    L'image embarque les plugins ruTorrent **`autotools`** (règles d'auto-label / auto-déplacement
+    à l'ajout) et **`tracklabels`** (label déduit du tracker). Utile si tes sources sont
+    régulières ; sinon le label manuel à l'ajout suffit et reste le plus prévisible.
 
 ## Dépannage
 

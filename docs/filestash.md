@@ -102,6 +102,27 @@ vérification de version sortante.
 5. Onglet **Settings** : forcer `Force SSL` désactivé (le TLS est terminé au VPS ; l'activer
    provoquerait une boucle de redirection), et vérifier que l'URL applicative est correcte.
 
+!!! danger "Sans `path`, Filestash sert la racine du conteneur"
+    La connexion locale créée par défaut ne porte **aucune clé `path`** :
+
+    ```json
+    {"label": "local", "type": "local"}
+    ```
+
+    Filestash retombe alors sur `/` et affiche **tout le système de fichiers du conteneur**
+    (`/app`, `/etc`, `/root`, `/var`…). Constaté le 2026-09-11. Le montage restreint du
+    `compose.yaml` ne protège pas de ça : il limite ce qui **existe** dans le conteneur, pas la
+    racine que Filestash **expose**.
+
+    Vérifier — et corriger si besoin — dans `/data/filestash/config/config.json` :
+
+    ```json
+    {"label": "local", "type": "local", "path": "/srv/seedbox"}
+    ```
+
+    Puis redémarrer le conteneur. **Se déconnecter et se reconnecter** ensuite : le backend est
+    mémorisé dans la session, donc l'ancienne vue persiste tant qu'on ne la renouvelle pas.
+
 ## Déploiement (Komodo)
 
 Entrée `[[stack]] filestash` dans `komodo/stacks.toml` : `server = "docker-tyron"`,
