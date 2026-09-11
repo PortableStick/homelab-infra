@@ -16,7 +16,15 @@ Sources : `hosts/tyron/stacks/filestash/compose.yaml`,
 | Chemin hôte | Monté dans | Rôle |
 | --- | --- | --- |
 | `/data/filestash` | `/app/data/state` | Configuration Filestash : mot de passe admin, backends déclarés, sessions |
-| `/srv/seedbox` | `/srv/seedbox` | Le disque seedbox, en **lecture-écriture**, exposé comme backend `local` |
+| `/srv/seedbox/downloads` | `/srv/seedbox/downloads` | `temp/` (en cours) et `complete/` (terminés), en **lecture-écriture** |
+| `/srv/seedbox/config/rtorrent/watch` | `/srv/seedbox/watch` | Dépôt de `.torrent` — rTorrent les charge automatiquement |
+
+!!! tip "Le disque n'est PAS monté en entier — c'est délibéré"
+    Le backend local pointe sur `/srv/seedbox`, qui ne contient **dans le conteneur** que
+    `downloads/` et `watch/`. La session rTorrent et la configuration ruTorrent
+    (`/srv/seedbox/config/`) restent invisibles : une suppression accidentelle depuis l'interface
+    y casserait tous les torrents en cours. Le dossier de surveillance, lui, est remonté à la
+    racine pour rester à portée de main alors qu'il vit sous `config/rtorrent/watch/`.
 
 À créer avant le premier déploiement — **avec le bon propriétaire** :
 
@@ -90,7 +98,7 @@ vérification de version sortante.
    Bitwarden (ce n'est pas un secret du dépôt : il vit dans `/data/filestash`, pas dans Git).
 3. Onglet **Backend** : ne garder que **Local** (« Storage » / `local`), désactiver les autres
    (S3, FTP, Dropbox…) pour réduire la surface.
-4. Chemin du backend local : `/srv/seedbox`.
+4. Chemin du backend local : `/srv/seedbox` — tu n'y verras que `downloads/` et `watch/`.
 5. Onglet **Settings** : forcer `Force SSL` désactivé (le TLS est terminé au VPS ; l'activer
    provoquerait une boucle de redirection), et vérifier que l'URL applicative est correcte.
 

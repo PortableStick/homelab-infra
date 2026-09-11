@@ -48,17 +48,29 @@ mount -a
 Arborescence, avec l'UID/GID `1000:1000` attendu par l'image rTorrent (`PUID`/`PGID`) :
 
 ```bash
-mkdir -p /srv/seedbox/config /srv/seedbox/passwd \
+mkdir -p /srv/seedbox/config/rtorrent/watch /srv/seedbox/passwd \
          /srv/seedbox/downloads/complete \
-         /srv/seedbox/downloads/incomplete \
-         /srv/seedbox/downloads/watch
+         /srv/seedbox/downloads/temp
 chown -R 1000:1000 /srv/seedbox
 ```
 
+!!! warning "Ces noms sont imposés par l'image — ne pas en inventer d'autres"
+    `/etc/rtorrent/.rtlocal.rc` fige les chemins :
+
+    | Variable rTorrent | Chemin | Rôle |
+    | --- | --- | --- |
+    | `cfg.download_temp` | `/downloads/temp/` | Téléchargements **en cours** |
+    | `cfg.download_complete` | `/downloads/complete/` | Déplacés ici **à la fin** (`event.download.finished`) |
+    | `cfg.watch` | `/data/rtorrent/watch/` → `config/rtorrent/watch/` | Dépôt de `.torrent` |
+
+    Créer un `downloads/incomplete/` ou un `downloads/watch/` ne sert à rien : rTorrent ne les
+    regarde pas. Et c'est bien `complete/` que [Jellyfin](jellyfin.md) monte en lecture seule —
+    la médiathèque ne se remplit donc **qu'au moment où un torrent se termine**.
+
 | Chemin hôte | Monté dans | Contenu |
 | --- | --- | --- |
-| `/srv/seedbox/config` | `rtorrent:/data` | `.rtorrent.rc`, session rTorrent, config et logs ruTorrent |
-| `/srv/seedbox/downloads` | `rtorrent:/downloads` | `complete/`, `incomplete/`, `watch/` (dépôt de `.torrent`) |
+| `/srv/seedbox/config` | `rtorrent:/data` | `.rtorrent.rc`, session rTorrent, logs, et le dossier **`rtorrent/watch/`** où déposer les `.torrent` |
+| `/srv/seedbox/downloads` | `rtorrent:/downloads` | `temp/` (en cours) et `complete/` (terminés, seedés) |
 | `/srv/seedbox/passwd` | `rtorrent:/passwd` | htpasswd nginx — **laissé vide** : l'auth est faite par Authelia |
 | `/data/seedbox/gluetun` | `gluetun:/gluetun` | État gluetun (serveurs Proton, port forwardé) — disque système |
 

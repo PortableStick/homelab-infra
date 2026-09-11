@@ -14,8 +14,15 @@ services:
     volumes:
       # Config + base de l'admin Filestash (mot de passe admin, backends déclarés).
       - /data/filestash:/app/data/state
-      # Le disque seedbox, exposé comme backend "local" depuis l'UI admin.
-      - /srv/seedbox:/srv/seedbox
+      # Vue volontairement restreinte : on NE monte PAS /srv/seedbox en entier.
+      # Le backend local pointe sur /srv/seedbox, qui ne contient donc ici que
+      # les deux dossiers que l'opérateur a une raison de manipuler :
+      #   downloads/ -> complete/ (terminés, seedés) et temp/ (en cours)
+      #   watch/     -> dépôt de .torrent, ramené ici depuis config/rtorrent/watch
+      # Restent invisibles : la session rTorrent et la config ruTorrent, dont une
+      # suppression accidentelle casserait les torrents en cours.
+      - /srv/seedbox/downloads:/srv/seedbox/downloads
+      - /srv/seedbox/config/rtorrent/watch:/srv/seedbox/watch
       - /etc/localtime:/etc/localtime:ro
     labels:
       - "traefik.enable=true"

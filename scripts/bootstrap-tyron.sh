@@ -69,12 +69,17 @@ else
 fi
 
 # --- 2. arborescence seedbox ------------------------------------------------
+# Noms imposés par l'image crazymax/rtorrent-rutorrent (/etc/rtorrent/.rtlocal.rc) :
+#   cfg.download_complete = /downloads/complete/   (déplacement en fin de téléchargement)
+#   cfg.download_temp     = /downloads/temp/       (téléchargements en cours)
+#   cfg.watch             = /data/rtorrent/watch/  (dépôt de .torrent)
+# Ne pas inventer d'autres noms (incomplete/, downloads/watch/…) : rTorrent ne les
+# utiliserait pas, et Jellyfin comme Filestash pointent sur ces chemins précis.
 log "Arborescence de ${MOUNT}"
-mkdir -p "${MOUNT}/config" \
+mkdir -p "${MOUNT}/config/rtorrent/watch" \
          "${MOUNT}/passwd" \
          "${MOUNT}/downloads/complete" \
-         "${MOUNT}/downloads/incomplete" \
-         "${MOUNT}/downloads/watch"
+         "${MOUNT}/downloads/temp"
 chown -R "${PUID}:${PGID}" "${MOUNT}"
 
 # --- 3. données des stacks (disque système) --------------------------------
