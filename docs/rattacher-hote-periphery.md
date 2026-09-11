@@ -37,6 +37,39 @@ Internet/Tailscale ──443──▶ Traefik VPS (edge, TLS *.int) ──HTTP t
     tar czf /root/backup-$(date +%F).tgz /data/immich-1 /data/immich-2
     ```
 
+!!! danger "Prérequis hôte : `ip_nonlocal_bind` — sinon la panne revient à chaque redémarrage"
+    Le Traefik local publie son port sur l'**IP Tailscale** (`ports: - "100.x.x.x:80:80"`). Or Docker
+    démarre ses conteneurs **avant** que tailscaled ait monté `tailscale0` :
+
+    ```
+    failed to bind host port 100.x.x.x:80/tcp: cannot assign requested address
+    ```
+
+    Docker abandonne, et `restart: unless-stopped` ne rattrape pas ce cas. Le piège est que le
+    conteneur peut rester **`Up` sans réseau ni mapping de port** : `docker ps` le montre en vie,
+    Komodo affiche la stack `running`, et pourtant l'edge renvoie **502** sur tous les services de
+    l'hôte. Constaté le 2026-09-11 sur `docker-tyron` (après un stop/start Proxmox) **et** sur
+    `docker-vindiesel`, où Immich, Pelican et mangetout étaient injoignables **depuis deux jours**
+    sans que rien ne le signale.
+
+    À poser sur **chaque** hôte Periphery portant un Traefik local (fait par
+    `scripts/bootstrap-tyron.sh`) :
+
+    ```bash
+    echo 'net.ipv4.ip_nonlocal_bind = 1' > /etc/sysctl.d/99-nonlocal-bind.conf
+    sysctl -p /etc/sysctl.d/99-nonlocal-bind.conf
+    ```
+
+    Diagnostic en une commande — un conteneur sain répond `80/tcp -> 100.x.x.x:80` :
+
+    ```bash
+    docker port traefik            # vide  = binding perdu
+    ss -tlnp | grep ':80 '         # rien  = idem
+    ```
+
+    Réparation : **supprimer et recréer** le conteneur (`docker rm -f traefik && docker compose up -d`).
+    Un simple `docker start` le relance sans réseau ni port — c'est ce qui a masqué la panne.
+
 ## 1. Déclarer l'hôte et ses stacks dans le repo
 
 Tout est déclaratif dans `komodo/stacks.toml` (lu par le Core depuis `main`) :
