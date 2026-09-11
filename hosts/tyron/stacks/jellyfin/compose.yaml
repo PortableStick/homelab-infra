@@ -1,0 +1,54 @@
+name: jellyfin
+
+services:
+  jellyfin:
+    container_name: jellyfin
+    image: jellyfin/jellyfin:12.0@sha256:baba630419915985442f315f08b0cf46d9f4c8a0cc4bd38e94a6d35751dd5ef5
+    networks:
+      - proxy
+    user: "1000:1000"
+    environment:
+      TZ: "Europe/Paris"
+      # URL annoncée aux clients (autodiscovery, liens de partage, DLNA).
+      JELLYFIN_PublishedServerUrl: "https://jellyfin.vindiesel.vip"
+    volumes:
+      - /data/jellyfin/config:/config
+      # Cache + transcodage : sur le disque système, pas sur le disque seedbox.
+      - /data/jellyfin/cache:/cache
+      # Les téléchargements terminés, en LECTURE SEULE : Jellyfin ne doit jamais
+      # pouvoir toucher aux fichiers que rTorrent est en train de seeder.
+      - /srv/seedbox/downloads/complete:/media:ro
+      - /etc/localtime:/etc/localtime:ro
+    # --- Transcodage matériel (désactivé) -----------------------------------
+    # La VM n'expose pas de noeud de rendu DRI (/dev/dri/renderD128 absent) :
+    # tout transcodage serait logiciel, sur 2 vCPU. Décommenter APRÈS avoir
+    # passé un GPU à la VM côté Proxmox, puis activer VAAPI dans l'UI Jellyfin.
+    # devices:
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - "video"
+    #   - "render"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # PUBLIC, sans forward-auth : les apps mobile/TV ne savent pas passer un
+      # portail Authelia. L'authentification est celle de Jellyfin (cf. doc).
+      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.vindiesel.vip`)"
+      - "traefik.http.routers.jellyfin.entrypoints=web"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+    restart: unless-stopped
+    healthcheck:
+      test: curl -fsS http://127.0.0.1:8096/health || exit 1
+      start_period: 120s
+      interval: 30s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  proxy:
+    name: proxy
+    external: true

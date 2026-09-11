@@ -9,6 +9,12 @@ name = "docker-vindiesel"
 enabled = true
 address = "https://100.65.11.58:8120"
 
+[[server]]
+name = "docker-tyron"
+[server.config]
+enabled = true
+address = "https://100.92.25.102:8120"
+
 [[repo]]
 name = "homelab-infra"
 [repo.config]
@@ -246,3 +252,52 @@ repo = "PortableStick/homelab-infra"
 file_paths = ["hosts/vindiesel/stacks/pelican/compose.yaml"]
 pre_deploy.path = "hosts/vindiesel/stacks/pelican"
 pre_deploy.command = "sops -d ../../../../secrets/vindiesel/pelican.env > .env"
+
+[[stack]]
+name = "traefik-tyron"
+description = "Reverse proxy local seedbox"
+deploy = true
+tags = ["edge", "tyron"]
+[stack.config]
+server = "docker-tyron"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/tyron/stacks/traefik/compose.yaml"]
+
+[[stack]]
+name = "seedbox"
+description = "rTorrent + ruTorrent derriere ProtonVPN (gluetun)"
+deploy = true
+after = ["traefik-tyron"]
+tags = ["app", "tyron"]
+[stack.config]
+server = "docker-tyron"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/tyron/stacks/seedbox/compose.yaml"]
+pre_deploy.path = "hosts/tyron/stacks/seedbox"
+pre_deploy.command = "sops -d ../../../../secrets/tyron/seedbox.env > .env"
+
+[[stack]]
+name = "jellyfin"
+description = "Jellyfin - lecture des telechargements"
+deploy = true
+after = ["traefik-tyron"]
+tags = ["app", "tyron"]
+[stack.config]
+server = "docker-tyron"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/tyron/stacks/jellyfin/compose.yaml"]
+
+[[stack]]
+name = "filestash"
+description = "Filestash - gestionnaire de fichiers du disque seedbox"
+deploy = true
+after = ["traefik-tyron"]
+tags = ["app", "tyron"]
+[stack.config]
+server = "docker-tyron"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/tyron/stacks/filestash/compose.yaml"]
