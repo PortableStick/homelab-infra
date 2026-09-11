@@ -115,10 +115,18 @@ Komodo utilise par ailleurs des **volumes Docker nommés** (`postgres-data`, `fe
 et deux chemins paramétrés par variables (`${COMPOSE_KOMODO_BACKUPS_PATH}` pour les sauvegardes,
 `${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}` pour la Periphery). Détails dans [Komodo](komodo.md).
 
-!!! info "À compléter — valeurs réelles des chemins paramétrés"
-    Les valeurs déchiffrées de `COMPOSE_KOMODO_BACKUPS_PATH` et `PERIPHERY_ROOT_DIRECTORY` vivent dans
-    `secrets/vps/komodo.env` (chiffré). Renseigner ici les chemins réels une fois confirmés, car ils
-    sont nécessaires à la restauration.
+!!! info "Valeurs réelles des chemins paramétrés"
+    Confirmées le 2026-09-11 en déchiffrant `secrets/vps/komodo.env` — nécessaires à la restauration :
+
+    | Variable | Valeur sur `vps-prod` |
+    | --- | --- |
+    | `COMPOSE_KOMODO_BACKUPS_PATH` | `/etc/komodo/backups` |
+    | `PERIPHERY_ROOT_DIRECTORY` | `/etc/komodo` |
+
+    Les sauvegardes de la base vivent donc **sous la racine Periphery**, sur le disque système du
+    VPS. C'est le point aveugle rappelé en page d'accueil : une perte du VPS emporte la base **et**
+    ses sauvegardes tant que la copie hors-site n'est pas en place, voir
+    [Restauration complète](restauration.md).
 
 ## Authentification
 

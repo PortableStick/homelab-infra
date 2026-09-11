@@ -13,15 +13,24 @@ Le `compose.yaml` de Komodo déploie quatre services :
 | --- | --- | --- | --- |
 | `postgres` | `ghcr.io/ferretdb/postgres-documentdb` | Stockage sous-jacent de FerretDB | Volume `postgres-data`. Label `komodo.skip` pour que Komodo ne l'arrête pas avec *StopAllContainers*. |
 | `ferretdb` | `ghcr.io/ferretdb/ferretdb` | Adaptateur compatible MongoDB au-dessus de Postgres | Volume `ferretdb-state`. Dépend de `postgres`. Label `komodo.skip`. |
-| `core` | `ghcr.io/moghtech/komodo-core:${COMPOSE_KOMODO_IMAGE_TAG:-2.2.0}` | UI + API Komodo | Port `9120`. Dépend de `ferretdb`. `KOMODO_DATABASE_ADDRESS: ferretdb:27017`. |
-| `periphery` | `ghcr.io/moghtech/komodo-periphery:${COMPOSE_KOMODO_IMAGE_TAG:-2.2.0}` | Agent qui exécute Docker sur l'hôte | Accède à `docker.sock`, `/proc`, au répertoire racine Periphery, et monte le binaire `sops` de l'hôte + `SOPS_AGE_KEY_FILE` (voir plus bas *pourquoi*). Dépend de `core`. |
+| `core` | `ghcr.io/moghtech/komodo-core:${COMPOSE_KOMODO_IMAGE_TAG:-2.3.3}` | UI + API Komodo | Port `9120`. Dépend de `ferretdb`. `KOMODO_DATABASE_ADDRESS: ferretdb:27017`. |
+| `periphery` | `ghcr.io/moghtech/komodo-periphery:${COMPOSE_KOMODO_IMAGE_TAG:-2.3.3}` | Agent qui exécute Docker sur l'hôte | Accède à `docker.sock`, `/proc`, au répertoire racine Periphery, et monte le binaire `sops` de l'hôte + `SOPS_AGE_KEY_FILE` (voir plus bas *pourquoi*). Dépend de `core`. |
 
 !!! note "Versions d'images"
-    Les tags `core`/`periphery` utilisent `${COMPOSE_KOMODO_IMAGE_TAG:-2.2.0}` (valeur par défaut
-    `2.2.0`, surchargeable par variable). Les images **`postgres-documentdb` et `ferretdb` sont
+    Les tags `core`/`periphery` utilisent `${COMPOSE_KOMODO_IMAGE_TAG:-2.3.3}` (valeur par défaut
+    `2.3.3`, surchargée par la variable du `compose.env`, elle aussi à `2.3.3`). Les images **`postgres-documentdb` et `ferretdb` sont
     désormais épinglées au digest** (`postgres-documentdb:17-0.107.0-ferretdb-2.7.0@sha256:…`,
     `ferretdb:2.7.0@sha256:…`) : une mise à jour amont ne peut plus être tirée par surprise, malgré le
     commentaire boilerplate *« 🚨 Pin to a specific version »* laissé par l'upstream.
+
+!!! warning "Garder le Core et les Periphery sur la même version"
+    La Periphery **conteneurisée** du serveur `Local` suit automatiquement
+    `COMPOSE_KOMODO_IMAGE_TAG`. Les Periphery **binaire+systemd** (`docker-vindiesel`,
+    `docker-tyron`), elles, sont installées par le script officiel qui prend toujours la
+    **dernière** version : un hôte rattaché aujourd'hui arrive donc en avance sur le Core.
+    C'est ce qui est arrivé le 2026-09-11 (Periphery 2.3.3 face à un Core 2.2.0). Komodo le
+    signale via `send_version_mismatch_alerts`. Après chaque rattachement, vérifier la colonne
+    *Version* dans **Servers** et aligner — en montant le Core de préférence.
 
 ## Volumes et chemins
 
