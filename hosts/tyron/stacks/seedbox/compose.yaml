@@ -97,7 +97,7 @@ services:
     volumes:
       # Config + session rTorrent et ruTorrent : sur le disque seedbox (avec les données).
       - /srv/seedbox/config:/data
-      - /srv/seedbox/downloads:/downloads
+      - /srv/seedbox/data:/downloads
       # htpasswd nginx. Laissé vide : l'authentification est faite par Authelia.
       - /srv/seedbox/passwd:/passwd
       - /etc/localtime:/etc/localtime:ro
@@ -126,12 +126,12 @@ services:
       PGID: "1000"
     volumes:
       - /data/sonarr:/config
-      # Ces deux montages doivent refléter EXACTEMENT la vue de rTorrent
-      # (/downloads/...), sinon Sonarr ne retrouve pas les fichiers termines et
-      # recopie au lieu de lier. Les deux sont sur le meme systeme de fichiers,
-      # condition sine qua non du lien dur.
-      - /srv/seedbox/downloads:/downloads
-      - /srv/seedbox/media:/media
+      # UN SEUL montage, identique a celui de rTorrent. Deux bind mounts separes
+      # apparaissent au noyau comme deux peripheriques distincts vu du conteneur :
+      # le lien dur echoue alors en « Cross-device link » et Sonarr RECOPIE en
+      # silence, doublant l'espace disque. La bibliotheque vit donc SOUS ce montage,
+      # en /downloads/media/, et non dans un montage a part.
+      - /srv/seedbox/data:/downloads
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     logging:

@@ -38,22 +38,39 @@ aux trackers sortent ainsi par le VPN, au même titre que le trafic BitTorrent.
 ### Le point qui compte : l'import par lien dur
 
 Sonarr n'a pas vocation à déplacer ce que rTorrent seede. Il crée un **lien dur** depuis
-`downloads/complete/` vers `media/` : un seul exemplaire des octets sur le disque, deux chemins.
+`data/complete/` vers `data/media/` : un seul exemplaire des octets sur le disque, deux chemins.
 rTorrent continue de seeder son fichier, Jellyfin lit une arborescence propre.
 
 ```
-/srv/seedbox/downloads/complete/series/Greys.Anatomy.S21E05.FRENCH.1080p-GRP/…mkv   ← rTorrent seede
-/srv/seedbox/media/series/Grey's Anatomy/Season 21/Grey's Anatomy - S21E05.mkv      ← même inode
+/srv/seedbox/data/complete/series/Greys.Anatomy.S21E05.FRENCH.1080p-GRP/…mkv   ← rTorrent seede
+/srv/seedbox/data/media/series/Grey's Anatomy/Season 21/…S21E05.mkv          ← même inode
 ```
 
-Deux conditions, toutes deux vérifiées :
+!!! danger "Un seul montage partagé — sinon `Cross-device link`"
+    C'est **la** subtilité de ce montage, et elle se paie cher parce qu'elle échoue en silence.
 
-1. **Même système de fichiers** — `downloads/` et `media/` sont sur `/srv/seedbox` (`stat -c %d`
-   renvoie le même numéro de périphérique). Un lien dur ne traverse pas une frontière de FS ; sinon
-   Sonarr recopie silencieusement et le disque double.
-2. **Mêmes chemins vus par les deux** — Sonarr monte `/srv/seedbox/downloads:/downloads`, exactement
-   comme rTorrent. Quand rTorrent annonce `/downloads/complete/series/…`, Sonarr trouve le fichier
-   au même endroit. Sans ça il faudrait un *Remote Path Mapping* dans Sonarr.
+    Sur l'hôte, `data/complete/` et `data/media/` sont évidemment sur le même système de
+    fichiers. Mais si on les monte dans le conteneur comme **deux bind mounts distincts**, le
+    noyau les présente comme deux périphériques différents et `ln` échoue :
+
+    ```
+    ln: failed to create hard link '/media/…' => '/downloads/complete/…': Cross-device link
+    ```
+
+    Sonarr **recopie** alors au lieu de lier : l'espace disque double, sans la moindre erreur
+    visible dans son interface. Constaté en test le 2026-09-11 avant toute donnée réelle.
+
+    D'où la règle : rTorrent **et** Sonarr montent le **même et unique** dossier hôte
+    `/srv/seedbox/data` sur `/downloads`, et la bibliothèque vit **sous** lui, en
+    `/downloads/media/`. Bonus : les deux voient exactement les mêmes chemins, donc aucun
+    *Remote Path Mapping* n'est nécessaire côté Sonarr.
+
+    Vérification, à faire **depuis le conteneur Sonarr** et non depuis l'hôte :
+
+    ```bash
+    docker exec seedbox_sonarr sh -c 'touch /downloads/complete/.t && ln /downloads/complete/.t /downloads/media/.t && stat -c %h /downloads/complete/.t'
+    # doit afficher 2 (deux liens sur le meme inode), puis nettoyer les .t
+    ```
 
 !!! warning "Ne pas faire pointer Jellyfin sur `downloads/complete`"
     C'était le montage initial, avant Sonarr. Il faut désormais `media/` : c'est là que vivent les
@@ -100,8 +117,9 @@ Arborescence, avec l'UID/GID `1000:1000` attendu par l'image rTorrent (`PUID`/`P
 
 ```bash
 mkdir -p /srv/seedbox/config/rtorrent/watch /srv/seedbox/passwd \
-         /srv/seedbox/downloads/complete \
-         /srv/seedbox/downloads/temp
+         /srv/seedbox/data/temp \
+         /srv/seedbox/data/complete/{films,series,musique} \
+         /srv/seedbox/data/media/{films,series}
 chown -R 1000:1000 /srv/seedbox
 ```
 
@@ -114,18 +132,18 @@ chown -R 1000:1000 /srv/seedbox
     | `cfg.download_complete` | `/downloads/complete/` | Déplacés ici **à la fin** (`event.download.finished`) |
     | `cfg.watch` | `/data/rtorrent/watch/` → `config/rtorrent/watch/` | Dépôt de `.torrent` |
 
-    Créer un `downloads/incomplete/` ou un `downloads/watch/` ne sert à rien : rTorrent ne les
-    regarde pas. Et c'est bien `complete/` que [Jellyfin](jellyfin.md) monte en lecture seule —
-    la médiathèque ne se remplit donc **qu'au moment où un torrent se termine**.
+    Côté hôte, ce `/downloads` est **`/srv/seedbox/data`**. Créer un `incomplete/` ou un
+    `downloads/watch/` ne sert à rien : rTorrent ne les regarde pas. Les sous-dossiers de
+    `complete/` correspondent aux **labels ruTorrent** — voir [Jellyfin](jellyfin.md).
 
 | Chemin hôte | Monté dans | Contenu |
 | --- | --- | --- |
 | `/srv/seedbox/config` | `rtorrent:/data` | `.rtorrent.rc`, session rTorrent, logs, et le dossier **`rtorrent/watch/`** où déposer les `.torrent` |
-| `/srv/seedbox/downloads` | `rtorrent:/downloads` | `temp/` (en cours) et `complete/` (terminés, seedés) |
+| `/srv/seedbox/data` | `rtorrent:/downloads` **et** `sonarr:/downloads` | `temp/` (en cours), `complete/<label>/` (terminés, seedés) et `media/` (bibliothèque renommée). **Un seul montage pour les deux** — voir l'encadré sur le lien dur |
 | `/srv/seedbox/passwd` | `rtorrent:/passwd` | htpasswd nginx — **laissé vide** : l'auth est faite par Authelia |
 | `/data/seedbox/gluetun` | `gluetun:/gluetun` | État gluetun (serveurs Proton, port forwardé) — disque système |
 
-`/srv/seedbox/downloads/complete` est aussi monté **en lecture seule** dans Jellyfin
+`/srv/seedbox/data/media` est monté **en lecture seule** dans Jellyfin
 (voir [Jellyfin](jellyfin.md)), et `/srv/seedbox` en entier dans [Filestash](filestash.md).
 
 !!! warning "Toujours monter le disque AVANT de déployer la stack"

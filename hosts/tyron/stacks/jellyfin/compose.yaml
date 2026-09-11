@@ -19,7 +19,7 @@ services:
       # downloads/complete), en LECTURE SEULE : Jellyfin ne doit jamais pouvoir
       # toucher aux fichiers que rTorrent est en train de seeder — et un lien dur
       # partage les mêmes octets que l'original.
-      - /srv/seedbox/media:/media:ro
+      - /srv/seedbox/data/media:/media:ro
       - /etc/localtime:/etc/localtime:ro
     # --- Transcodage matériel (désactivé) -----------------------------------
     # La VM n'expose pas de noeud de rendu DRI (/dev/dri/renderD128 absent) :

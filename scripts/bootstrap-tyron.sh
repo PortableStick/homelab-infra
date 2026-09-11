@@ -75,18 +75,23 @@ fi
 #   cfg.watch             = /data/rtorrent/watch/  (dépôt de .torrent)
 # Ne pas inventer d'autres noms (incomplete/, downloads/watch/…) : rTorrent ne les
 # utiliserait pas, et Jellyfin comme Filestash pointent sur ces chemins précis.
+#
+# Côté hôte, ce `/downloads` correspond à ${MOUNT}/data. Ce dossier est le montage
+# UNIQUE partagé par rTorrent et Sonarr — c'est la condition du lien dur : deux bind
+# mounts distincts apparaissent au noyau comme deux périphériques et font échouer
+# `ln` en « Cross-device link ». La bibliothèque vit donc SOUS lui, en data/media/.
 log "Arborescence de ${MOUNT}"
 # Les sous-dossiers de complete/ correspondent aux LABELS ruTorrent : rTorrent y range
 # tout seul en fin de téléchargement (`d.get_finished_dir` = complete/ + label). On les
 # crée d'avance pour pouvoir déclarer les médiathèques Jellyfin avant le 1er téléchargement.
 mkdir -p "${MOUNT}/config/rtorrent/watch" \
          "${MOUNT}/passwd" \
-         "${MOUNT}/downloads/temp" \
-         "${MOUNT}/downloads/complete/films" \
-         "${MOUNT}/downloads/complete/series" \
-         "${MOUNT}/downloads/complete/musique" \
-         "${MOUNT}/media/series" \
-         "${MOUNT}/media/films"
+         "${MOUNT}/data/temp" \
+         "${MOUNT}/data/complete/films" \
+         "${MOUNT}/data/complete/series" \
+         "${MOUNT}/data/complete/musique" \
+         "${MOUNT}/data/media/series" \
+         "${MOUNT}/data/media/films"
 chown -R "${PUID}:${PGID}" "${MOUNT}"
 
 # --- 3. données des stacks (disque système) --------------------------------
