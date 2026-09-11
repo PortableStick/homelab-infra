@@ -56,7 +56,7 @@ Concrètement :
 | `.sops.yaml` | Règles de chiffrement SOPS (quels chemins, quelle clé age). |
 | `.gitleaks.toml` + `.github/workflows/gitleaks.yml` | Scan anti-fuite de secrets (CI + local). |
 | `.githooks/pre-commit` | Refuse le commit d'un secret non chiffré et lance `gitleaks protect`. |
-| `scripts/` | Scripts d'exploitation : `bootstrap.sh` (bootstrap manuel du VPS/Komodo) et `bootstrap-periphery.sh` (rattachement d'un hôte Periphery). |
+| `scripts/` | Scripts d'exploitation : `bootstrap.sh` (bootstrap manuel du VPS/Komodo), `bootstrap-periphery.sh` (rattachement d'un hôte Periphery) et `bootstrap-tyron.sh` (prépa disque/répertoires de l'hôte seedbox). |
 
 ## Carte de la documentation
 

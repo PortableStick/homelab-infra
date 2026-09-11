@@ -28,6 +28,10 @@ Sources : `hosts/tyron/stacks/seedbox/`, `secrets/tyron/seedbox.env`,
 Un disque de **700 Go** est dédié aux téléchargements, séparé du disque système (128 Go) pour qu'un
 disque plein n'empêche pas la VM de tourner.
 
+Le script versionné `scripts/bootstrap-tyron.sh` fait tout ça (formatage, fstab, arborescence,
+répertoires `/data`, réseau Docker `proxy`) et refuse de formater un disque qui porte déjà une
+signature. Pour le détail, ou pour le faire à la main :
+
 ```bash
 # Préparation initiale (une seule fois, disque vierge)
 parted -s /dev/sdb mklabel gpt
