@@ -78,14 +78,15 @@ Configuration dans `compose.yaml` (non-secrets) :
 | `SERVER_COUNTRIES` | `Spain` | Pays de sortie — la config Proton a été générée sur `ES#44` |
 | `PORT_FORWARD_ONLY` | `on` | gluetun ne retient que les serveurs Proton qui supportent le port forwarding |
 | `VPN_PORT_FORWARDING` | `on` | Active la négociation NAT-PMP |
-| `DOT` / `DNS_ADDRESS` | `off` / `10.2.0.1` | Résolveur DNS **de Proton, dans le tunnel** : pas de fuite DNS vers le FAI |
+| *(DNS)* | valeurs par défaut de gluetun | Résolveur **DoT interne à gluetun**, qui sort par le tunnel : aucune requête DNS ne part chez le FAI |
 
 !!! info "gluetun ne se limite pas au serveur du fichier de conf"
     La clé privée WireGuard générée par Proton fonctionne avec **n'importe quel** serveur Proton :
     gluetun en choisit un lui-même parmi ceux qui correspondent à `SERVER_COUNTRIES` +
     `PORT_FORWARD_ONLY`, et en change tout seul si celui en cours ne répond plus. Les lignes
     `[Peer]`, `Endpoint` et `DNS` du fichier téléchargé chez Proton ne sont donc **pas** reprises
-    dans la configuration.
+    dans la configuration — et surtout **il ne faut pas figer `DNS_ADDRESS` sur le `10.2.0.1`**
+    du fichier : c'est le résolveur interne d'**un** serveur, pas une adresse valable partout.
 
 ## Port forwarding (NAT-PMP) — indispensable pour seeder
 

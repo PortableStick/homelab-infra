@@ -23,9 +23,10 @@ services:
       # Port forwarding NAT-PMP (exige "NAT-PMP" activé sur la config Proton).
       VPN_PORT_FORWARDING: "on"
       VPN_PORT_FORWARDING_UP_COMMAND: "/bin/sh /gluetun/set-rtorrent-port.sh {{PORTS}}"
-      # DNS de Proton dans le tunnel (pas de fuite DNS vers le FAI).
-      DOT: "off"
-      DNS_ADDRESS: "10.2.0.1"
+      # DNS : on garde le resolveur DoT interne de gluetun (defaut). Il sort par le
+      # tunnel, donc aucune requete DNS ne part chez le FAI. Ne PAS figer ici le
+      # resolveur interne d'un serveur Proton donne (10.2.0.1) : gluetun choisit son
+      # serveur lui-meme parmi ceux de SERVER_COUNTRIES, et en change en cours de route.
       HEALTH_VPN_DURATION_INITIAL: "30s"
     # WIREGUARD_PRIVATE_KEY + WIREGUARD_ADDRESSES : rendu par pre_deploy (sops -d).
     env_file:
