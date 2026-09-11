@@ -80,14 +80,38 @@ fi
 
 # --- 4. autoriser le Core VPS + restreindre les IP --------------------------
 [ -n "${CORE_PUBLIC_KEY}" ] || die "CORE_PUBLIC_KEY vide — renseigne la clé publique du Core (UI > Settings)."
-if ! grep -q '^core_public_keys' "${PERIPHERY_CONFIG}"; then
-  log "Autorisation du Core (core_public_keys)"
-  printf '\ncore_public_keys = "%s"\n' "${CORE_PUBLIC_KEY}" >> "${PERIPHERY_CONFIG}"
-fi
-if ! grep -q '^allowed_ips' "${PERIPHERY_CONFIG}"; then
-  log "Restriction d'accès (allowed_ips)"
-  printf 'allowed_ips = %s\n' "${ALLOWED_IPS}" >> "${PERIPHERY_CONFIG}"
-fi
+# Pose une clé de config : remplace la ligne si elle existe déjà, sinon l'ajoute,
+# puis vérifie que l'écriture a bien eu lieu.
+#
+# Un simple `grep -q '^cle' || append` ne suffit PAS : le gabarit livré par
+# l'installeur contient déjà des lignes ACTIVES portant les valeurs par défaut
+# (`allowed_ips = []`, `bind_ip = "[::]"`). Le test réussissait donc, le script
+# affichait « Restriction d'accès » — et n'écrivait rien. La Periphery restait
+# ouverte à toutes les IP. Piège rencontré le 2026-09-11 en installant
+# docker-tyron ; vérifier aussi les hôtes installés avec l'ancienne version.
+set_config() {
+  local key="$1" value="$2"
+  if grep -qE "^${key}[[:space:]]*=" "${PERIPHERY_CONFIG}"; then
+    sed -i "s|^${key}[[:space:]]*=.*|${key} = ${value}|" "${PERIPHERY_CONFIG}"
+  else
+    printf '\n%s = %s\n' "${key}" "${value}" >> "${PERIPHERY_CONFIG}"
+  fi
+  grep -qF "${key} = ${value}" "${PERIPHERY_CONFIG}" \
+    || die "Échec de l'écriture de ${key} dans ${PERIPHERY_CONFIG}"
+}
+
+log "Autorisation du Core (core_public_keys)"
+set_config core_public_keys "\"${CORE_PUBLIC_KEY}\""
+
+log "Restriction d'accès (allowed_ips)"
+# bind_ip en IPv4 pur : avec le défaut `[::]`, une connexion IPv4 arrive sous la
+# forme ::ffff:a.b.c.d, qui ne se compare pas à un CIDR IPv4 d'allowed_ips.
+set_config bind_ip "\"0.0.0.0\""
+set_config allowed_ips "${ALLOWED_IPS}"
+
+# Nom du serveur tel que déclaré côté Core. Inerte en mode inbound, mais évite de
+# laisser le hostname de la machine, qui prête à confusion dans les logs.
+set_config connect_as "\"${CONNECT_AS}\""
 
 # --- 5. SOPS_AGE_KEY_FILE pour le service (pre_deploy des stacks) ------------
 log "Drop-in systemd : SOPS_AGE_KEY_FILE"

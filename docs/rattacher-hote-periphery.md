@@ -137,6 +137,40 @@ CORE_PUBLIC_KEY="MCow...clé_du_Core..." ./scripts/bootstrap-periphery.sh
 Le script demande de **coller la clé privée age** (depuis Bitwarden) et vérifie qu'elle correspond bien
 à la clé publique du repo. Pour un autre hôte, surcharger `CONNECT_AS` (ex. `CONNECT_AS=docker-tyron`).
 
+## 2 bis. Autoriser le VPS à joindre le nouvel hôte (ACL Tailscale)
+
+!!! danger "Étape obligatoire, invisible depuis les deux machines"
+    Le VPS est le **seul nœud `tagged-devices`** du tailnet ; tous les autres appartiennent au
+    compte `PortableStick@`. L'ACL du tailnet laisse les appareils de l'utilisateur se joindre
+    entre eux, mais donne au VPS un accès **nominatif**, hôte par hôte. Un hôte fraîchement
+    rattaché n'est donc **pas** joignable par le Core, alors que tout semble correct des deux
+    côtés : la Periphery écoute, le poste de travail l'atteint, la VM *pingue* le VPS.
+
+    Symptôme exact côté Core : `Failed to connect to websocket | url: wss://100.x.x.x:8120/...`,
+    et **aucune trace** dans `journalctl -u periphery` — la connexion est jetée par Tailscale
+    avant d'arriver.
+
+Pour lever le doute, lire le filtre de paquets **entrant** que Tailscale a poussé au nouvel hôte :
+
+```bash
+# sur le nouvel hôte
+tailscale debug netmap | jq '.PacketFilter[].Srcs'
+```
+
+L'IP tailnet du VPS (`100.67.165.98`) doit figurer dans cette liste. Si elle en est absente,
+ajouter l'hôte à la règle correspondante dans la console Tailscale (**Access controls**) :
+
+```json
+{
+  "action": "accept",
+  "src":    ["tag:<tag-du-vps>"],
+  "dst":    ["100.65.11.58:8120", "100.92.25.102:8120"]
+}
+```
+
+Mieux : remplacer les IP brutes par des alias `hosts` ou un `tag:periphery` posé sur chaque hôte
+Periphery, pour que le prochain rattachement ne redemande pas d'édition d'ACL.
+
 ## 3. Accepter la Periphery côté Core
 
 Comme c'est une install neuve, sa clé publique n'est pas encore approuvée. UI Komodo → **Servers** →
@@ -203,6 +237,9 @@ l'app mobile Immich.
 | `password authentication failed for user "postgres"` | `.env` vide (secret chiffré vide) **ou** mot de passe ≠ base | recréer le secret **non vide** (§1) ; sinon réaligner la base : `docker exec -it immich_postgres psql -U postgres -c "ALTER USER postgres PASSWORD '<mdp>';"` |
 | `container name "/traefik" already in use` | restes de l'ancien déploiement | nettoyer conteneurs + réseaux (§4) |
 | `.env` rendu vide malgré un `pre_deploy` en succès | secret déchiffre en vide (`sops -d` sort rien, `EXIT=0`) | vérifier le contenu clair **avant** `sops -e -i` |
+| `Failed to connect to websocket \| wss://100.x:8120`, **rien** dans `journalctl -u periphery` | ACL Tailscale : le VPS (`tagged-devices`) n'a pas accès au nouvel hôte | ajouter l'hôte à la règle d'ACL — voir §2 bis |
+| La Periphery accepte toutes les IP alors que le script annonce « Restriction d'accès » | Bug corrigé le 2026-09-11 : le gabarit contient déjà `allowed_ips = []`, donc l'ancien test `grep -q '^allowed_ips'` réussissait et le script n'écrivait rien | relancer `bootstrap-periphery.sh` (version actuelle), ou corriger à la main puis `systemctl restart periphery` ; **vérifier les hôtes installés avant cette date** |
+| `allowed_ips` renseigné mais le Core est refusé | Periphery bindée sur `[::]` : une connexion IPv4 arrive en `::ffff:a.b.c.d` et ne matche pas un CIDR IPv4 | `bind_ip = "0.0.0.0"` (posé par le script depuis le 2026-09-11) |
 
 ---
 
