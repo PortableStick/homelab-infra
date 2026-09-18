@@ -3,7 +3,7 @@ name: wings
 services:
   wings:
     container_name: wings
-    image: ghcr.io/pelican-dev/wings:latest
+    image: ghcr.io/pelican/wings:latest
     restart: unless-stopped
     networks:
       - wings0

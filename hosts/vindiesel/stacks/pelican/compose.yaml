@@ -3,7 +3,7 @@ name: pelican
 services:
   panel:
     container_name: pelican_panel
-    image: ghcr.io/pelican-dev/panel:latest
+    image: ghcr.io/pelican/panel:latest
     networks:
       - proxy
       - backend
