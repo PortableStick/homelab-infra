@@ -12,3 +12,6 @@ hosts/**/.env
 !**/*.example
 # Build MkDocs local (déployé sur gh-pages par la CI)
 site/
+
+# Sortie graphify (graphe de connaissance local, non versionne)
+graphify-out/
