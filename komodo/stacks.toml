@@ -254,6 +254,22 @@ pre_deploy.path = "hosts/vindiesel/stacks/pelican"
 pre_deploy.command = "sops -d ../../../../secrets/vindiesel/pelican.env > .env"
 
 [[stack]]
+name = "fnc"
+description = "Fast & Curious (addon streaming) - dépôt privé"
+deploy = true
+after = ["traefik-vindiesel"]
+tags = ["app", "vindiesel"]
+[stack.config]
+server = "docker-vindiesel"
+git_provider = "github.com"
+git_account = "PortableStick"
+repo = "PortableStick/fast_and_curious"
+file_paths = ["deploy/vindiesel/compose.yaml"]
+run_build = true
+pre_deploy.path = "deploy/vindiesel"
+pre_deploy.command = "sops -d secrets/gluetun.env > gluetun.env && sops -d secrets/postgres.env > postgres.env && sops -d secrets/fnc.env > .env"
+
+[[stack]]
 name = "traefik-tyron"
 description = "Reverse proxy local seedbox"
 deploy = true

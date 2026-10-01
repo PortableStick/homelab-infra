@@ -42,6 +42,37 @@ http:
       service: home-vindiesel
       tls: {}
 
+    # Fast & Curious : addon PUBLIC (lecteurs hors tailnet). Le Traefik de vindiesel
+    # ne laisse passer que les routes de l'addon sur ce nom.
+    fnc:
+      rule: "Host(`fnc.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-vindiesel
+      tls: {}
+
+    # Fast & Curious interne : plugin Jellyfin et lecture, tailnet seulement (jeton du plugin).
+    fnc-int-plugin:
+      rule: "Host(`fnc.int.vindiesel.vip`) && (PathPrefix(`/plugin/`) || PathPrefix(`/play/`) || PathPrefix(`/videos/`))"
+      entryPoints:
+        - websecure
+      service: home-vindiesel
+      middlewares:
+        - int-vpn
+      priority: 100
+      tls: {}
+
+    # Fast & Curious interne : administration, tailnet + Authelia.
+    fnc-int:
+      rule: "Host(`fnc.int.vindiesel.vip`)"
+      entryPoints:
+        - websecure
+      service: home-vindiesel
+      middlewares:
+        - int-vpn
+        - authelia@docker
+      tls: {}
+
   services:
     home-vindiesel:
       loadBalancer:
