@@ -11,6 +11,11 @@ services:
       TZ: "Europe/Paris"
       # URL annoncée aux clients (autodiscovery, liens de partage, DLNA).
       JELLYFIN_PublishedServerUrl: "https://jellyfin.vindiesel.vip"
+    # Plugin Fast & Curious : fnc.int.vindiesel.vip n'est pas résolu par le DNS du
+    # conteneur (via le MagicDNS de tyron) alors que la route par le tailnet marche.
+    # IP Tailscale du VPS (edge Traefik), comme dans l'enregistrement DNS public.
+    extra_hosts:
+      - "fnc.int.vindiesel.vip:100.67.165.98"
     volumes:
       - /data/jellyfin/config:/config
       # Cache + transcodage : sur le disque système, pas sur le disque seedbox.
