@@ -1,0 +1,78 @@
+# Trame — agenda hebdomadaire TDAH. Squelette d'infrastructure.
+#
+# ÉTAT : l'application n'existe pas encore (spec + maquette seulement, dépôt
+# PortableStick/trame). Cette stack monte la chaîne complète DNS -> Traefik ->
+# TLS -> PocketBase et sert la maquette comme page publique, pour valider le
+# chemin avant d'avoir du code à déployer.
+#
+# pb_public est monté depuis ./public et contient AUJOURD'HUI la maquette
+# statique, recopiée depuis trame/demo/vue-globale.html. Elle sera remplacée
+# par le build du front (Vite) quand il existera — cf. trame/docs/SPEC.md §10.
+
+name: trame
+
+services:
+  pocketbase:
+    container_name: trame_pocketbase
+    # Pas d'image officielle PocketBase : on construit depuis la release
+    # GitHub, version épinglée — la même que mangetout, volontairement.
+    build:
+      context: .
+      args:
+        PB_VERSION: "0.39.5"
+    image: trame-pocketbase:0.39.5
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - frontend
+    volumes:
+      - /data/trame/pb_data:/pb/pb_data
+      - ./public:/pb/pb_public:ro
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=frontend"
+
+      # --- Application, publique ---
+      # Pas de forward-auth ici : PocketBase fera son propre OIDC vers Authelia
+      # (SPEC §10.2). Un portail devant casserait la PWA et le hors-ligne.
+      - "traefik.http.routers.trame.rule=Host(`trame.vindiesel.vip`)"
+      - "traefik.http.routers.trame.entrypoints=websecure"
+      - "traefik.http.routers.trame.tls=true"
+      - "traefik.http.routers.trame.priority=10"
+      - "traefik.http.routers.trame.middlewares=trame-sec@docker"
+      - "traefik.http.services.trame.loadbalancer.server.port=8090"
+
+      # --- Console d'administration PocketBase ---
+      # Jamais exposée nue : forward-auth Authelia + 2FA (SPEC §10.3).
+      # Priorité plus haute pour gagner contre le routeur ci-dessus.
+      - "traefik.http.routers.trame-admin.rule=Host(`trame.vindiesel.vip`) && PathPrefix(`/_`)"
+      - "traefik.http.routers.trame-admin.entrypoints=websecure"
+      - "traefik.http.routers.trame-admin.tls=true"
+      - "traefik.http.routers.trame-admin.priority=100"
+      - "traefik.http.routers.trame-admin.middlewares=authelia@docker,trame-sec@docker"
+      - "traefik.http.routers.trame-admin.service=trame"
+
+      # --- En-têtes de sécurité ---
+      - "traefik.http.middlewares.trame-sec.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.trame-sec.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.trame-sec.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.trame-sec.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.trame-sec.headers.frameDeny=true"
+      - "traefik.http.middlewares.trame-sec.headers.referrerPolicy=strict-origin-when-cross-origin"
+    healthcheck:
+      test: wget -qO- http://127.0.0.1:8090/api/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  frontend:
+    name: frontend
+    external: true

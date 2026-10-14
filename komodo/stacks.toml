@@ -226,6 +226,19 @@ pre_deploy.path = "hosts/vindiesel/stacks/mangetout"
 pre_deploy.command = "sops -d ../../../../secrets/vindiesel/mangetout.env > .env"
 
 [[stack]]
+name = "trame"
+description = "Trame (PocketBase + maquette) - agenda hebdomadaire TDAH"
+deploy = true
+after = ["traefik", "authelia"]
+tags = ["app"]
+[stack.config]
+server = "Local"
+git_provider = "github.com"
+repo = "PortableStick/homelab-infra"
+file_paths = ["hosts/vps-prod/stacks/trame/compose.yaml"]
+run_build = true
+
+[[stack]]
 name = "obsidian-livesync"
 description = "CouchDB pour Obsidian LiveSync - public"
 deploy = true

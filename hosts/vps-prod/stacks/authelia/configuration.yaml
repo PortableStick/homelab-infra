@@ -91,6 +91,12 @@ access_control:
     ## Futurs services *.int.vindiesel.vip protégés par le middleware forward-auth.
     - domain: '*.int.vindiesel.vip'
       policy: 'two_factor'
+    ## Trame (agenda) : l'application est publique — elle fera son propre OIDC,
+    ## un portail devant casserait la PWA et le mode hors ligne. Seule la console
+    ## d'administration PocketBase (/_/) passe par le forward-auth.
+    - domain: 'trame.vindiesel.vip'
+      resources: ['^/_.*']
+      policy: 'two_factor'
     ## Seedbox (hôte tyron) : services publics mais réservés à l'opérateur.
     ## Jellyfin n'est PAS listé : il n'a pas de middleware forward-auth devant lui
     ## (les apps mobile/TV ne savent pas passer le portail) — voir docs/jellyfin.md.

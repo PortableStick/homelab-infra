@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trame — maquette des vues</title>
+<!-- Aucune requête réseau au chargement : la police par défaut est celle du système.
+     Les trois autres choix sont téléchargés à la demande (voir loadFont).
+     Dans l'app, elles seront auto-hébergées — cf. SPEC §9. -->
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   JETONS
+   Tout est en OKLCH. Les couleurs de catégorie ne sont PAS des hexadécimaux
+   choisis à l'œil : chaque catégorie ne définit qu'une teinte (--h) et un
+   chroma (--c), et le système impose les clartés (« tone »). C'est la règle
+   de Material 3 : le contraste se garantit par un écart de clarté suffisant,
+   pas en testant des couples de couleurs après coup.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fs: 14px;            /* pilote TOUT : chaque taille du produit est en rem */
+  --density: 1;
+  --hour: calc(4.6rem * var(--density));
+  --gutter: 3.4rem;
+  --ovh: calc(12.8rem * var(--density));
+
+  --bg:         oklch(0.17 0.012 265);
+  --surface:    oklch(0.21 0.013 265);
+  --surface-2:  oklch(0.25 0.014 265);
+  --line:       oklch(0.30 0.012 265);  /* graduations : décoratif, cf. SPEC §9 */
+  --line-soft:  oklch(0.25 0.010 265);
+  --line-ctrl:  oklch(0.52 0.015 265);  /* bordures de contrôles : ≥ 3:1 */
+  --text:       oklch(0.95 0.005 265);
+  --muted:      oklch(0.72 0.012 265);
+  --faint:      oklch(0.62 0.010 265);
+  --accent:     oklch(0.78 0.11 230);   /* « aujourd'hui », et rien d'autre */
+  --now:        oklch(0.68 0.19 25);
+  --today-bg:   oklch(0.23 0.022 240);
+  --focus-ring: oklch(0.85 0.14 230);
+
+  --r-s: .25rem; --r-m: .45rem; --r-l: .65rem;
+  --z-block:1; --z-tiny:2; --z-now:3; --z-head:4; --z-scrim:8; --z-panel:9; --z-tabbar:10;
+}
+:root[data-theme="light"]{
+  --bg:         oklch(0.985 0.003 265);
+  --surface:    oklch(1 0 0);
+  --surface-2:  oklch(0.975 0.004 265);
+  --line:       oklch(0.89 0.006 265);
+  --line-soft:  oklch(0.93 0.005 265);
+  --line-ctrl:  oklch(0.62 0.020 265);
+  --text:       oklch(0.25 0.015 265);
+  --muted:      oklch(0.42 0.012 265);
+  --faint:      oklch(0.48 0.010 265);
+  --accent:     oklch(0.48 0.13 240);
+  --now:        oklch(0.52 0.20 25);
+  --today-bg:   oklch(0.965 0.016 240);
+  --focus-ring: oklch(0.45 0.16 240);
+}
+
+*{box-sizing:border-box}
+html{font-size:var(--fs)}
+body{
+  margin:0; min-height:100dvh; background:var(--bg); color:var(--text);
+  font-family:var(--font); font-size:1rem; line-height:1.35;
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; height:100dvh; overflow:clip;
+}
+button{font:inherit; color:inherit; background:none; border:none; cursor:pointer}
+:focus-visible{outline:2px solid var(--focus-ring); outline-offset:2px; border-radius:var(--r-s)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* ─────────────────────────── barre du haut ─────────────────────────── */
+header{
+  flex:0 0 auto; display:flex; align-items:center; gap:.85rem; flex-wrap:wrap;
+  padding:.5rem .85rem; background:var(--surface); border-bottom:1px solid var(--line);
+}
+h1{margin:0; font-size:.95rem; font-weight:700; letter-spacing:-.01em; white-space:nowrap}
+h1 span{color:var(--faint); font-weight:500; font-size:.72rem; letter-spacing:.04em; margin-left:.3rem}
+
+/* Le bandeau « maintenant » est l'information la plus importante du produit
+   (SPEC §7.2). Il n'est donc JAMAIS la première chose supprimée : en dessous
+   de 900px il passe en pleine largeur et grossit, c'est le logo qui saute. */
+.now-strip{
+  display:flex; align-items:center; gap:.5rem; margin:0;
+  padding:.3rem .7rem .3rem .55rem; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:999px;
+  font-size:.9rem; min-width:0;
+}
+.now-strip .dot{width:.5rem;height:.5rem;border-radius:50%;background:var(--now);flex:0 0 auto;
+  box-shadow:0 0 0 .18rem color-mix(in oklab,var(--now) 25%, transparent)}
+.now-strip .t{font-variant-numeric:tabular-nums; color:var(--muted)}
+.now-strip b{font-weight:600}
+.now-strip .rest{color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.now-strip .fait{color:var(--muted); white-space:nowrap}
+
+.grow{flex:1 1 auto}
+.navgrp{display:flex; align-items:center; gap:.3rem}
+.btn{border:1px solid var(--line-ctrl); background:var(--surface-2); border-radius:var(--r-m);
+  padding:.35rem .6rem; font-size:.9rem; color:var(--muted)}
+.btn:hover{color:var(--text); background:var(--surface)}
+.btn:active{transform:translateY(1px)}
+.period{font-weight:600; font-size:.92rem; white-space:nowrap; min-width:11rem; text-align:center}
+.seg{display:flex; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-l); padding:.15rem; gap:.15rem}
+.seg button{padding:.35rem .7rem; border-radius:var(--r-m); font-size:.9rem; color:var(--muted); white-space:nowrap}
+.seg button:hover{color:var(--text)}
+.seg button[aria-pressed="true"]{background:var(--bg); color:var(--text); font-weight:600; box-shadow:inset 0 0 0 1px var(--line-ctrl)}
+
+/* ─────────────────────────── scène ─────────────────────────── */
+main{flex:1; min-height:0; display:flex; position:relative}
+.stage{flex:1; min-width:0; display:flex; flex-direction:column}
+.scroller{flex:1; min-height:0; overflow:auto; scrollbar-width:thin}
+.head,.cols{display:grid; grid-template-columns:var(--gutter) repeat(var(--n),minmax(0,1fr))}
+.head{position:sticky; top:0; z-index:var(--z-head); background:var(--surface); border-bottom:1px solid var(--line)}
+.head .cell{padding:.4rem .4rem .45rem; text-align:center; border-left:1px solid var(--line-soft); min-width:0}
+.head .cell:first-child{border-left:none}
+.head .dow{font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.head .dnum{font-size:1.2rem; font-weight:600; line-height:1.1}
+.head .cell.today .dow,.head .cell.today .dnum{color:var(--accent)}
+.head .load{margin:.25rem auto 0; height:.2rem; width:60%; border-radius:999px; background:var(--line)}
+.head .load i{display:block;height:100%;border-radius:999px;background:var(--faint)}
+
+.cols{position:relative}
+/* Vue Jour : au-delà d'une certaine largeur, une colonne unique étire chaque
+   bloc en ruban. On borne la mesure et on centre, comme une colonne de texte. */
+.stage[data-view="1"] .head,.stage[data-view="1"] .cols{max-width:46rem; margin-inline:auto}
+.gutter{position:relative; border-right:1px solid var(--line)}
+.gutter span{position:absolute; right:.5rem; transform:translateY(-50%);
+  font-size:.78rem; color:var(--muted); font-variant-numeric:tabular-nums}
+.col{position:relative; border-left:1px solid var(--line);
+  background-image:
+    repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px var(--hour)),
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--hour)/2), var(--line-soft) calc(var(--hour)/2) calc(var(--hour)/2 + 1px), transparent calc(var(--hour)/2 + 1px) var(--hour));
+}
+/* :is() égalise la spécificité : « aujourd'hui » ne doit jamais perdre
+   contre « week-end » un samedi (bug de la v1). */
+.col.weekend{background-color:color-mix(in oklab, var(--bg) 55%, transparent)}
+.col.today{background-color:var(--today-bg)}
+.col-empty{position:absolute; inset:35% .5rem auto; text-align:center; font-size:.8rem; color:var(--faint)}
+
+/* bandes « hors plage » : rien ne disparaît en silence */
+.oob{position:absolute; left:.15rem; right:.15rem; display:flex; align-items:center; justify-content:center;
+  gap:.25rem; height:1.15rem; font-size:.72rem; color:var(--muted); background:var(--surface-2);
+  border:1px dashed var(--line-ctrl); border-radius:var(--r-s); z-index:var(--z-tiny)}
+.oob.top{top:.15rem} .oob.bot{bottom:.15rem}
+
+/* ─────────────────────────── blocs ─────────────────────────── */
+.b{
+  --fill: oklch(0.28 calc(var(--c) * 0.42) var(--h));
+  --ink:  oklch(0.90 calc(var(--c) * 0.55) var(--h));
+  --ink2: oklch(0.78 calc(var(--c) * 0.40) var(--h));
+  --bar:  oklch(0.72 var(--c) var(--h));
+  --barw: 3px;
+  position:absolute; z-index:var(--z-block); container-type:inline-size;
+  border-radius:var(--r-s); padding:.1rem .35rem .1rem .5rem; overflow:hidden;
+  background:var(--fill); color:var(--ink);
+  box-shadow:inset var(--barw) 0 0 0 var(--bar);
+  text-align:left; cursor:pointer;
+}
+:root[data-theme="light"] .b{
+  --fill: oklch(0.955 calc(var(--c) * 0.30) var(--h));
+  --ink:  oklch(0.40 var(--c) var(--h));
+  --ink2: oklch(0.47 calc(var(--c) * 0.85) var(--h));
+  --bar:  oklch(0.60 var(--c) var(--h));
+}
+/* Le passé recule par son CONTENANT, jamais par l'opacité du texte :
+   l'opacité faisait tomber les titres à 2,1:1 dans la v1. */
+.b.past{--fill: oklch(0.225 calc(var(--c) * 0.14) var(--h)); --barw:2px}
+:root[data-theme="light"] .b.past{--fill: oklch(0.982 calc(var(--c) * 0.09) var(--h))}
+.b .t{font-weight:600; font-size:.86rem; line-height:1.2; overflow:hidden;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow-wrap:anywhere}
+.b .m{font-size:.76rem; color:var(--ink2); font-variant-numeric:tabular-nums; white-space:nowrap}
+.b .ck{font-size:.8rem; margin-right:.2rem}
+.b.done .t{text-decoration:line-through; text-decoration-thickness:.09em}
+
+/* paliers — les seuils en px sont calculés en JS depuis la taille de base,
+   pour que la règle tienne quelle que soit la taille de texte choisie. */
+.b.s-30,.b.s-15{display:flex; align-items:center; gap:.35rem; padding-block:0}
+.b.s-30 .t,.b.s-15 .t{-webkit-line-clamp:1; flex:1; min-width:0; white-space:nowrap;
+  text-overflow:ellipsis; display:block}
+/* Règle d'or (SPEC §4.1) : le titre passe avant l'heure. Dans une colonne
+   étroite, l'heure disparaît — jamais le titre. Mesuré : sans ça, un titre
+   tombait à 7px de large pendant que l'heure gardait ses 34px. */
+@container (max-width: 7rem){ .b.s-30 .m, .b.s-15 .m{display:none} }
+.b.s-30 .t{font-size:.82rem}
+.b.s-15 .t{font-size:.8rem}          /* plancher 11px à --fs:14 — SPEC §4.1 */
+.b.s-15 .m{font-size:.72rem}
+.b.s-5{overflow:visible; padding:0; background:none; box-shadow:none;
+  display:flex; align-items:center; gap:.35rem; z-index:var(--z-tiny)}
+.b.s-5::before{content:""; flex:0 0 auto; width:1.6rem; height:100%; min-height:3px;
+  border-radius:999px; background:var(--bar)}
+.b.s-5 .t{flex:1; min-width:0; display:block; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; font-size:.8rem; line-height:1; color:var(--ink)}
+
+.more{position:absolute; right:.15rem; z-index:var(--z-tiny); font-size:.74rem; font-weight:600; color:var(--muted);
+  background:var(--surface-2); border:1px solid var(--line-ctrl); border-radius:var(--r-s);
+  padding:.05rem .3rem}
+
+.nowline{position:absolute; left:var(--gutter); right:0; height:0; z-index:var(--z-now); pointer-events:none}
+.nowline .rule{position:absolute; left:0; right:0; top:-1px; height:1px; background:var(--now); opacity:.45}
+.nowline .strong{position:absolute; top:-1px; height:2px; background:var(--now); opacity:1}
+.nowline b{position:absolute; left:calc(-1 * var(--gutter)); top:50%; transform:translateY(-50%);
+  width:calc(var(--gutter) - .25rem); text-align:right; font-size:.78rem; font-weight:700;
+  color:var(--now); background:var(--bg); border-radius:var(--r-s); padding:.1rem .25rem;
+  font-variant-numeric:tabular-nums}
+.nowline i{position:absolute; top:-.28rem; width:.56rem; height:.56rem; border-radius:50%; background:var(--now)}
+
+/* ─────────────────────────── vue d'ensemble ─────────────────────────── */
+.ov{flex:1; min-height:0; overflow:auto; padding:.8rem .9rem 2rem; scrollbar-width:thin}
+.ov-week{display:grid; grid-template-columns:5.5rem repeat(7,minmax(0,1fr)); gap:.4rem; margin-bottom:.6rem}
+.ov-wlabel{display:flex; flex-direction:column; justify-content:center; gap:.1rem; padding-right:.3rem}
+.ov-wlabel .w{font-size:.76rem; color:var(--muted); font-weight:600}
+.ov-wlabel .d{font-size:.84rem; font-weight:600}
+.ov-wlabel .h{font-size:.76rem; color:var(--muted); font-variant-numeric:tabular-nums}
+.ov-wlabel.current .w{color:var(--accent)}
+.ov-day{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-m);
+  padding:.35rem .35rem .4rem; display:flex; flex-direction:column; gap:.3rem; text-align:left; width:100%}
+.ov-day:hover{border-color:var(--line-ctrl)}
+.ov-day.today{border-color:var(--accent); background:var(--today-bg)}
+.ov-day.weekend{background:color-mix(in oklab, var(--surface) 65%, var(--bg))}
+.ov-dhead{display:flex; align-items:baseline; justify-content:space-between; gap:.2rem}
+.ov-dhead .dw{font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:var(--muted)}
+.ov-dhead .dn{font-size:.88rem; font-weight:700; font-variant-numeric:tabular-nums}
+.ov-day.today .dn,.ov-day.today .dw{color:var(--accent)}
+.ov-track{position:relative; height:var(--ovh); border-radius:var(--r-s); overflow:hidden;
+  background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--line-soft)}
+.ov-noon{position:absolute; left:0; right:0; height:1px; background:var(--line)}
+/* Le remplissage de la vue d'ensemble est INDÉPENDANT du thème : c'est une
+   carte de densité, pas une surface d'interface. C'est ce qui rend le
+   contraste de l'étiquette garanti en clair comme en sombre. */
+.ov-b{position:absolute; border-radius:2px; overflow:hidden; display:flex; align-items:center;
+  padding-left:.2rem; background:oklch(0.74 var(--c) var(--h))}
+.ov-b span{font-size:.7rem; font-weight:600; line-height:1; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; color:oklch(0.17 calc(var(--c) * 0.3) var(--h))}
+.ov-empty{position:absolute; inset:0; display:grid; place-items:center; font-size:.76rem; color:var(--faint)}
+.ov-foot{display:flex; align-items:center; gap:.3rem}
+.ov-load{flex:1; height:.25rem; border-radius:999px; background:var(--line); overflow:hidden}
+.ov-load i{display:block; height:100%; border-radius:999px; background:var(--faint)}
+/* « surchargé » est une TRAME, pas une couleur : --accent veut déjà dire
+   « aujourd'hui », et une couleur seule exclut les daltoniens. */
+.ov-load.heavy i{background:repeating-linear-gradient(135deg, var(--muted) 0 2px, transparent 2px 4px), var(--faint)}
+.ov-hrs{font-size:.7rem; color:var(--muted); font-variant-numeric:tabular-nums; min-width:1.6rem; text-align:right}
+.ov-scale{display:flex; flex-direction:column; justify-content:space-between; height:var(--ovh);
+  font-size:.68rem; color:var(--faint); font-variant-numeric:tabular-nums; padding-top:1.1rem}
+
+/* ─────────────────────────── panneau ─────────────────────────── */
+.scrim{display:none; position:absolute; inset:0; background:oklch(0 0 0 / .45); z-index:var(--z-scrim)}
+aside{width:16rem; flex:0 0 16rem; background:var(--surface); border-left:1px solid var(--line);
+  overflow:auto; padding:.9rem; display:none; scrollbar-width:thin; z-index:var(--z-panel)}
+aside.open{display:block}
+aside .ph{display:flex; align-items:center; justify-content:space-between; margin-bottom:.8rem}
+aside h2{margin:0; font-size:1rem; font-weight:700}
+.grp{margin-bottom:1.1rem}
+.grp h3{margin:0 0 .35rem; font-size:.84rem; font-weight:600; color:var(--muted)}
+.opts{display:flex; flex-wrap:wrap; gap:.3rem}
+.opts button{border:1px solid var(--line-ctrl); background:var(--surface-2); border-radius:var(--r-m);
+  padding:.3rem .55rem; font-size:.84rem; color:var(--muted)}
+.opts button:hover{color:var(--text)}
+.opts button[aria-pressed="true"]{border-color:var(--accent); color:var(--text);
+  background:color-mix(in oklab,var(--accent) 14%, var(--surface-2)); font-weight:600}
+.cat{border:1px solid var(--line); border-radius:var(--r-m); padding:.4rem; margin-bottom:.4rem;
+  display:grid; grid-template-columns:minmax(0,1fr); gap:.35rem}
+.cat-top{display:flex; align-items:center; gap:.4rem}
+.cat-sw{width:1.1rem;height:1.1rem;border-radius:var(--r-s);background:oklch(0.74 var(--c) var(--h));flex:0 0 auto}
+.cat-name{flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--line-ctrl);
+  border-radius:var(--r-s); color:var(--text); font:inherit; font-size:.84rem; padding:.2rem .35rem}
+.cat-count{font-size:.74rem; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap}
+.cat-del{color:var(--muted); font-size:.85rem; padding:.15rem .3rem; border-radius:var(--r-s)}
+.cat-del:hover{color:var(--text); background:var(--surface-2)}
+.cat-del[disabled]{opacity:.35; cursor:not-allowed}
+/* Les 12 teintes présélectionnées : le contrôle principal. Le curseur en
+   dessous est l'échappatoire libre. Dans les deux cas la clarté est imposée,
+   donc aucun choix ne peut produire un couple illisible. */
+.hues{display:flex; flex-wrap:wrap; gap:.22rem}
+.hues button{width:1.2rem; height:1.2rem; border-radius:var(--r-s); border:1px solid transparent;
+  background:oklch(0.74 0.13 var(--ph))}
+.hues button[aria-pressed="true"]{border-color:var(--text); box-shadow:0 0 0 1px var(--text)}
+.cat input[type=range]{width:100%; accent-color:oklch(0.74 var(--c) var(--h)); margin:0}
+.addcat{width:100%; border:1px dashed var(--line-ctrl); border-radius:var(--r-m); padding:.35rem;
+  font-size:.84rem; color:var(--muted)}
+.addcat:hover{color:var(--text); border-color:var(--text)}
+.note{font-size:.8rem; color:var(--muted); line-height:1.45}
+
+/* ─────────────────────────── détail d'un bloc ─────────────────────────── */
+/* Bulle ancrée, pas boîte modale : la semaine reste visible autour (P1).
+   L'API popover native fournit la fermeture au clic extérieur et à Échap,
+   et place l'élément en couche supérieure — donc aucun rognage par le
+   overflow du défilement de la grille. */
+#detail{position:fixed; inset:auto; margin:0; width:min(21rem, calc(100vw - 1.5rem));
+  background:var(--surface); color:var(--text); border:1px solid var(--line-ctrl);
+  border-radius:var(--r-l); box-shadow:0 .6rem 1.8rem oklch(0 0 0 / .38); padding:.75rem}
+#detail::backdrop{background:transparent}
+.d-head{display:flex; align-items:center; gap:.4rem; margin-bottom:.3rem}
+.d-cat{display:flex; align-items:center; gap:.3rem; font-size:.8rem; color:var(--muted)}
+.d-cat i{width:.6rem; height:.6rem; border-radius:var(--r-s); background:oklch(0.74 var(--c) var(--h))}
+.d-state{font-size:.78rem; padding:.1rem .4rem; border-radius:999px; border:1px solid var(--line-ctrl); color:var(--muted)}
+.d-title{margin:0 0 .15rem; font-size:1.05rem; font-weight:700; line-height:1.25; overflow-wrap:anywhere}
+.d-title.done{text-decoration:line-through; text-decoration-thickness:.08em}
+.d-when{font-size:.88rem; color:var(--muted); font-variant-numeric:tabular-nums}
+.d-rest{margin-top:.4rem; padding:.3rem .5rem; border-radius:var(--r-m); font-size:.88rem;
+  background:color-mix(in oklab, var(--now) 16%, var(--surface)); color:var(--text)}
+.d-sep{height:1px; background:var(--line); margin:.6rem 0}
+.d-sub{display:flex; align-items:center; gap:.45rem; padding:.18rem 0; font-size:.88rem; width:100%; text-align:left}
+.d-sub .box{width:.95rem; height:.95rem; flex:0 0 auto; border:1px solid var(--line-ctrl);
+  border-radius:var(--r-s); display:grid; place-items:center; font-size:.7rem}
+.d-sub[aria-pressed="true"] .box{background:oklch(0.74 var(--c) var(--h)); border-color:transparent;
+  color:oklch(0.17 calc(var(--c)*.3) var(--h))}
+.d-sub[aria-pressed="true"] span{color:var(--muted); text-decoration:line-through}
+.d-note{font-size:.85rem; color:var(--muted); line-height:1.45}
+.d-opt{display:flex; align-items:center; gap:.45rem; font-size:.85rem; color:var(--muted); width:100%; text-align:left; padding:.18rem 0}
+.d-opt .box{width:.95rem;height:.95rem;flex:0 0 auto;border:1px solid var(--line-ctrl);border-radius:var(--r-s);display:grid;place-items:center;font-size:.7rem}
+.d-opt[aria-pressed="true"] .box{background:var(--accent); border-color:transparent; color:var(--bg)}
+.d-opt[aria-pressed="true"]{color:var(--text)}
+.d-acts{display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.6rem}
+.d-acts button{border:1px solid var(--line-ctrl); background:var(--surface-2); border-radius:var(--r-m);
+  padding:.35rem .6rem; font-size:.85rem; color:var(--muted)}
+.d-acts button:hover{color:var(--text)}
+.d-acts button.primary{border-color:var(--accent); color:var(--text);
+  background:color-mix(in oklab, var(--accent) 16%, var(--surface-2)); font-weight:600}
+@media (max-width:900px){
+  /* feuille basse : les actions tombent dans la zone du pouce */
+  #detail{left:0 !important; right:0; top:auto !important; bottom:0; width:100%;
+    border-radius:var(--r-l) var(--r-l) 0 0; padding-bottom:calc(.75rem + env(safe-area-inset-bottom))}
+  #detail::backdrop{background:oklch(0 0 0 / .45)}
+  .d-acts button{min-height:44px; flex:1 1 7rem}
+}
+
+/* ─────────────────────────── bas de page ─────────────────────────── */
+footer{flex:0 0 auto; display:flex; align-items:center; gap:.8rem; flex-wrap:wrap;
+  padding:.35rem .85rem; border-top:1px solid var(--line); background:var(--surface);
+  font-size:.8rem; color:var(--muted)}
+.lg{display:flex; align-items:center; gap:.3rem}
+.lg i{width:.6rem;height:.6rem;border-radius:var(--r-s);display:block;background:oklch(0.74 var(--c) var(--h))}
+kbd{font-family:ui-monospace,monospace; font-size:.74rem; border:1px solid var(--line-ctrl);
+  border-bottom-width:2px; border-radius:var(--r-s); padding:.05rem .25rem; color:var(--muted)}
+.tabbar{display:none}
+
+/* ─────────────────────────── adaptatif ─────────────────────────── */
+@media (max-width:1100px){ h1 span{display:none} }
+@media (max-width:900px){
+  h1{display:none}                       /* on sacrifie le logo, pas l'heure */
+  header{gap:.5rem; padding:.45rem .6rem; row-gap:.45rem}
+  .now-strip{order:-1; flex:1 0 100%; font-size:1rem; padding:.4rem .8rem}
+  .seg{display:none}                     /* remplacé par la barre d'onglets */
+  .period{min-width:0; flex:1; font-size:.9rem}
+  footer .kbdhint{display:none}
+  aside{position:absolute; right:0; top:0; bottom:0; width:min(18rem,86vw)}
+  .scrim.open{display:block}
+  .tabbar{display:grid; grid-template-columns:repeat(4,1fr); gap:.2rem; flex:0 0 auto;
+    padding:.25rem .4rem calc(.25rem + env(safe-area-inset-bottom)); background:var(--surface);
+    border-top:1px solid var(--line); z-index:var(--z-tabbar)}
+  .tabbar button{padding:.6rem .2rem; border-radius:var(--r-m); font-size:.82rem; color:var(--muted);
+    min-height:44px}
+  .tabbar button[aria-pressed="true"]{background:var(--surface-2); color:var(--text); font-weight:600}
+  .ov-week{grid-template-columns:3.2rem repeat(7,minmax(0,1fr)); gap:.25rem}
+  .ov-wlabel .d,.ov-wlabel .h{display:none}
+  /* 31px par jour : le quantième suffit, le jour de la semaine est donné
+     par la position dans la ligne. Mieux que deux libellés tronqués. */
+  .ov-dhead .dw{display:none}
+  .ov-day{padding:.25rem .2rem .3rem}
+  /* Cibles tactiles : on ne se repose pas sur pointer:coarse, qui n'est pas
+     fiable en émulation ni sur les hybrides tactile/souris. */
+  header .btn,.tabbar button{min-height:44px}
+  /* Semaine complète sur téléphone : plutôt que sept colonnes de 49px où
+     plus aucun titre ne tient, on impose une largeur minimale et la grille
+     défile horizontalement. La colonne des heures reste collée à gauche. */
+  .head,.cols{grid-template-columns:var(--gutter) repeat(var(--n),minmax(6.6rem,1fr))}
+  .gutter{position:sticky; left:0; z-index:5; background:var(--bg)}
+  .head>div:first-child{position:sticky; left:0; z-index:6; background:var(--surface)}
+}
+@media (pointer:coarse){
+  .btn,.seg button,.opts button{min-height:44px; padding-inline:.8rem}
+  .navgrp{gap:.5rem}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Trame <span>maquette</span></h1>
+  <p class="now-strip" id="nowStrip"></p>
+  <div class="navgrp">
+    <button class="btn" id="prev" aria-label="Période précédente"><span aria-hidden="true">‹</span></button>
+    <button class="btn" id="today">Aujourd'hui</button>
+    <button class="btn" id="next" aria-label="Période suivante"><span aria-hidden="true">›</span></button>
+  </div>
+  <p class="period" id="period" aria-live="polite"></p>
+  <div class="grow"></div>
+  <div class="seg" id="views" role="group" aria-label="Choix de la vue">
+    <button data-v="1">Jour</button>
+    <button data-v="3">3 jours</button>
+    <button data-v="7">Semaine</button>
+    <button data-v="ov">Vue d'ensemble</button>
+  </div>
+  <button class="btn" id="cog" aria-expanded="false" aria-controls="panel">Réglages</button>
+</header>
+
+<main>
+  <div class="stage" id="stage"></div>
+  <div class="scrim" id="scrim"></div>
+  <aside id="panel" aria-label="Personnalisation">
+    <div class="ph"><h2>Personnalisation</h2><button class="btn" id="closePanel" aria-label="Fermer les réglages">✕</button></div>
+    <div class="grp"><h3>Police</h3><div class="opts" id="fonts"></div></div>
+    <div class="grp"><h3>Taille du texte</h3><div class="opts" id="sizes">
+      <button data-s="13px">13</button><button data-s="14px">14</button><button data-s="16px">16</button>
+    </div></div>
+    <div class="grp"><h3>Densité</h3><div class="opts" id="dens">
+      <button data-d=".78">Compact</button><button data-d="1">Normal</button><button data-d="1.22">Aéré</button>
+    </div></div>
+    <div class="grp"><h3>Thème</h3><div class="opts" id="themes">
+      <button data-t="auto">Système</button><button data-t="dark">Sombre</button><button data-t="light">Clair</button>
+    </div></div>
+    <div class="grp"><h3>Catégories et couleurs</h3><div id="cats"></div>
+      <p class="note">Renomme, recolore, ajoute ou supprime librement. Tu choisis la teinte ;
+      le système impose la clarté, donc aucun choix ne peut produire un couple illisible.
+      C'est le principe des palettes tonales de Material 3.</p></div>
+    <div class="grp"><h3>Affichage</h3><div class="opts" id="wkend"><button data-w="1">Week-end affiché</button></div></div>
+    <p class="note">Maquette : les réglages sont réels. Glisser-déposer, création, inbox et
+    notifications ne sont pas implémentés.</p>
+  </aside>
+</main>
+
+<div id="detail" popover="auto" role="dialog" aria-labelledby="dTitle"></div>
+
+<nav class="tabbar" id="tabbar" aria-label="Choix de la vue"></nav>
+
+<footer>
+  <span id="legend" style="display:flex;gap:.7rem;flex-wrap:wrap"></span>
+  <span class="grow"></span>
+  <span class="kbdhint"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> vues ·
+    <kbd>←</kbd><kbd>→</kbd> naviguer · <kbd>t</kbd> aujourd'hui · <kbd>Échap</kbd> fermer</span>
+</footer>
+
+<script>
+'use strict';
+/* ═══════════════ données ═══════════════ */
+/* Chaque catégorie ne porte qu'une teinte et un chroma. Les clartés sont
+   imposées par le CSS (cf. bloc JETONS), ce qui garantit le contraste. */
+const CATS = {
+  focus:  {label:'Focus',   h:310, c:0.13},
+  cours:  {label:'Cours',   h:248, c:0.12},
+  corps:  {label:'Corps',   h:150, c:0.12},
+  admin:  {label:'Admin',   h: 70, c:0.13},
+  perso:  {label:'Perso',   h: 15, c:0.13},
+  routine:{label:'Routine', h:196, c:0.10},
+};
+const FONTS = {
+  system:  {label:'Système',  stack:"system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"},
+  inter:   {label:'Inter',    stack:"'Inter', system-ui, sans-serif",      q:'Inter:wght@400;500;600;700'},
+  atkinson:{label:'Atkinson', stack:"'Atkinson Hyperlegible', system-ui, sans-serif", q:'Atkinson+Hyperlegible:wght@400;700'},
+  fraunces:{label:'Fraunces', stack:"'Fraunces', Georgia, serif",          q:'Fraunces:opsz,wght@9..144,400;9..144,600'},
+  mono:    {label:'Mono',     stack:"'JetBrains Mono', ui-monospace, monospace", q:'JetBrains+Mono:wght@400;600'},
+};
+const DAY_START = 7*60, DAY_END = 23*60;
+const DOW = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const DOW_LONG = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+const MONTHS = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+const TPL = [
+ [ ['7:45',10,'Médocs','routine'],['7:55',30,'Petit-déj + douche','routine'],['8:30',25,'Trajet','routine'],
+   ['9:00',120,'Cours — Algo & structures','cours'],['11:00',15,'Appeler le médecin','admin'],
+   ['11:15',45,'Révisions flash','focus'],['12:15',45,'Déjeuner','perso'],['13:15',15,'Marche','corps'],
+   ['14:00',105,'TP Algo — rendu 3','cours'],['16:00',90,'Deep work — Trame','focus'],
+   ['17:45',5,'Vitamines','routine'],['18:15',75,'Muscu — haut du corps','corps'],
+   ['20:00',40,'Dîner','perso'],['21:00',60,'Série','perso'],['22:30',15,'Vaisselle + sac','routine'] ],
+ [ ['7:45',10,'Médocs','routine'],['8:00',30,'Petit-déj','routine'],
+   ['9:30',120,'Cours — Réseaux','cours'],['11:35',20,'Mails en retard','admin'],
+   ['12:30',45,'Déjeuner','perso'],['14:00',180,'Projet — maquette','focus'],
+   ['17:15',15,'Pause café','perso'],['17:30',60,'Courses','admin'],
+   ['19:00',45,'Cuisine','perso'],['20:00',90,'Jeu en ligne','perso'],['22:15',10,'Médocs du soir','routine'] ],
+ [ ['6:00',30,'Réveil raté','routine'],['6:40',35,'Lever difficile','routine'],['7:45',10,'Médocs','routine'],['8:00',25,'Petit-déj','routine'],
+   ['8:40',15,'Confirmer le kiné','admin'],
+   ['9:00',150,'Cours — Maths','cours'],['11:45',30,'Déjeuner rapide','perso'],
+   ['12:30',60,'Sieste / recharge','routine'],['14:00',120,'Deep work — Trame','focus'],
+   ['16:15',45,'Lecture','perso'],['17:30',90,'Escalade','corps'],['20:00',45,'Dîner','perso'],
+   ['21:00',30,'Paperasse CAF','admin'],['22:40',70,'Insomnie — série','perso'],['23:30',40,'Scroll au lit','perso'] ],
+ [ ['7:45',10,'Médocs','routine'],['8:00',30,'Petit-déj','routine'],
+   ['9:00',60,'Réunion projet','cours'],['9:30',45,'Appel asso','admin'],['9:45',30,'Relance stage','admin'],
+   ['9:50',40,'Note de frais','admin'],['10:00',20,'Relevé de notes','admin'],
+   ['10:30',90,'TP Réseaux','cours'],['12:15',45,'Déjeuner','perso'],['13:30',15,'Marche','corps'],
+   ['14:00',150,'Deep work — Trame','focus'],['17:00',20,'Rangement bureau','routine'],
+   ['18:00',75,'Muscu — bas du corps','corps'],['20:00',40,'Dîner','perso'],['21:00',75,'Film','perso'] ],
+ [ ['7:45',10,'Médocs','routine'],['8:00',30,'Petit-déj','routine'],
+   ['9:00',120,'Cours — Systèmes','cours'],['11:15',15,'Déclarer les heures','admin'],
+   ['11:30',45,'Révisions','focus'],['12:30',60,'Déjeuner avec Léa','perso'],
+   ['14:00',120,'Soutenance blanche','cours'],['16:30',60,'Bilan de la semaine','admin'],
+   ['18:00',60,'Natation','corps'],['19:30',45,'Dîner','perso'],['21:00',150,'Soirée','perso'] ],
+ [ ['9:30',10,'Médocs','routine'],['9:45',45,'Petit-déj tranquille','perso'],
+   ['11:00',90,'Ménage','routine'],['13:00',60,'Déjeuner','perso'],
+   ['14:30',150,'Bidouille perso','focus'],['17:30',60,'Vélo','corps'],
+   ['19:00',60,'Cuisine + dîner','perso'],['21:00',120,'Soirée jeux','perso'] ],
+ [ ['10:00',10,'Médocs','routine'],['10:30',60,'Brunch','perso'],['12:00',90,'Appel famille','perso'],
+   ['14:00',60,'Lessive + repassage','routine'],['15:30',90,'Révisions calmes','focus'],
+   ['17:30',45,'Marche','corps'],['19:00',45,'Dîner','perso'],
+   ['20:00',45,'Préparer la semaine','admin'],['21:30',60,'Lecture','perso'] ],
+];
+const SPECIAL = {
+  '0:3': [['15:00',45,'Dentiste','admin']],
+  '1:1': [['9:00',240,'PARTIEL — Algo','cours']],
+  '1:4': [['19:30',180,'Anniv de Théo','perso']],
+  '2:2': [['10:00',120,'Entretien stage','admin']],
+  '2:5': [['10:00',480,'Week-end chez mes parents','perso']],
+  '2:6': [['10:00',300,'Week-end chez mes parents','perso']],
+  '3:0': [['14:00',90,'Rdv psy','admin']],
+  '3:3': [['9:00',360,'Hackathon','focus']],
+  '4:2': [['17:00',90,'Concert','perso']],
+  '4:4': [],                      // journée volontairement vide : état vide à démontrer
+};
+const EMPTY_DAYS = new Set(['4:4']);
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const toMin = s => {const [h,m]=s.split(':').map(Number); return h*60+m};
+
+function dayBlocks(week, dow){
+  if(EMPTY_DAYS.has(week+':'+dow)) return [];
+  const rnd = mulberry32(week*31 + dow*7 + 3);
+  const out = [];
+  if(!(week===2 && dow>=5)){                      // le week-end « chez les parents » remplace tout
+    for(const [s,d,t,c] of TPL[dow]){
+      if(week>0 && rnd()<0.18) continue;          // les semaines ne se ressemblent pas
+      out.push({start: toMin(s) + (week>0 && rnd()<0.3 ? (rnd()<0.5?-15:15) : 0), dur:d, title:t, cat:c});
+    }
+  }
+  for(const [s,d,t,c] of (SPECIAL[week+':'+dow] || [])) out.push({start:toMin(s), dur:d, title:t, cat:c});
+  out.sort((a,b)=>a.start-b.start || a.dur-b.dur);
+  return out;
+}
+
+/* ═══════════════ dates ═══════════════ */
+const now = new Date();
+const mondayOf = d => {const x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7)); x.setHours(0,0,0,0); return x};
+const M0 = mondayOf(now);
+const addDays = (d,n)=>{const x=new Date(d); x.setDate(x.getDate()+n); return x};
+const sameDay = (a,b)=>a.toDateString()===b.toDateString();
+const nowMin = now.getHours()*60 + now.getMinutes();
+const todayOffset = Math.round((new Date(now.getFullYear(),now.getMonth(),now.getDate()) - M0)/864e5);
+/* fmt gère le dépassement de minuit : 1500 min → « 01:00 », pas « 25:00 ». */
+const fmt = m => String(Math.floor((m%1440+1440)%1440/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const dur = m => m>=60 ? (m%60 ? (m/60|0)+' h '+(m%60) : (m/60|0)+' h') : m+' min';
+const blocksForOffset = off => dayBlocks(((Math.floor(off/7)%5)+5)%5, ((off%7)+7)%7);
+/* « fait » déterministe : ~60 % des blocs passés, pour montrer l'état sans
+   base de données. Les actions du panneau de détail écrivent dans STATE, qui
+   a priorité — c'est ce qui rend la maquette réellement manipulable. */
+const keyOf = (off,b) => off + ':' + b.start;
+const STATE = new Map();                 // clé -> {done, moved, subs:Set, alert}
+const stateOf = (off,b) => {
+  const k = keyOf(off,b);
+  if(!STATE.has(k)) STATE.set(k, {done:null, moved:false, subs:new Set(), alert:b.dur>=30});
+  return STATE.get(k);
+};
+const isDone = (off,b) => {
+  const o = STATE.get(keyOf(off,b));
+  return o && o.done !== null ? o.done : (off*397 + b.start*7) % 10 > 3;
+};
+
+/* Remplissage de démonstration : notes et sous-tâches tirées de façon
+   déterministe, seulement sur des blocs assez longs pour en avoir. */
+const NOTES = ['Salle B204 — prendre le badge.', 'Préparer la veille, sinon ça ne se fera pas.',
+  'Si ça déborde : couper à l\'heure et reprendre demain.', 'Apporter le carnet et les écouteurs.',
+  'Compter 10 min de trajet en plus.'];
+const SUBS = ['Sortir le matériel', 'Relire les notes de la dernière fois', 'Couper les notifications',
+  'Prévenir si je décale', 'Ranger avant de partir'];
+const hash = (off,b) => Math.abs(off*8191 + b.start*31 + b.title.length*7);
+const noteFor = (off,b) => b.dur >= 45 && hash(off,b) % 3 !== 0 ? NOTES[hash(off,b) % NOTES.length] : null;
+const subsFor = (off,b) => {
+  if(b.dur < 60) return [];
+  const n = 1 + hash(off,b) % 3, out = [];
+  for(let i = 0; i < n; i++) out.push(SUBS[(hash(off,b) + i*2) % SUBS.length]);
+  return out;
+};
+
+/* ═══════════════ état ═══════════════ */
+const S = {view:'7', anchor:0, weekend:true, font:'system', fs:'14px', density:'1', theme:'auto'};
+
+/* ═══════════════ chevauchements ═══════════════ */
+/* Répartition en colonnes, plafonnée à 3 : au-delà, un jeton « +N » plutôt
+   que des colonnes de 20px illisibles (SPEC §4). */
+/* Le plafond dépend de la largeur réelle d'une colonne : trois blocs côte à
+   côte dans 104px de téléphone donnent 22px chacun, c'est-à-dire plus de
+   titre du tout. Mieux vaut un bloc lisible et un jeton « +2 ». */
+function maxLanesFor(colW){ return colW >= 240 ? 3 : colW >= 150 ? 2 : 1; }
+function lanes(bs, MAX_LANES = 3){
+  const res = bs.map(()=>({lane:0, of:1, hidden:false}));
+  const chips = [];
+  let i = 0;
+  while(i < bs.length){
+    let j = i, end = bs[i].start + bs[i].dur;
+    while(j+1 < bs.length && bs[j+1].start < end){ j++; end = Math.max(end, bs[j].start+bs[j].dur); }
+    const n = j - i + 1;
+    if(n > 1){
+      const laneEnd = [];
+      for(let k = i; k <= j; k++){
+        let L = laneEnd.findIndex(e => e <= bs[k].start);
+        if(L < 0) L = laneEnd.length;
+        laneEnd[L] = bs[k].start + bs[k].dur;
+        res[k].lane = L;
+      }
+      const of = Math.min(laneEnd.length, MAX_LANES);
+      let hidden = 0;
+      for(let k = i; k <= j; k++){
+        res[k].of = of;
+        if(res[k].lane >= MAX_LANES){ res[k].hidden = true; hidden++; }
+      }
+      if(hidden) chips.push({start: bs[i].start, n: hidden, lane: of-1, of});
+    }
+    i = j + 1;
+  }
+  return {res, chips};
+}
+
+/* ═══════════════ grille ═══════════════ */
+/* --hour et --ovh sont des calc() en rem : getPropertyValue renvoie la chaîne
+   « calc(...) », pas des pixels. On recalcule donc les hauteurs en JS depuis
+   la même constante que le CSS. Les deux doivent rester synchronisées. */
+const HOUR_REM = 4.6, OVH_REM = 12.8;
+const rootPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
+const hourPx = () => HOUR_REM * (+S.density) * rootPx();
+const ovhPx  = () => OVH_REM  * (+S.density) * rootPx();
+/* Les paliers suivent la taille de base : à 16px, un bloc de 30 min reste un
+   bloc de 30 min, pas un bloc tronqué. */
+function tier(h){
+  const u = rootPx();
+  return h >= 3.3*u ? '' : h >= 2.0*u ? 's-30' : h >= 0.95*u ? 's-15' : 's-5';
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* Une catégorie supprimée ne fait pas disparaître ses blocs : ils retombent
+   sur la première catégorie restante. Perdre un bloc serait pire que le
+   recolorer. */
+const catOf = key => CATS[key] || Object.values(CATS)[0];
+
+/* Jours visibles : le réglage « week-end » filtre réellement les colonnes
+   (il ne faisait rien dans la v1 — bouton décoratif). */
+function visibleDays(count, from){
+  const out = [];
+  for(let i = 0; i < count; i++){
+    const off = from + i, wd = addDays(M0, off).getDay();
+    if(!S.weekend && count >= 7 && (wd === 0 || wd === 6)) continue;
+    out.push(off);
+  }
+  return out;
+}
+
+const RENDERED = new Map();              // clé -> {off, b} du dernier rendu
+
+function renderGrid(){
+  RENDERED.clear();
+  const HP = hourPx(), H = (DAY_END-DAY_START)/60*HP, y = m => (m-DAY_START)/60*HP;
+  const days = visibleDays(+S.view, S.anchor), n = days.length;
+  const stageW = document.getElementById('stage').clientWidth || 1280;
+  const maxLanes = maxLanesFor((stageW - 3.4*rootPx()) / n);
+  let head = `<div class="head" style="--n:${n}"><div></div>`;
+  let cols = `<div class="cols" style="--n:${n}; height:${H}px"><div class="gutter">`;
+  for(let h = DAY_START/60; h <= DAY_END/60; h++)
+    cols += `<span style="top:${y(h*60)}px">${String(h).padStart(2,'0')}:00</span>`;
+  cols += `</div>`;
+
+  for(const off of days){
+    const date = addDays(M0, off), bs = blocksForOffset(off), {res, chips} = lanes(bs, maxLanes);
+    const isToday = sameDay(date, now), wkd = date.getDay()===0 || date.getDay()===6;
+    const busy = bs.reduce((s,b)=>s+b.dur, 0);
+    head += `<div class="cell${isToday?' today':''}">
+        <div class="dow">${DOW[(date.getDay()+6)%7]}</div>
+        <div class="dnum">${date.getDate()}</div>
+        <div class="load"><i style="width:${Math.min(100, busy/(DAY_END-DAY_START)*100).toFixed(0)}%"></i></div>
+      </div>`;
+
+    cols += `<div class="col${isToday?' today':''}${wkd?' weekend':''}">`;
+    if(!bs.length) cols += `<p class="col-empty">Rien de prévu</p>`;
+    let before = 0, after = 0;
+    bs.forEach((b,k) => {
+      if(res[k].hidden) return;
+      const end = b.start + b.dur;
+      if(end <= DAY_START){ before++; return; }
+      if(b.start >= DAY_END){ after++; return; }
+      const cut0 = b.start < DAY_START, cut1 = end > DAY_END;
+      const top = y(Math.max(b.start, DAY_START));
+      const h = Math.max(4, y(Math.min(end, DAY_END)) - top - 2);
+      const past = off < todayOffset || (off === todayOffset && end < nowMin);
+      const done = past && isDone(off, b);
+      const t = tier(h), {lane, of} = res[k], w = 100/of;
+      const C = catOf(b.cat);
+      const time = `${fmt(b.start)}–${fmt(end)}`;
+      const label = `${b.title}, ${time}, ${dur(b.dur)}, ${C.label}${done?', fait':past?', non fait':''}`;
+      let inner;
+      if(t === '')      inner = `<div class="t">${done?'<span class="ck" aria-hidden="true">✓</span>':''}${esc(b.title)}</div><div class="m">${fmt(b.start)} · ${dur(b.dur)}${cut1?' · dépasse 23 h':''}</div>`;
+      else if(t === 's-5') inner = `<span class="t">${esc(b.title)}</span>`;
+      else              inner = `<span class="t">${done?'<span class="ck" aria-hidden="true">✓</span>':''}${esc(b.title)}</span><span class="m">${fmt(b.start)}</span>`;
+      RENDERED.set(keyOf(off,b), {off, b});
+      cols += `<div class="b ${t}${past?' past':''}${done?' done':''}" tabindex="0" role="button"
+        data-key="${keyOf(off,b)}" aria-label="${esc(label)}, voir le détail"
+        style="--h:${C.h}; --c:${C.c};
+        top:${top}px; height:${h}px; left:calc(${lane*w}% + 2px); width:calc(${w}% - 4px)"
+        title="${esc(b.title)} — ${time} (${dur(b.dur)})">${inner}</div>`;
+    });
+    for(const c of chips)
+      cols += `<div class="more" style="top:${y(c.start)+2}px">+${c.n}</div>`;
+    if(before) cols += `<div class="oob top">↑ ${before} avant 07:00</div>`;
+    if(after)  cols += `<div class="oob bot">↓ ${after} après 23:00</div>`;
+    cols += `</div>`;
+  }
+
+  const ti = days.indexOf(todayOffset);
+  if(ti >= 0 && nowMin >= DAY_START && nowMin <= DAY_END){
+    const lw = 100/n;
+    cols += `<div class="nowline" style="top:${y(nowMin)}px"><b>${fmt(nowMin)}</b>
+      <div class="rule"></div>
+      <div class="strong" style="left:${ti*lw}%; width:${lw}%"></div>
+      <i style="left:calc(${ti*lw}% - .28rem)"></i></div>`;
+  }
+  return `<div class="scroller" id="sc">${head}</div>${cols}</div></div>`;
+}
+
+/* ═══════════════ vue d'ensemble ═══════════════ */
+function renderOverview(){
+  const ovh = ovhPx();
+  const y = m => (Math.min(Math.max(m, DAY_START), DAY_END) - DAY_START)/(DAY_END-DAY_START)*ovh;
+  const startWeek = Math.floor(S.anchor/7);
+  let h = `<div class="ov">`;
+  for(let w = 0; w < 5; w++){
+    const wk = startWeek + w, mon = addDays(M0, wk*7), sun = addDays(mon, 6), isCur = wk === 0;
+    let total = 0, cells = '';
+    const dows = S.weekend ? [0,1,2,3,4,5,6] : [0,1,2,3,4];
+    for(const d of dows){
+      const off = wk*7 + d, date = addDays(M0, off), bs = blocksForOffset(off), {res} = lanes(bs, 8);
+      const busy = bs.reduce((s,b)=>s+b.dur, 0); total += busy;
+      const pct = Math.min(100, busy/(DAY_END-DAY_START)*100);
+      const isToday = sameDay(date, now), wkd = d >= 5;
+      let inner = `<div class="ov-noon" style="top:${y(12*60)}px"></div>`;
+      if(!bs.length) inner += `<span class="ov-empty">—</span>`;
+      bs.forEach((b,k) => {
+        const top = y(b.start), hh = Math.max(2.5, y(b.start+b.dur) - top);
+        const {lane, of} = res[k], w2 = 100/of;
+        const C = catOf(b.cat);
+        inner += `<div class="ov-b" style="--h:${C.h}; --c:${C.c}; top:${Math.min(top, ovh-hh)}px;
+          height:${hh}px; left:calc(${lane*w2}% + 2px); width:calc(${w2}% - 4px)"
+          >${hh >= 0.78*rootPx() ? `<span>${esc(b.title)}</span>` : ''}</div>`;
+      });
+      cells += `<button class="ov-day${isToday?' today':''}${wkd?' weekend':''}" data-off="${off}"
+        aria-label="${DOW_LONG[d]} ${date.getDate()} ${MONTHS[date.getMonth()]}, ${Math.round(busy/60)} heures planifiées${pct>80?', journée chargée':''}">
+        <span class="ov-dhead"><span class="dw">${DOW[d]}</span><span class="dn">${date.getDate()}</span></span>
+        <span class="ov-track">${inner}</span>
+        <span class="ov-foot"><span class="ov-load${pct>80?' heavy':''}"><i style="width:${pct.toFixed(0)}%"></i></span>
+          <span class="ov-hrs">${Math.round(busy/60)} h</span></span>
+      </button>`;
+    }
+    h += `<div class="ov-week" style="grid-template-columns:5.5rem repeat(${dows.length},minmax(0,1fr))">
+      <div class="ov-wlabel${isCur?' current':''}">
+        <span class="w">${isCur ? 'Cette semaine' : 'S'+weekNum(mon)}</span>
+        <span class="d">${mon.getDate()} – ${sun.getDate()} ${MONTHS[sun.getMonth()]}</span>
+        <span class="h">${Math.round(total/60)} h</span>
+      </div>${cells}</div>`;
+  }
+  return h + '</div>';
+}
+function weekNum(d){const x=new Date(d); x.setDate(x.getDate()+3-((x.getDay()+6)%7));
+  const w1=new Date(x.getFullYear(),0,4); return 1+Math.round(((x-w1)/864e5-3+((w1.getDay()+6)%7))/7)}
+
+/* ═══════════════ bandeau « maintenant » ═══════════════ */
+function renderNow(){
+  const bs = blocksForOffset(todayOffset);
+  const cur = bs.find(b => nowMin >= b.start && nowMin < b.start+b.dur);
+  const nxt = bs.find(b => b.start > nowMin);
+  const faits = bs.filter(b => b.start+b.dur < nowMin && isDone(todayOffset, b)).length;
+  let txt;
+  if(cur)      txt = `<b>${esc(cur.title)}</b><span class="rest">· il reste ${dur(cur.start+cur.dur-nowMin)}</span>`;
+  else if(nxt) txt = `<span class="rest">Rien en cours ·</span><b>${esc(nxt.title)}</b><span class="rest">dans ${dur(nxt.start-nowMin)}</span>`;
+  else         txt = `<span class="rest">Plus rien de prévu aujourd'hui</span>`;
+  /* Créditer sans accuser : on compte ce qui est fait, jamais ce qui manque. */
+  const credit = faits ? `<span class="fait">· ${faits} fait${faits>1?'s':''}</span>` : '';
+  document.getElementById('nowStrip').innerHTML =
+    `<span class="dot"></span><span class="t">${fmt(nowMin)}</span>${txt}${credit}`;
+}
+
+/* ═══════════════ orchestration ═══════════════ */
+function periodLabel(){
+  if(S.view === 'ov'){
+    const a = addDays(M0, Math.floor(S.anchor/7)*7), b = addDays(a, 34);
+    return `${a.getDate()} ${MONTHS[a.getMonth()]} – ${b.getDate()} ${MONTHS[b.getMonth()]}`;
+  }
+  const n = +S.view, a = addDays(M0, S.anchor), b = addDays(M0, S.anchor+n-1);
+  if(n === 1) return `${DOW[(a.getDay()+6)%7]} ${a.getDate()} ${MONTHS[a.getMonth()]}`;
+  const am = a.getMonth() !== b.getMonth() ? ' '+MONTHS[a.getMonth()] : '';
+  return `${a.getDate()}${am} – ${b.getDate()} ${MONTHS[b.getMonth()]} ${b.getFullYear()}`;
+}
+
+function render(){
+  const stage = document.getElementById('stage');
+  stage.dataset.view = S.view;
+  stage.innerHTML = S.view === 'ov' ? renderOverview() : renderGrid();
+  document.getElementById('period').textContent = periodLabel();
+  for(const b of document.querySelectorAll('#views button,#tabbar button'))
+    b.setAttribute('aria-pressed', String(b.dataset.v === S.view));
+  renderNow();
+  if(S.view !== 'ov'){                       // P2 : on ouvre sur l'heure qu'il est
+    const sc = document.getElementById('sc');
+    if(sc) sc.scrollTop = Math.max(0, (nowMin-DAY_START)/60*hourPx() - sc.clientHeight*0.42);
+  }
+  for(const el of document.querySelectorAll('.ov-day'))
+    el.onclick = () => { S.view = '7'; S.anchor = Math.floor(+el.dataset.off/7)*7; render(); };
+  if(openKey && detail.matches(':popover-open'))
+    placeDetail(document.querySelector(`.b[data-key="${CSS.escape(openKey)}"]`));
+}
+
+/* ═══════════════ détail d'un bloc ═══════════════ */
+const detail = document.getElementById('detail');
+let openKey = null;
+
+function detailHTML(off, b){
+  const C = catOf(b.cat), st = stateOf(off, b), end = b.start + b.dur;
+  const past = off < todayOffset || (off === todayOffset && end < nowMin);
+  const current = off === todayOffset && nowMin >= b.start && nowMin < end;
+  const done = isDone(off, b);
+  const note = noteFor(off, b), subs = subsFor(off, b);
+  const state = st.moved ? 'reporté' : done ? 'fait' : past ? 'non fait' : current ? 'en cours' : 'à venir';
+  return `
+    <div class="d-head" style="--h:${C.h}; --c:${C.c}">
+      <span class="d-cat"><i></i>${esc(C.label)}</span>
+      <span class="d-state">${state}</span>
+    </div>
+    <h2 class="d-title${done?' done':''}" id="dTitle">${esc(b.title)}</h2>
+    <p class="d-when">${fmt(b.start)} – ${fmt(end)} · ${dur(b.dur)}${end > DAY_END ? ' · dépasse la plage' : ''}</p>
+    ${current ? `<p class="d-rest">Il reste ${dur(end - nowMin)}</p>` : ''}
+    ${subs.length ? `<div class="d-sep"></div>` + subs.map((t,i) =>
+      `<button class="d-sub" data-sub="${i}" aria-pressed="${st.subs.has(i)}"
+        style="--h:${C.h}; --c:${C.c}"><span class="box">${st.subs.has(i)?'✓':''}</span><span>${esc(t)}</span></button>`
+      ).join('') : ''}
+    ${note ? `<div class="d-sep"></div><p class="d-note">${esc(note)}</p>` : ''}
+    <div class="d-sep"></div>
+    <button class="d-opt" data-alert aria-pressed="${st.alert}">
+      <span class="box">${st.alert?'✓':''}</span><span>Alerte 5 min avant la fin</span></button>
+    <div class="d-acts">
+      <button data-act="done" class="${done?'':'primary'}">${done ? 'Annuler « fait »' : '✓ Marquer fait'}</button>
+      ${!done ? `<button data-act="later">→ demain</button>` : ''}
+      <button data-act="dup">Dupliquer</button>
+      <button data-act="close">Fermer</button>
+    </div>`;
+}
+
+/* Ancrage : à droite du bloc, basculé à gauche puis recentré si ça déborde.
+   Sur téléphone, le CSS reprend la main et colle la feuille en bas. */
+function placeDetail(el){
+  if(innerWidth <= 900 || !el) return;
+  const r = el.getBoundingClientRect(), d = detail.getBoundingClientRect();
+  let x = r.right + 8;
+  if(x + d.width > innerWidth - 8) x = r.left - d.width - 8;
+  if(x < 8) x = Math.max(8, (innerWidth - d.width) / 2);
+  let y = r.top;
+  if(y + d.height > innerHeight - 8) y = Math.max(8, innerHeight - d.height - 8);
+  detail.style.left = x + 'px';
+  detail.style.top = y + 'px';
+}
+
+function openDetail(key){
+  const rec = RENDERED.get(key); if(!rec) return;
+  openKey = key;
+  detail.innerHTML = detailHTML(rec.off, rec.b);
+  if(!detail.matches(':popover-open')) detail.showPopover();
+  placeDetail(document.querySelector(`.b[data-key="${CSS.escape(key)}"]`));
+}
+
+detail.addEventListener('click', e => {
+  const btn = e.target.closest('button'); if(!btn || !openKey) return;
+  const {off, b} = RENDERED.get(openKey), st = stateOf(off, b);
+  if(btn.dataset.sub !== undefined){
+    const i = +btn.dataset.sub;
+    st.subs.has(i) ? st.subs.delete(i) : st.subs.add(i);
+  } else if(btn.hasAttribute('data-alert')){
+    st.alert = !st.alert;
+  } else switch(btn.dataset.act){
+    case 'done':  st.done = !isDone(off, b); break;
+    case 'later': st.moved = true; st.done = false; break;
+    case 'dup':   break;                      // non implémenté : maquette
+    case 'close': detail.hidePopover(); return;
+  }
+  render();                                   // la grille reflète l'action…
+  openDetail(openKey);                        // …et le détail se réancre
+});
+detail.addEventListener('toggle', e => { if(e.newState === 'closed') openKey = null; });
+
+/* ═══════════════ réglages ═══════════════ */
+const loadedFonts = new Set();
+function setFont(key){
+  const f = FONTS[key];
+  if(f.q && !loadedFonts.has(key)){          // téléchargée seulement si choisie
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = `https://fonts.googleapis.com/css2?family=${f.q}&display=swap`;
+    document.head.appendChild(l); loadedFonts.add(key);
+  }
+  document.documentElement.style.setProperty('--font', f.stack);
+}
+const prefersDark = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){
+  document.documentElement.dataset.theme =
+    S.theme === 'auto' ? (prefersDark.matches ? 'dark' : 'light') : S.theme;
+}
+prefersDark.addEventListener('change', () => { if(S.theme === 'auto'){ applyTheme(); render(); } });
+
+function group(id, attr, apply){
+  const box = document.getElementById(id);
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    for(const x of box.children) x.setAttribute('aria-pressed', String(x === b));
+    apply(b.dataset[attr]); render();
+  });
+}
+
+const fontsBox = document.getElementById('fonts');
+for(const [k,f] of Object.entries(FONTS)){
+  const b = document.createElement('button');
+  b.dataset.f = k; b.textContent = f.label;
+  b.setAttribute('aria-pressed', String(k === S.font));   // posé dès le chargement
+  fontsBox.appendChild(b);
+}
+group('fonts','f', v => { S.font = v; setFont(v); });
+group('sizes','s', v => { S.fs = v; document.documentElement.style.setProperty('--fs', v); });
+group('dens','d',  v => { S.density = v; document.documentElement.style.setProperty('--density', v); });
+group('themes','t',v => { S.theme = v; applyTheme(); });
+document.getElementById('wkend').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  S.weekend = !S.weekend;
+  b.setAttribute('aria-pressed', String(S.weekend));
+  b.textContent = S.weekend ? 'Week-end affiché' : 'Week-end masqué';
+  render();
+});
+for(const [id,val] of [['sizes',S.fs],['dens',S.density],['themes',S.theme]])
+  for(const b of document.getElementById(id).children)
+    b.setAttribute('aria-pressed', String(Object.values(b.dataset)[0] === val));
+document.querySelector('#wkend button').setAttribute('aria-pressed','true');
+
+const catsBox = document.getElementById('cats'), legEl = document.getElementById('legend');
+/* Douze teintes choisies pour rester distinguables entre elles à 9,5px —
+   espacement volontairement irrégulier, cf. SPEC §6. */
+const PRESET_HUES = [15, 40, 70, 100, 130, 150, 175, 196, 225, 248, 275, 310];
+
+const catCount = key => {
+  let n = 0;
+  for(let off = 0; off < 35; off++) for(const b of blocksForOffset(off)) if(b.cat === key) n++;
+  return n;
+};
+
+function buildCats(){
+  catsBox.innerHTML = '';
+  const keys = Object.keys(CATS);
+  for(const k of keys){
+    const C = CATS[k], row = document.createElement('div');
+    row.className = 'cat';
+    row.style.cssText = `--h:${C.h}; --c:${C.c}`;
+    row.innerHTML = `
+      <div class="cat-top">
+        <span class="cat-sw"></span>
+        <input class="cat-name" value="${esc(C.label)}" aria-label="Nom de la catégorie">
+        <span class="cat-count">${catCount(k)} blocs</span>
+        <button class="cat-del" aria-label="Supprimer la catégorie ${esc(C.label)}"
+          ${keys.length < 2 ? 'disabled' : ''}>✕</button>
+      </div>
+      <div class="hues">${PRESET_HUES.map(h =>
+        `<button style="--ph:${h}" data-h="${h}" aria-label="Teinte ${h} degrés"
+          aria-pressed="${h === C.h}"></button>`).join('')}</div>
+      <input type="range" min="0" max="359" value="${C.h}" aria-label="Teinte libre de ${esc(C.label)}">`;
+
+    const setHue = h => {
+      CATS[k].h = h;
+      row.style.setProperty('--h', h);
+      row.querySelector('input[type=range]').value = h;
+      for(const sw of row.querySelectorAll('.hues button'))
+        sw.setAttribute('aria-pressed', String(+sw.dataset.h === h));
+      render(); legend();
+    };
+    row.querySelector('.hues').addEventListener('click', e => {
+      const b = e.target.closest('button'); if(b) setHue(+b.dataset.h);
+    });
+    row.querySelector('input[type=range]').addEventListener('input', e => setHue(+e.target.value));
+
+    const nameInput = row.querySelector('.cat-name');
+    /* « input » pour la légende (retour immédiat), « change » pour la grille :
+       re-rendre à chaque frappe ferait perdre le focus du champ. */
+    nameInput.addEventListener('input', () => { CATS[k].label = nameInput.value; legend(); });
+    nameInput.addEventListener('change', () => { render(); });
+
+    row.querySelector('.cat-del').addEventListener('click', () => {
+      if(Object.keys(CATS).length < 2) return;
+      delete CATS[k];
+      buildCats(); legend(); render();     // les blocs orphelins reprennent la 1re catégorie
+    });
+    catsBox.appendChild(row);
+  }
+  const add = document.createElement('button');
+  add.className = 'addcat';
+  add.textContent = '+ Ajouter une catégorie';
+  add.onclick = () => {
+    const used = new Set(Object.values(CATS).map(c => c.h));
+    const h = PRESET_HUES.find(x => !used.has(x)) ?? Math.floor(Math.random()*360);
+    CATS['cat' + Date.now().toString(36)] = {label:'Nouvelle catégorie', h, c:0.12};
+    buildCats(); legend(); render();
+    catsBox.querySelector('.cat:last-of-type .cat-name').select();
+  };
+  catsBox.appendChild(add);
+}
+function legend(){
+  legEl.innerHTML = Object.values(CATS)
+    .map(c => `<span class="lg" style="--h:${c.h}; --c:${c.c}"><i></i>${esc(c.label)}</span>`).join('');
+}
+buildCats();
+
+/* Délégation sur #stage : son contenu est remplacé à chaque rendu, pas lui. */
+document.getElementById('stage').addEventListener('click', e => {
+  const el = e.target.closest('.b');
+  if(el) openDetail(el.dataset.key);
+});
+document.getElementById('stage').addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('.b');
+  if(el){ e.preventDefault(); openDetail(el.dataset.key); }
+});
+
+/* ═══════════════ navigation ═══════════════ */
+const tabbar = document.getElementById('tabbar');
+for(const v of [['1','Jour'],['3','3 jours'],['7','Semaine'],['ov','Ensemble']]){
+  const b = document.createElement('button');
+  b.dataset.v = v[0]; b.textContent = v[1]; tabbar.appendChild(b);
+}
+/* Même bouton, même résultat : « 3 jours » donnait hier/aujourd'hui/demain
+   depuis Semaine, et aujourd'hui/demain/après-demain depuis Jour. La règle est
+   maintenant unique — si aujourd'hui était visible, la nouvelle vue le recentre. */
+function setView(v){
+  const span = S.view === 'ov' ? 35 : +S.view;
+  const todayVisible = todayOffset >= S.anchor && todayOffset < S.anchor + span;
+  S.view = v;
+  if(v === 'ov' || v === '7') S.anchor = Math.floor((todayVisible ? todayOffset : S.anchor)/7)*7;
+  else if(todayVisible)       S.anchor = todayOffset - (v === '3' ? 1 : 0);
+  render();
+}
+for(const box of [document.getElementById('views'), tabbar])
+  box.addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(b.dataset.v); });
+document.getElementById('prev').onclick = () => { S.anchor -= S.view === 'ov' ? 7 : +S.view; render(); };
+document.getElementById('next').onclick = () => { S.anchor += S.view === 'ov' ? 7 : +S.view; render(); };
+document.getElementById('today').onclick = () => {
+  S.anchor = (S.view === '7' || S.view === 'ov') ? Math.floor(todayOffset/7)*7
+                                                 : todayOffset - (S.view === '3' ? 1 : 0);
+  render();
+};
+
+const panel = document.getElementById('panel'), scrim = document.getElementById('scrim'), cog = document.getElementById('cog');
+function setPanel(open){
+  panel.classList.toggle('open', open);
+  scrim.classList.toggle('open', open);
+  cog.setAttribute('aria-expanded', String(open));
+  if(open) panel.querySelector('button').focus(); else cog.focus();
+}
+cog.onclick = () => setPanel(!panel.classList.contains('open'));
+document.getElementById('closePanel').onclick = () => setPanel(false);
+scrim.onclick = () => setPanel(false);
+
+addEventListener('keydown', e => {
+  if(e.target.matches('input,textarea')) return;
+  if(e.key === 'Escape' && panel.classList.contains('open')) return setPanel(false);
+  if(e.ctrlKey || e.metaKey || e.altKey) return;        // ne pas voler Ctrl+1 au navigateur
+  const map = {'1':'1','2':'3','3':'7','4':'ov'};
+  if(map[e.key]) setView(map[e.key]);
+  else if(e.key === 'ArrowLeft')  document.getElementById('prev').click();
+  else if(e.key === 'ArrowRight') document.getElementById('next').click();
+  else if(e.key.toLowerCase() === 't') document.getElementById('today').click();
+});
+
+/* ═══════════════ démarrage ═══════════════ */
+applyTheme();
+if(innerWidth < 768) S.view = '3', S.anchor = todayOffset - 1;   // SPEC §3.2 : défaut mobile
+legend();
+render();
+</script>
+</body>
+</html>
