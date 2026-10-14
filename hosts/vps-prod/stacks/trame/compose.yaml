@@ -29,6 +29,10 @@ services:
     volumes:
       - /data/trame/pb_data:/pb/pb_data
       - ./public:/pb/pb_public:ro
+      # Migrations de schéma versionnées. Copiées depuis le dépôt trame, qui
+      # en est la source de vérité — cette copie disparaîtra quand la stack
+      # sourcera directement PortableStick/trame (précédent : stack « fnc »).
+      - ./pb_migrations:/pb/pb_migrations:ro
       - /etc/localtime:/etc/localtime:ro
     labels:
       - "traefik.enable=true"
