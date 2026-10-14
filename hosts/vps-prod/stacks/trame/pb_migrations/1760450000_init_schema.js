@@ -8,11 +8,6 @@
 // opérations de chaque collection, et la règle de création vérifie en plus
 // que l'appelant ne peut pas écrire un bloc au nom de quelqu'un d'autre.
 
-// Identifiant fixe plutôt que résolu : la relation de `blocks` est validée
-// au moment de l'enregistrement, et dépendre d'une recherche faite dans la
-// même transaction a échoué (« collectionId cannot be blank »).
-const CATEGORIES_ID = 'pbc_trame_cats0';
-
 migrate((app) => {
   const users = app.findCollectionByNameOrId('users');
 
@@ -40,7 +35,6 @@ migrate((app) => {
   // c'est ce qui garantit le contraste (SPEC §6). Aucune couleur stockée en
   // hexadécimal, sinon un jour quelqu'un en écrira une illisible.
   app.save(new Collection({
-    id: CATEGORIES_ID,
     name: 'categories',
     type: 'base',
     ...ownerOnly,
@@ -55,6 +49,10 @@ migrate((app) => {
     ],
     indexes: ['CREATE INDEX idx_categories_owner ON categories (owner)'],
   }));
+
+  // La relation de `blocks` est validée à l'enregistrement : l'identifiant de
+  // la collection cible doit exister avant. D'où l'ordre, et cette lecture.
+  const categoriesId = app.findCollectionByNameOrId('categories').id;
 
   // ── Blocs ──────────────────────────────────────────────────────────────
   // Un seul objet : pas de distinction tâche/événement imposée (SPEC §5).
@@ -71,7 +69,7 @@ migrate((app) => {
       // Durée minimale 5 min (SPEC §4). Plafond à 24 h : au-delà, c'est une
       // erreur de saisie, pas un bloc.
       { name: 'duration', type: 'number', required: true, min: 5, max: 1440, onlyInt: true },
-      { name: 'category', type: 'relation', required: false, collectionId: CATEGORIES_ID, maxSelect: 1, cascadeDelete: false },
+      { name: 'category', type: 'relation', required: false, collectionId: categoriesId, maxSelect: 1, cascadeDelete: false },
       { name: 'note',     type: 'editor',  required: false },
       // Pas de valeur « en retard » : elle n'existe pas dans ce produit (P4).
       { name: 'state',    type: 'select', required: true, maxSelect: 1,
