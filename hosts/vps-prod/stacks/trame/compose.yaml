@@ -34,14 +34,17 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend"
 
-      # --- Application, publique ---
-      # Pas de forward-auth ici : PocketBase fera son propre OIDC vers Authelia
-      # (SPEC §10.2). Un portail devant casserait la PWA et le hors-ligne.
+      # --- Application ---
+      # TEMPORAIRE : derrière le portail tant que ce n'est qu'un squelette.
+      # Rien ici n'a besoin d'être public, et la page serait indexable.
+      # À RETIRER quand le vrai front arrivera : il fera son propre OIDC, et un
+      # forward-auth devant casserait la PWA, le hors-ligne et les notifications
+      # (SPEC §10.2). Retirer aussi la règle large côté Authelia au même moment.
       - "traefik.http.routers.trame.rule=Host(`trame.vindiesel.vip`)"
       - "traefik.http.routers.trame.entrypoints=websecure"
       - "traefik.http.routers.trame.tls=true"
       - "traefik.http.routers.trame.priority=10"
-      - "traefik.http.routers.trame.middlewares=trame-sec@docker"
+      - "traefik.http.routers.trame.middlewares=authelia@docker,trame-sec@docker"
       - "traefik.http.services.trame.loadbalancer.server.port=8090"
 
       # --- Console d'administration PocketBase ---
