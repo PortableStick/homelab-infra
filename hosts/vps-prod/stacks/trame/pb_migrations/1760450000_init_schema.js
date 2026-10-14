@@ -50,6 +50,10 @@ migrate((app) => {
     indexes: ['CREATE INDEX idx_categories_owner ON categories (owner)'],
   }));
 
+  // PocketBase valide la relation à l'enregistrement : l'identifiant de la
+  // collection cible doit être connu AVANT de créer `blocks`.
+  const categoriesId = app.findCollectionByNameOrId('categories').id;
+
   // ── Blocs ──────────────────────────────────────────────────────────────
   // Un seul objet : pas de distinction tâche/événement imposée (SPEC §5).
   // Seul `title` est obligatoire côté produit ; `start` et `duration` sont
@@ -65,7 +69,7 @@ migrate((app) => {
       // Durée minimale 5 min (SPEC §4). Plafond à 24 h : au-delà, c'est une
       // erreur de saisie, pas un bloc.
       { name: 'duration', type: 'number', required: true, min: 5, max: 1440, onlyInt: true },
-      { name: 'category', type: 'relation', required: false, collectionId: '', maxSelect: 1, cascadeDelete: false },
+      { name: 'category', type: 'relation', required: false, collectionId: categoriesId, maxSelect: 1, cascadeDelete: false },
       { name: 'note',     type: 'editor',  required: false },
       // Pas de valeur « en retard » : elle n'existe pas dans ce produit (P4).
       { name: 'state',    type: 'select', required: true, maxSelect: 1,
@@ -89,12 +93,6 @@ migrate((app) => {
       'CREATE INDEX idx_blocks_alert ON blocks (alert_end, start)',
     ],
   }));
-
-  // La relation `category` ne peut être câblée qu'une fois `categories` créée.
-  const blocks = app.findCollectionByNameOrId('blocks');
-  const categories = app.findCollectionByNameOrId('categories');
-  blocks.fields.getByName('category').collectionId = categories.id;
-  app.save(blocks);
 
   // ── Inbox ──────────────────────────────────────────────────────────────
   // Capture sans date (SPEC §7.5). Rien ne se perd en attendant d'être planifié.
