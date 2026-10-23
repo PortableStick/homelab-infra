@@ -100,7 +100,9 @@ services:
       RT_LOG_LEVEL: "info"
       RT_SESSION_SAVE_SECONDS: "1800"
       # Traefik (VPS puis local) est devant : on fait confiance à X-Forwarded-For.
-      REAL_IP_FROM: "0.0.0.0/0"
+      # 2026-10-23 (audit) : etait "0.0.0.0/0", donc n'importe quel client pouvait
+      # forger son IP dans les logs nginx. Restreint au bridge Docker local.
+      REAL_IP_FROM: "172.16.0.0/12"
       REAL_IP_HEADER: "X-Forwarded-For"
       UPLOAD_MAX_SIZE: "64M"
     volumes:

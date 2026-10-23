@@ -1,0 +1,28 @@
+## En-tetes de securite appliques a TOUS les routeurs de l'entrypoint websecure
+## (cf. `--entrypoints.websecure.http.middlewares=secure-headers@file` dans compose.yaml).
+##
+## Volontairement minimaliste : uniquement des en-tetes qui ne cassent aucun client.
+##   - PAS de CSP : il faudrait une politique par application, et une CSP trop stricte
+##     casse Jellyfin, Immich et la console PocketBase.
+##   - PAS de `preload` sur le HSTS : l'inscription sur la liste des navigateurs est
+##     difficilement reversible. A envisager seulement quand tout est stabilise.
+##   - frameOptions SAMEORIGIN plutot que DENY : DENY casserait tout lecteur embarque.
+http:
+  middlewares:
+    secure-headers:
+      headers:
+        # HSTS 1 an, sous-domaines inclus. Tout *.vindiesel.vip et *.lucasmasse.net
+        # passe par cet entrypoint, qui redirige deja 80 -> 443 : rien a casser.
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: false
+        # Empeche le navigateur de deviner un type MIME different de celui annonce.
+        contentTypeNosniff: true
+        # Interdit l'embarquement dans une iframe d'une autre origine (clickjacking).
+        frameDeny: false
+        customResponseHeaders:
+          X-Frame-Options: "SAMEORIGIN"
+          # Ne pas annoncer le logiciel serveur quand l'applicatif le laisse filtrer.
+          X-Powered-By: ""
+        # Ne fuite le chemin complet qu'en same-origin.
+        referrerPolicy: "strict-origin-when-cross-origin"

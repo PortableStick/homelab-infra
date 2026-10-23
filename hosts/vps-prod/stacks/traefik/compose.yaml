@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.7.13@sha256:1c32e7c368204fd72812152ebdd2ac0425993df6fd982317deb02e48f2d5423c
+    image: traefik:v3.7.16@sha256:c8a121e4bb1347e8fd52657fab12f2cb70b68f8a018895e2068f92c9e519b9c2
     container_name: traefik
     restart: unless-stopped
     security_opt:
@@ -18,6 +18,9 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # En-tetes de securite poses sur tous les routeurs websecure (HSTS, nosniff,
+      # frame SAMEORIGIN, referrer). Definis dans dynamic/security-headers.yaml.
+      - "--entrypoints.websecure.http.middlewares=secure-headers@file"
       - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
       - "--entrypoints.websecure.http.tls.domains[0].main=vindiesel.vip"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.vindiesel.vip"
@@ -29,7 +32,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=acme-dns"
       - "--certificatesresolvers.letsencrypt.acme.email=kastu69@proton.me"
       - "--certificatesresolvers.letsencrypt.acme.storage=/acme/acme.json"
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
     ports:
       - "80:80"

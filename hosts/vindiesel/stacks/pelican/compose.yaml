@@ -3,7 +3,7 @@ name: pelican
 services:
   panel:
     container_name: pelican_panel
-    image: ghcr.io/pelican/panel:latest
+    image: ghcr.io/pelican/panel:latest@sha256:cb717c15da9bcdc93f22a22a02d5460a1ce51fd03f2975b4ce53d745f4cc9ac8
     networks:
       - proxy
       - backend
@@ -21,7 +21,13 @@ services:
       APP_TIMEZONE: "Europe/Paris"
       APP_LOCALE: "fr"
       BEHIND_PROXY: "true"
-      TRUSTED_PROXIES: "0.0.0.0/0"
+      # 2026-10-23 (audit) : etait "0.0.0.0/0". Laravel faisait alors confiance aux
+      # en-tetes X-Forwarded-* de n'importe quel client — usurpation d'IP dans les
+      # logs et le rate-limit, et empoisonnement de l'en-tete Host (le reset de mot
+      # de passe de Pelican a deja eu une prise de compte par ce biais, GHSA-2vm3-965q-cxpg).
+      # Seul le reseau bridge Docker `proxy` doit etre de confiance. On prend la plage
+      # privee complete plutot que le /16 exact : le subnet change si le reseau est recree.
+      TRUSTED_PROXIES: "172.16.0.0/12"
       DB_CONNECTION: mariadb
       DB_HOST: database
       DB_PORT: "3306"
@@ -57,7 +63,7 @@ services:
 
   database:
     container_name: pelican_mariadb
-    image: mariadb:11.4
+    image: mariadb:11.4@sha256:250e1609e93c0e6aecf64bfbab2d84d5e89d2481540fe77447ff6c855c3b1873
     networks:
       - backend
     environment:
@@ -82,7 +88,7 @@ services:
 
   cache:
     container_name: pelican_redis
-    image: redis:7.4-alpine
+    image: redis:7.4-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
     networks:
       - backend
     command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --save 60 1"]

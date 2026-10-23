@@ -67,6 +67,42 @@ else
   echo "  ajoute manuellement \"userland-proxy\": false puis 'systemctl restart docker'."
 fi
 
+# --- Étape 2c : durcissement SSH ---------------------------------------------
+# Le port 22 du VPS est ouvert sur Internet. Par défaut Ubuntu accepte encore
+# l'authentification par MOT DE PASSE : c'est du brute-force offert, d'autant
+# que cet hôte porte la clé age maître qui déchiffre TOUS les secrets du parc.
+# Audit du 2026-10-23 : le serveur annonçait `publickey,password` pour root.
+#
+# Idempotent, et volontairement prudent : on ne touche à rien tant qu'aucune clé
+# publique n'est autorisée, sinon le script se ferme la porte au nez.
+log "Durcissement SSH (clé uniquement)"
+AUTH_KEYS="${HOME:-/root}/.ssh/authorized_keys"
+if [ -s "${AUTH_KEYS}" ]; then
+  mkdir -p /etc/ssh/sshd_config.d
+  cat > /etc/ssh/sshd_config.d/99-hardening.conf <<'EOF'
+# Posé par scripts/bootstrap.sh — cf. docs/securite-ci.md
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin prohibit-password
+EOF
+  if sshd -t 2>/dev/null; then
+    systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null || true
+    echo "  Authentification par mot de passe désactivée."
+  else
+    rm -f /etc/ssh/sshd_config.d/99-hardening.conf
+    echo "  sshd -t a échoué : configuration annulée, rien n'a été changé."
+  fi
+else
+  echo "  AUCUNE clé publique dans ${AUTH_KEYS} — durcissement SAUTÉ."
+  echo "  Poser une clé d'abord, sinon ce VPS devient inaccessible."
+fi
+
+# fail2ban : le port 22 reste ouvert, autant amortir le bruit de fond.
+if ! command -v fail2ban-server >/dev/null 2>&1; then
+  log "Installation de fail2ban"
+  apt-get update -qq && apt-get install -y -qq fail2ban || echo "  Échec — à installer à la main."
+fi
+
 # --- Étape 3 : port 53 (info) ------------------------------------------------
 log "Vérification du port 53 (acme-dns écoute sur ${PUBLIC_IP}:53)"
 if ss -ulpn 2>/dev/null | grep -q "${PUBLIC_IP}:53"; then

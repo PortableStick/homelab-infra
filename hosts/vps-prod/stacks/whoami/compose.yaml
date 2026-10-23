@@ -22,10 +22,11 @@ services:
       - "traefik.http.routers.wildcard-generator.tls.domains[2].main=int.vindiesel.vip"
       - "traefik.http.routers.wildcard-generator.tls.domains[2].sans=*.int.vindiesel.vip"
 
-      - "traefik.http.routers.whoami-public.rule=Host(`whoami.vindiesel.vip`) || Host(`whoami.lucasmasse.net`)"
-      - "traefik.http.routers.whoami-public.entrypoints=websecure"
-      - "traefik.http.routers.whoami-public.tls=true"
-      - "traefik.http.routers.whoami-public.service=whoami"
+      # RETIRE le 2026-10-23 (audit de securite) : le routeur public renvoyait un 200
+      # sans aucune authentification et reaffichait TOUS les en-tetes de la requete,
+      # dont le cookie `authelia_session` (pose sur le domaine apex vindiesel.vip,
+      # donc envoye ici aussi). Outil de debug : il n'a rien a faire sur Internet.
+      # Le routeur whoami-int ci-dessous rend le meme service, cote tailnet.
 
       - "traefik.http.routers.whoami-int.rule=Host(`whoami.int.vindiesel.vip`)"
       - "traefik.http.routers.whoami-int.entrypoints=websecure"

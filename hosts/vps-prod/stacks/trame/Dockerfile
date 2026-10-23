@@ -1,7 +1,7 @@
 # PocketBase — construit depuis le binaire officiel épinglé.
 # (Il n'existe pas d'image Docker officielle PocketBase ; on build depuis la release GitHub.)
 # Multi-arch : TARGETARCH est fourni par BuildKit (amd64 | arm64).
-ARG PB_VERSION=0.39.5
+ARG PB_VERSION=0.40.6
 
 FROM alpine:3.20 AS build
 ARG PB_VERSION

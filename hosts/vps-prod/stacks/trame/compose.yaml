@@ -19,8 +19,8 @@ services:
     build:
       context: .
       args:
-        PB_VERSION: "0.39.5"
-    image: trame-pocketbase:0.39.5
+        PB_VERSION: "0.40.6"
+    image: trame-pocketbase:0.40.6
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true

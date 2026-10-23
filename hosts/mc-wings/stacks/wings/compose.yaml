@@ -3,13 +3,18 @@ name: wings
 services:
   wings:
     container_name: wings
-    image: ghcr.io/pelican/wings:latest
+    image: ghcr.io/pelican/wings:latest@sha256:cf62cae99329dde1a0507d144fc5fb0c5e9d6c8346e6987d67dc08bc323e5644
     restart: unless-stopped
     networks:
       - wings0
+    # 2026-10-23 (audit) : ces ports etaient publies sur 0.0.0.0, contrairement aux
+    # Traefik de tyron et vindiesel qui bindent sur leur IP tailnet. L'API Wings et
+    # le SFTP des serveurs de jeu n'ont aucune raison d'ecouter sur toutes les
+    # interfaces. Renseigner WINGS_BIND_IP (IP Tailscale de mc-wings) avant de
+    # deployer cette stack — elle n'est pas encore pilotee par Komodo.
     ports:
-      - "8080:8080"
-      - "2022:2022"
+      - "${WINGS_BIND_IP:-127.0.0.1}:8080:8080"
+      - "${WINGS_BIND_IP:-127.0.0.1}:2022:2022"
     tty: true
     environment:
       TZ: "Europe/Paris"
