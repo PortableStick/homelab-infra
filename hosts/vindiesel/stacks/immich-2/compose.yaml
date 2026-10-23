@@ -3,7 +3,7 @@ name: immich2
 services:
   immich-server:
     container_name: immich2_server
-    image: ghcr.io/immich-app/immich-server:v2.7.5@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
+    image: ghcr.io/immich-app/immich-server:v3.3.5@sha256:485d546a2e31d6a8b4db8423fcba5c109de8c218d93410af115fd1ccfc4352a6
     networks:
       - proxy
       - backend
@@ -22,7 +22,7 @@ services:
       DB_DATABASE_NAME: immich
       DB_DATA_LOCATION: /data/immich-2/library/postgres
       UPLOAD_LOCATION: /data/immich-2/library
-      IMMICH_VERSION: v2.7.5
+      IMMICH_VERSION: v3.3.5
       LIBVA_DRIVER_NAME: iHD
     env_file:
       - .env
@@ -43,7 +43,7 @@ services:
 
   immich-machine-learning:
     container_name: immich2_machine_learning
-    image: ghcr.io/immich-app/immich-machine-learning:v2.7.5-openvino@sha256:71cd5a681823c4b818f4b24b3f05816eccc3d085559e7615f695bde77e64f1f2
+    image: ghcr.io/immich-app/immich-machine-learning:v3.3.5-openvino@sha256:1dbac7f811b51b80c55ee0cf678e0089d3532c798f14a65747d5d7b473a4f9d6
     networks:
       - backend
     devices:
